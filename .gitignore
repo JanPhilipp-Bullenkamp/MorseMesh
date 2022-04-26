@@ -1,2 +1,7 @@
 Data/
 .ipynb_checkpoints/
+LoadData/__pycache__/
+MeshSizeReduction/__pycache__/
+MorseAlgorithms/__pycache__/
+PlotData/__pycache__/
+
