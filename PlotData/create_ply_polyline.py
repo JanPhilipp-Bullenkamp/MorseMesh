@@ -163,7 +163,7 @@ def write_ply_file_simplified(C, Paths, rawdata, target_file):
     # simplification parameters
     minimum_length = 5
     modulo_decimator = 1
-    thresh = 0.07
+    thresh = 0.15
     
     # copy properties from input data
     properties = []
