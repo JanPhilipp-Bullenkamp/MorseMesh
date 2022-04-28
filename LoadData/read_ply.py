@@ -1,52 +1,57 @@
 from plyfile import PlyData, PlyElement, PlyProperty, PlyListProperty
 import numpy as np
+from collections import Counter
+import timeit
 
-from Vertex import Vertex
+from .Datastructure import Vertex, Edge, Face
 
-def read_ply(filename):
+def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
+    start_time = timeit.default_timer()
     
     rawdata = PlyData.read(filename)
-
-    proplist = []
-    for ind, prop in enumerate(rawdata[0].properties):
-        if prop.name == "red":
-            proplist.append(ind)
-        elif prop.name == "green":
-            proplist.append(ind)
-        elif prop.name == "blue":
-            proplist.append(ind)
-        elif prop.name == "nx":
-            proplist.append(ind)
-        elif prop.name == "ny":
-            proplist.append(ind)
-        elif prop.name == "nz":
-            proplist.append(ind)
-        elif prop.name == "alpha":
-            proplist.append(ind)
-        elif prop.name == "quality":
-            proplist.append(ind)
-        else:
-            proplist.append(None)
-
-    for index, pt in enumerate(rawdata['vertex']):
-        vert = Vertex(pt[0], pt[1], pt[2])
-        if proplist[3] != None:
-            vert.r = pt[proplist[3]]
-        if proplist[4] != None:
-            vert.g = pt[proplist[4]]
-        if proplist[5] != None:
-            vert.b = pt[proplist[5]]
-        if proplist[6] != None:
-            vert.nx = pt[proplist[6]]
-        if proplist[7] != None:
-            vert.ny = pt[proplist[7]]
-        if proplist[8] != None:
-            vert.nz = pt[proplist[8]]
-        if proplist[9] != None:
-            vert.alpha = pt[proplist[9]]
-        if proplist[10] != None:
-            vert.quality = pt[proplist[10]]
-
-        vert.index = index
+    
+    end_time = timeit.default_timer() - start_time
+    print('Time read data file:', end_time) 
+    
+    vals = []
+    for vindex, pt in enumerate(rawdata['vertex']):
+        vert = Vertex(pt[0], pt[1], pt[2], quality=pt[quality_index], index=vindex)
+        vert.fun_val = vert.quality
+        vals.append(vert.fun_val)
+        vertices_dict[vindex] = vert
+        
+    counts = Counter(vals)
+    for key, value in vertices_dict.items():
+        if counts[value.fun_val] > 1:
+            value.fun_val = value.fun_val + (counts[value.fun_val] - 1) * 0.0000001
+            counts[value.fun_val] = counts[value.fun_val] - 1
+            
+    
+    eindex = 0
+    unique_edges = set()
+    for findex, rawface in enumerate(rawdata['face']):
+        face = Face(indices=set(rawface[0]), index=findex)
+        face.fun_val = face.set_fun_val(vertices_dict)
+        
+        faces_dict[findex] = face
+        
+        for i in range(3):
+            tmp = list(rawface[0])
+            tmp_ind = tmp.pop(i)
+            vertices_dict[tmp_ind].star["F"].append(findex)
+            
+            if set(tmp) not in unique_edges:
+                edge = Edge(indices=set(tmp), index=eindex)
+                edge.fun_val = edge.set_fun_val(vertices_dict)
+                
+                edges_dict[eindex] = edge
+                for tmp_ed_ind in tmp:
+                    vertices_dict[tmp_ed_ind].star["E"].append(eindex)
+                
+                eindex+=1
+                
+                unique_edges.add(frozenset(tmp))
+         
+            
 
 
