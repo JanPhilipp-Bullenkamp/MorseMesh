@@ -1,5 +1,6 @@
 from LoadData.Datastructure import Vertex, Edge, Face
 from LoadData.read_ply import read_ply
+from MorseAlgorithms.ProcessLowerStarts2 import ProcessLowerStars2
 
 import timeit
 
@@ -16,7 +17,7 @@ class Mesh:
         self.Edges = {}
         self.Faces = {}
         
-        self.flag_ProcessLowerStar = False
+        self.flag_ProcessLowerStars = False
         self.flag_MorseComplex = False
 
         self.V12 = {}
@@ -69,4 +70,5 @@ class Mesh:
             self.C[1] = []
             self.C[2] = []
             
-        ProcessLowerStars(self.Vertices, self.Edges, self.Faces, self.C, self.V12, self.V23)
+        ProcessLowerStars2(self.Vertices, self.Edges, self.Faces, self.C, self.V12, self.V23)
+        self.flag_ProcessLowerStars = True

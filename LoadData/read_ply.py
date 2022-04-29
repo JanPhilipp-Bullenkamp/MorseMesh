@@ -15,7 +15,7 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
     
     vals = []
     for vindex, pt in enumerate(rawdata['vertex']):
-        vert = Vertex(pt[0], pt[1], pt[2], quality=pt[quality_index], index=vindex)
+        vert = Vertex(x=pt[0], y=pt[1], z=pt[2], quality=pt[quality_index], index=vindex)
         vert.fun_val = vert.quality
         vals.append(vert.fun_val)
         vertices_dict[vindex] = vert
@@ -31,7 +31,7 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
     unique_edges = set()
     for findex, rawface in enumerate(rawdata['face']):
         face = Face(indices=set(rawface[0]), index=findex)
-        face.fun_val = face.set_fun_val(vertices_dict)
+        face.set_fun_val(vertices_dict)
         
         faces_dict[findex] = face
         
@@ -42,7 +42,7 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
             
             if set(tmp) not in unique_edges:
                 edge = Edge(indices=set(tmp), index=eindex)
-                edge.fun_val = edge.set_fun_val(vertices_dict)
+                edge.set_fun_val(vertices_dict)
                 
                 edges_dict[eindex] = edge
                 for tmp_ed_ind in tmp:

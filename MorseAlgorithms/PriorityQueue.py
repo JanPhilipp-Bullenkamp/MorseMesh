@@ -1,3 +1,8 @@
+'''
+!!!!!!!
+\todo should implement heapq as well
+!!!!!!!!!!
+'''
 class PriorityQueue(object): 
     def __init__(self): 
         self.queue = []
@@ -33,7 +38,6 @@ def compare_heights(small, big):
                 return True
             elif small[i] > big[i]:
                 return False
-        #print('were completely same, therefore False')
         return False
     if len(small) < len(big):
         for i in range(len(small)):
@@ -41,7 +45,6 @@ def compare_heights(small, big):
                 return True
             elif small[i] > big[i]:
                 return False
-        #print('same entries but shorter small, therefore False')
         return False
     if len(small) > len(big):
         for i in range(len(big)):
@@ -49,7 +52,6 @@ def compare_heights(small, big):
                 return True
             elif small[i] > big[i]:
                 return False
-        #print('same entries but longer small, therefore True')
         return True
 
 
