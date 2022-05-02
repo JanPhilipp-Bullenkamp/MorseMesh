@@ -50,7 +50,7 @@ def ProcessLowerStars2(vertices_dict, edges_dict, faces_dict, C, V12, V23):
         lowerStar = lower_star(vertex, edges_dict, faces_dict)
         
         if (len(lowerStar['edges'])+len(lowerStar['faces'])) == 0:
-            C[0].append(vertex.index)
+            C[0].add(vertex.index)
             
         else:
             PQzero = PriorityQueue()
@@ -83,11 +83,11 @@ def ProcessLowerStars2(vertices_dict, edges_dict, faces_dict, C, V12, V23):
                 
                 if PQzero.notEmpty():
                     gamma_key, gamma_value = PQzero.pop_front()
-
+                    
                     if len(gamma_value) == 2:
-                        C[1].append(gamma_key)
+                        C[1].add(gamma_key)
                     if len(gamma_value) == 3:
-                        C[2].append(gamma_key)
+                        C[2].add(gamma_key)
                     
                     for key, value in lowerStar['faces'].items():
                         if (num_unpaired_faces(key,PQzero, edges_dict, faces_dict) == 1 and value > gamma_value):

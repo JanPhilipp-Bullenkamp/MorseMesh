@@ -1,6 +1,7 @@
 from LoadData.Datastructure import Vertex, Edge, Face
 from LoadData.read_ply import read_ply
-from MorseAlgorithms.ProcessLowerStarts2 import ProcessLowerStars2
+from ProcessLowerStarts2 import ProcessLowerStars2
+from ExtractMorseComplex2 import ExtractMorseComplex2
 
 import timeit
 
@@ -24,9 +25,9 @@ class Mesh:
         self.V23 = {}
 
         self.C = {}
-        self.C[0] = []
-        self.C[1] = []
-        self.C[2] = []
+        self.C[0] = set()
+        self.C[1] = set()
+        self.C[2] = set()
 
 
     def load_mesh_ply(self, filename, quality_index):
@@ -66,9 +67,14 @@ class Mesh:
             self.V23 = {}
 
             self.C = {}
-            self.C[0] = []
-            self.C[1] = []
-            self.C[2] = []
+            self.C[0] = set()
+            self.C[1] = set()
+            self.C[2] = set()
             
         ProcessLowerStars2(self.Vertices, self.Edges, self.Faces, self.C, self.V12, self.V23)
         self.flag_ProcessLowerStars = True
+        
+    # returns MorseComplex (a reduced complex)    
+    def ExtractMorseComplex(self):
+        return ExtractMorseComplex2(self.Vertices, self.Edges, self.Faces, self.V12, self.V23, self.C)
+    

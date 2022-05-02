@@ -23,8 +23,9 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
     counts = Counter(vals)
     for key, value in vertices_dict.items():
         if counts[value.fun_val] > 1:
+            tmp = value.fun_val
             value.fun_val = value.fun_val + (counts[value.fun_val] - 1) * 0.0000001
-            counts[value.fun_val] = counts[value.fun_val] - 1
+            counts[tmp] = counts[tmp] - 1
             
     
     eindex = 0
