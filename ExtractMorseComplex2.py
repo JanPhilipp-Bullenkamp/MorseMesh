@@ -102,7 +102,10 @@ def ExtractMorseComplex2(vert_dict, edge_dict, face_dict, V12, V23, C):
                 path.append(itnode.data)
                 path.append(C_index)
                 face = path[0]
-                crit_cell.paths[face] = path[::-1]
+                if face not in crit_cell.paths.keys():
+                    crit_cell.paths[face] = path[::-1]
+                else:
+                    crit_cell.paths[face] = [crit_cell.paths[face], path[::-1]]
                 
             if p == 1:
                 initial_complex.CritEdges[C_index] = crit_cell
