@@ -97,12 +97,30 @@ class CritFace:
     
     
 class MorseComplex:
-    def __init__(self, persistence=None):
+    def __init__(self, persistence=None, filename=None):
         self.CritVertices = {}
         self.CritEdges = {}
         self.CritFaces = {}
         
+        self.persistence = persistence
+        self.filename = filename
+        
     def add_vertex(self, vert):
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
+        
+        
+    def info(self):
+        print("MorseComplex Info")
+        print("-------------------------------------")
+        if self.filename != None:
+            print("Filename: ", self.filename)
+        if self.persistence != None:
+            print("Persistence of this reduced Complex: ", self.persistence)
+        print("Number of Vertices: ", len(self.CritVertices))
+        print("Number of Edges: ", len(self.CritEdges))
+        print("Number of Faces: ", len(self.CritFaces))
+        print("-------------------------------------")
+        print("Euler characteristic: ", len(self.CritVertices) - len(self.CritEdges) +len(self.CritFaces))
+        print("-------------------------------------")
         

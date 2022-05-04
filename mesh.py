@@ -2,6 +2,7 @@ from LoadData.Datastructure import Vertex, Edge, Face
 from LoadData.read_ply import read_ply
 from ProcessLowerStarts2 import ProcessLowerStars2
 from ExtractMorseComplex2 import ExtractMorseComplex2
+from MorseAlgorithms.ReduceMorseComplex import CancelCriticalPairs2
 
 import timeit
 
@@ -18,8 +19,8 @@ class Mesh:
         self.Edges = {}
         self.Faces = {}
         
-        self.flag_ProcessLowerStars = False
-        self.flag_MorseComplex = False
+        self._flag_ProcessLowerStars = False
+        self._flag_MorseComplex = False
 
         self.V12 = {}
         self.V23 = {}
@@ -28,6 +29,10 @@ class Mesh:
         self.C[0] = set()
         self.C[1] = set()
         self.C[2] = set()
+        
+        self.MorseComplex = None
+        
+        self.reducedMorseComplexes = []
 
 
     def load_mesh_ply(self, filename, quality_index):
@@ -50,19 +55,9 @@ class Mesh:
         print("Euler characteristic: ", len(self.Vertices) + len(self.Faces) -len(self.Edges))
         print("-------------------------------------")
         
-    def info_Morse(self):
-        print("MorseComplex Info")
-        print("-------------------------------------")
-        print("Number of Vertices: ", len(self.C[0]))
-        print("Number of Edges: ", len(self.C[1]))
-        print("Number of Faces: ", len(self.C[2]))
-        print("-------------------------------------")
-        print("Euler characteristic: ", len(self.C[0]) + len(self.C[2]) -len(self.C[1]))
-        print("-------------------------------------")
-        
     def ProcessLowerStars(self):
         # reset if has been computed already
-        if self.flag_ProcessLowerStars:
+        if self._flag_ProcessLowerStars:
             self.V12 = {}
             self.V23 = {}
 
@@ -72,9 +67,37 @@ class Mesh:
             self.C[2] = set()
             
         ProcessLowerStars2(self.Vertices, self.Edges, self.Faces, self.C, self.V12, self.V23)
-        self.flag_ProcessLowerStars = True
+        self._flag_ProcessLowerStars = True
         
-    # returns MorseComplex (a reduced complex)    
+    # returns full MorseComplex   
+    def only_return_ExtractMorseComplex(self):
+        if not self._flag_ProcessLowerStars:
+            raise ValueError('Need to call ProcessLowerStars first, cannot calculate MorseComplex otherwise!')
+        else:
+            return ExtractMorseComplex2(self.Vertices, self.Edges, self.Faces, self.V12, self.V23, self.C)
+    
     def ExtractMorseComplex(self):
-        return ExtractMorseComplex2(self.Vertices, self.Edges, self.Faces, self.V12, self.V23, self.C)
+        if not self._flag_ProcessLowerStars:
+            raise ValueError('Need to call ProcessLowerStars first, cannot calculate MorseComplex otherwise!')
+        else:
+            if self._flag_MorseComplex:
+                self.MorseComplex = None
+
+            self.MorseComplex = ExtractMorseComplex2(self.Vertices, self.Edges, self.Faces, self.V12, self.V23, self.C)
+            self.MorseComplex.filename = self.filename
+            self._flag_MorseComplex = True
+        
+    def only_return_ReducedMorseComplex(self, persistence):
+        if not self._flag_MorseComplex:
+            raise ValueError('Need to call ExtractMorseComplex first, cannot reduce MorseComplex otherwise!')
+        else:
+            return CancelCriticalPairs2(self.MorseComplex, persistence)
+        
+    def ReducedMorseComplex(self, persistence):
+        if not self._flag_MorseComplex:
+            raise ValueError('Need to call ExtractMorseComplex first, cannot reduce MorseComplex otherwise!')
+        else:
+            self.reducedMorseComplexes.append(CancelCriticalPairs2(self.MorseComplex, persistence))
+        return self.reducedMorseComplexes[-1]
+    
     

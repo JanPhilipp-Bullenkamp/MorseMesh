@@ -1,6 +1,7 @@
 from collections import Counter
 import numpy as np
 import timeit
+from copy import deepcopy
 
 from .CancellationQueue import CancellationQueue
 
@@ -30,330 +31,213 @@ def get_closest_extremum(crit_edge, vert_dict, face_dict):
     else: 
         return None
 
-# saddle given as CritEdge object, extremum just as index!
-def cancel_one_critical_pair(saddle, extremum, dim, MorseComplex):
+# saddle and minimum given as CritEdge and CritVertex objects
+def cancel_one_critical_pair_min(saddle, minimum, MorseComplex):
+    """
+    Cancels a saddle and minimum pair of the MorseComplex
+        saddle: a CritEdge object
+        minimum: a CritVertex object
+        MorseComplex: a MorseComplex object, that will be changed accordingly
+    """
+    # cut paths between old saddle and its connected maxima, as we cancel the saddle
+    # saddle can be twice in the connection list, but paths would be stored under one key only,
+    # therefore pop key and both will be removed (need None argument for second iteration)
+    for conn_max in saddle.connected_maxima:
+        MorseComplex.CritFaces[conn_max].connected_saddles.remove(saddle.index)
+        MorseComplex.CritFaces[conn_max].paths.pop(saddle.index, None)
+        
+    # find new saddles and minima:
+    new_saddles = []
+    for conn_sad in minimum.connected_saddles:
+        if conn_sad != saddle.index:
+            new_saddles.append(conn_sad)
+    new_minima = []
+    for conn_min in saddle.connected_minima:
+        if conn_min != minimum.index:
+            new_minima.append(conn_min)
     
-    # Case: saddle to minimum path should be cancelled:
-    #     1. invert path btw old min and saddle
-    #     2. reconnnect new_saddles from old_min to min from old_saddle by path adding
-    #     3. remove saddle from all maxima connections and delete paths
-    if dim == 0:
-        # 1. remove saddle from all maxima connections and delete paths
-        for max_conn in set(saddle.connected_maxima):
-            # since we want to remove all instances:
-            # remove saddle from connected maxima
-            MorseComplex.CritFaces[max_conn].connected_saddles.remove(saddle.index)
-            # delete path from maximum to saddle
-            MorseComplex.CritFaces[max_conn].paths.pop(saddle.index)
-            # remove maximum from saddle
-            saddle.connected_maxima.remove(max_conn)
+    # save the inverted path between sadle and minimum:
+    # reverse path and remove first and last elt (min and saddle otherwise duplicated)
+    inverted_cropped_path = saddle.paths[minimum.index][1:-1][::-1]
+    
+    new_saddles_counts = Counter(new_saddles)
+    new_minima_counts = Counter(new_minima)
+    for new_sad, nb_sad in new_saddles_counts.items():
+        # save paths from new saddle to minimum 
+        # (want to pop the minimum from the new saddle paths afterwards)
+        new_saddle_paths = MorseComplex.CritEdges[new_sad].paths[minimum.index]
+        
+        # remove all instances of minimum from new saddles connections and paths
+        for i in range(nb_sad):
+            MorseComplex.CritEdges[new_sad].connected_minima.remove(minimum.index)
+            MorseComplex.CritEdges[new_sad].paths.pop(minimum.index, None)
             
-        # reverse path and remove first and last elt (min and saddle otherwise duplicated)
-        inverted_cropped_path = saddle.paths[extremum][1:-1][::-1]
-        
-        # remove connected minimum we will cancel, since we later want to loop over the remaining ones
-        # can remove only one, as there should be no other
-        saddle.connected_minima.remove(extremum)
-        
-        # remove saddle from min connection for the same reason
-        MorseComplex.CritVertices[extremum].connected_saddles.remove(saddle.index)
-        
-        for sad_index in set(MorseComplex.CritVertices[extremum].connected_saddles):
-            for min_index in set(saddle.connected_minima):
-                # add saddle to min and min to saddle, for the new connection
-                MorseComplex.CritEdges[sad_index].connected_minima.append(min_index)
-                MorseComplex.CritVertices[min_index].connected_saddles.append(sad_index)
-                # save the new path to the saddle. Path is: 
-                # new_saddle_to_old_min + inverted_old_min_to_old_saddle + old_saddle_to_new_min
-                MorseComplex.CritEdges[sad_index].paths[min_index] = MorseComplex.CritEdges[sad_index].paths[extremum] + inverted_cropped_path + saddle.paths[min_index]
-                
-                # remove old saddle and min from new saddles and mins
-                if extremum in MorseComplex.CritEdges[sad_index].connected_minima:
-                    MorseComplex.CritEdges[sad_index].connected_minima.remove(extremum)
+        # now loop over new minima to connect new paths and remove saddle from new min connections
+        for new_min, nb_min in new_minima_counts.items():
+            # nb_min should be one, as the saddle can only connect to two minima, or one minimum twice 
+            # and one is the one we want to cancel to, so it should be one path two 2 minima
+            if nb_min == 1:
+                # new saddle had one connection to old min:
+                # then: add new min to new saddle connection and take the single path:
+                # new_sad-old_min + old_min-old_sad(reversed) + old_sad-new_min 
+                if nb_sad == 1:
+                    MorseComplex.CritEdges[new_sad].connected_minima.append(new_min)
+                    MorseComplex.CritVertices[new_min].connected_saddles.append(new_sad)
+                    if new_min not in MorseComplex.CritEdges[new_sad].paths.keys():
+                        MorseComplex.CritEdges[new_sad].paths[new_min] = new_saddle_paths + inverted_cropped_path + saddle.paths[new_min]
+                    else:
+                        MorseComplex.CritEdges[new_sad].paths[new_min] = [MorseComplex.CritEdges[new_sad].paths[new_min], new_saddle_paths + inverted_cropped_path + saddle.paths[new_min]]
                     
-                if saddle.index in MorseComplex.CritVertices[min_index].connected_saddles:
-                    MorseComplex.CritVertices[min_index].connected_saddles.remove(saddle.index)
                 
-                        
-        # now remove old min and saddle completely:
-        MorseComplex.CritVertices.pop(extremum)
-        MorseComplex.CritEdges.pop(saddle.index)
+                # new saddle had 2 connections to old min, therefore also 2 conn to new min
+                elif nb_sad == 2:
+                    # add to connection twice
+                    for k in range(nb_sad):
+                        MorseComplex.CritEdges[new_sad].connected_minima.append(new_min)
+                        MorseComplex.CritVertices[new_min].connected_saddles.append(new_sad)
+                    # add both paths to the paths to new_min (only differ in the first part from new_sad to old_min)
+                    MorseComplex.CritEdges[new_sad].paths[new_min] = [new_saddle_paths[0] + inverted_cropped_path + saddle.paths[new_min], new_saddle_paths[1] + inverted_cropped_path + saddle.paths[new_min]]
+                    
+            else:
+                print("Saddle should only be able to connect to two minima or one minimum twice!")
+                raise RuntimeError
+    
+    # needs to be put out oif the new saddles loop, otherwise repeated for each sadddle
+    for new_min, nb_min in new_minima_counts.items():
+        for j in range(nb_min):
+            MorseComplex.CritVertices[new_min].connected_saddles.remove(saddle.index)
+                
+    # now pop old saddle and old min from complex, as they have been cancelled and reconnected:
+    MorseComplex.CritEdges.pop(saddle.index)
+    MorseComplex.CritVertices.pop(minimum.index)
+    
+    return MorseComplex
+
+
+def cancel_one_critical_pair_max(saddle, maximum, MorseComplex):
+    """
+    Cancels a saddle and maximum pair of the MorseComplex
+        saddle: a CritEdge object
+        maximum: a CritFace object
+        MorseComplex: a MorseComplex object, that will be changed accordingly
+    """
+    # cut paths between old saddle and its connected minima, as we cancel the saddle
+    # saddle can be twice in the connection list
+    for conn_min in saddle.connected_minima:
+        MorseComplex.CritVertices[conn_min].connected_saddles.remove(saddle.index)
         
+    # find new saddles and maxima:
+    new_saddles = []
+    for conn_sad in maximum.connected_saddles:
+        if conn_sad != saddle.index:
+            new_saddles.append(conn_sad)
+    new_maxima = []
+    for conn_max in saddle.connected_maxima:
+        if conn_max != maximum.index:
+            new_maxima.append(conn_max)
+    
+    # save the inverted path between sadle and maximum:
+    # reverse path and remove first and last elt (max and saddle otherwise duplicated)
+    inverted_cropped_path = maximum.paths[saddle.index][1:-1][::-1]
+    
+    new_saddles_counts = Counter(new_saddles)
+    new_maxima_counts = Counter(new_maxima)
+    for new_max, nb_max in new_maxima_counts.items():
+        # save paths from new maximum to saddle 
+        # (want to pop the saddle from the new max paths afterwards)
+        new_max_paths = MorseComplex.CritFaces[new_max].paths[saddle.index]
         
-    if dim == 2:
-        # 1. remove saddle from all minima connections and delete paths
-        for min_conn in set(saddle.connected_minima):
-            # remove saddle from connected minima
-            MorseComplex.CritVertices[min_conn].connected_saddles.remove(saddle.index)
-            # remove minimum from saddle conn
-            saddle.connected_minima.remove(min_conn)
+        # remove all instances of saddle from new max connections and paths
+        for i in range(nb_max):
+            MorseComplex.CritFaces[new_max].connected_saddles.remove(saddle.index)
+            MorseComplex.CritFaces[new_max].paths.pop(saddle.index, None)
             
-        # reverse path and remove first and last elt (max and saddle otherwise duplicated)
-        inverted_cropped_path = MorseComplex.CritFaces[extremum].paths[saddle.index][1:-1][::-1]
-        
-        # remove saddle from maximum since we want to loop over all except the one we cancel
-        # therefore one removal should be enough
-        #MorseComplex.CritFaces[extremum].connected_saddles.remove(saddle.index)
-        
-        # and remove extremum from saddle, same reason
-        saddle.connected_maxima.remove(extremum)
-        
-        print(" Length of saddles conn maxima: ", len(saddle.connected_maxima))
-        print(" Length of maxs conn saddles: ", len(MorseComplex.CritFaces[extremum].connected_saddles))
-        for sad_index in set(MorseComplex.CritFaces[extremum].connected_saddles):
-            for max_index in set(saddle.connected_maxima):
-                # add saddle to max and max to saddle, for the new connection
-                MorseComplex.CritEdges[sad_index].connected_maxima.append(max_index)
-                MorseComplex.CritFaces[max_index].connected_saddles.append(sad_index)
-                # save the new path to the saddle. Path is: 
-                # new_max_to_old_saddle + inverted_old_max_to_old_saddle + old_max_to_new_saddle
-                MorseComplex.CritFaces[max_index].paths[sad_index] = MorseComplex.CritFaces[max_index].paths[saddle.index] + inverted_cropped_path + MorseComplex.CritFaces[extremum].paths[sad_index]
+        # now loop over new saddles to connect new paths and remove maximum from new saddle connections
+        for new_sad, nb_sad in new_saddles_counts.items():
+            # need cases:
+            # 1. one path new_max-old_sad and one path old_max-new_sad
+            # 2. two paths new_max-old_sad and one path old_max-new_sad
+            # 3. one path new_max-old_sad and two paths old_max-new_sad
+            # 4. two paths new_max-old_sad and two paths old_max-new_sad
+            if nb_sad == 1 and nb_max == 1:
+                MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
+                MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
+                if new_sad not in MorseComplex.CritFaces[new_max].paths.keys():
+                    MorseComplex.CritFaces[new_max].paths[new_sad] = new_max_paths + inverted_cropped_path + maximum.paths[new_sad]
+                else:
+                    MorseComplex.CritFaces[new_max].paths[new_sad] = [MorseComplex.CritFaces[new_max].paths[new_sad], new_max_paths + inverted_cropped_path + maximum.paths[new_sad]]
                 
-                # remove old saddle and max from the new saddles and maxes
-                if extremum in MorseComplex.CritEdges[sad_index].connected_maxima:
-                    MorseComplex.CritEdges[sad_index].connected_maxima.remove(extremum)
-                print("Try to remove: ", saddle.index)
-                print("ConnSaddles of new max before removing: ", MorseComplex.CritFaces[max_index].connected_saddles)
-                if saddle.index in MorseComplex.CritFaces[max_index].connected_saddles:
-                    MorseComplex.CritFaces[max_index].connected_saddles.remove(saddle.index)
-                print("ConnSaddles of new max after removing: ", MorseComplex.CritFaces[max_index].connected_saddles)
-                        
-        # now remove old max and saddle completely:
-        MorseComplex.CritFaces.pop(extremum)
-        MorseComplex.CritEdges.pop(saddle.index)
-        
-        print("saddle: ", saddle.index, " and max ", extremum, " were cancelled")
-        if saddle.index in MorseComplex.CritEdges.keys():
-            print("-----------------------------------------------------------------")
-            print("-----------------------------------------------------------------")
-            print("-----------------------------------------------------------------")
-            print("SHOULDNT HAVE WORKED!")
-            print("-----------------------------------------------------------------")
-            print("-----------------------------------------------------------------")
-            print("-----------------------------------------------------------------")
-        if extremum in MorseComplex.CritFaces.keys():
-            print("-----------------------------------------------------------------")
-            print("-----------------------------------------------------------------")
-            print("-----------------------------------------------------------------")
-            print("SHOULDNT HAVE WORKED!")
-            print("-----------------------------------------------------------------")
-            print("-----------------------------------------------------------------")
-            print("-----------------------------------------------------------------")
-        print("-----------------------------------------------------------------")
-        
-        for ind, edge in MorseComplex.CritEdges.items():
-            if extremum in edge.connected_maxima:
-                print("////////////////////////////////////////////////////////////")
-                print("SHOULDNT HAVE WORKED!")
-                print("MAx: ", extremum , " was in edge ", edge.index)
-                print("////////////////////////////////////////////////////////////")
-        for ind, vert in MorseComplex.CritVertices.items():
-            if saddle.index in vert.connected_saddles:
-                print("////////////////////////////////////////////////////////////")
-                print("SHOULDNT HAVE WORKED!")
-                print("saddle: ", saddle.index , " was in vertex ", vert.index)
-                print("////////////////////////////////////////////////////////////")
-        for ind, face in MorseComplex.CritFaces.items():
-            if saddle.index in face.connected_saddles:
-                print("////////////////////////////////////////////////////////////")
-                print("SHOULDNT HAVE WORKED!")
-                print("sadd: ", saddle.index , " was in max ", face.index)
-                print("////////////////////////////////////////////////////////////")
+            elif nb_sad == 1 and nb_max == 2:
+                for p in range(2):
+                    MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
+                    MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
+                # add two paths: first part from new_max to saddle is different
+                MorseComplex.CritFaces[new_max].paths[new_sad] = [new_max_paths[0] + inverted_cropped_path + maximum.paths[new_sad], new_max_paths[1] + inverted_cropped_path + maximum.paths[new_sad]]
                 
-        
+            elif nb_sad == 2 and nb_max == 1:
+                for p in range(2):
+                    MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
+                    MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
+                # add two paths: last part from max to new_sad is different
+                MorseComplex.CritFaces[new_max].paths[new_sad] = [new_max_paths + inverted_cropped_path + maximum.paths[new_sad][0], new_max_paths + inverted_cropped_path + maximum.paths[new_sad][1]]
                 
+            elif nb_sad == 2 and nb_max == 2:
+                '''
+                ! We reduce this case!
+                instead of the 4 possibilities, we only take two (should topologically be equal, due to mod 2 or so ? 
+                Problem for all 4 would be the paths, as we store them such that we expect max 2 paths between two critical simplices
+                '''
+                for p in range(2):
+                    MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
+                    MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
+                # add two paths: last part from max to new_sad and first part from new_max to sad are different,
+                # we take one of each to reduce the cases from 4 to 2
+                MorseComplex.CritFaces[new_max].paths[new_sad] = [new_max_paths[0] + inverted_cropped_path + maximum.paths[new_sad][0], new_max_paths[1] + inverted_cropped_path + maximum.paths[new_sad][1]]
+                
+            else:
+                print("More than 2 paths between new_max and saddle or max and new_saddle, shouldnt be possible!")
+                raise RuntimeError
+                
+    # needs to be put out of new_max loop, otherwise repeated to often
+    for new_sad, nb_sad in new_saddles_counts.items():
+        for j in range(nb_sad):
+            MorseComplex.CritEdges[new_sad].connected_maxima.remove(maximum.index)
+                
+    # now pop old saddle and old min from complex, as they have been cancelled and reconnected:
+    MorseComplex.CritEdges.pop(saddle.index)
+    MorseComplex.CritFaces.pop(maximum.index)
+    
+    return MorseComplex
             
-        '''
-
-    if np.array(extremum).shape == ():
-
-        new_saddles = []
-        for elt in self.min_conn[extremum]:
-            if elt != saddle:
-                new_saddles.append(elt)
-           
-            for index, sad_list_tup in enumerate(self.saddle_conn[elt]):
-                if np.array(sad_list_tup).shape == ():
-                    if sad_list_tup == extremum:
-                        self.saddle_conn[elt].pop(index)     
-            for index, sad_tuple in enumerate(self.Facelist[elt]):
-                if np.array(sad_tuple[0]).shape == ():
-                    if sad_tuple[0] == extremum:
-                        self.Facelist[elt].pop(index)            
-
-        new_min = []
-        for elt in self.saddle_conn[saddle]:
-            if np.array(elt).shape == ():
-                if elt != extremum:
-                    new_min.append(elt)
-                self.min_conn[elt].remove(saddle)
-                for index, min_tuple in enumerate(self.Facelist[saddle]):
-                    if np.array(min_tuple[0]).shape == ():
-                        if min_tuple[0] == elt:
-                            self.Facelist[saddle].pop(index)     
-            # delete connections from saddle to 2-cells
-            elif np.array(elt).shape == (self.N,):
-                self.max_conn[elt].remove(saddle)
-                self.Paths[elt].pop(saddle,None)
-                for index, sad_tuple in enumerate(self.Facelist[elt]):
-                    if np.array(sad_tuple[0]).shape == (2,):
-                        if sad_tuple[0][0] == saddle[0] and sad_tuple[0][1] == saddle[1]:
-                            self.Facelist[elt].pop(index)
-
-        # change the V field new V (needs to be done before the paths are changed
-        self._change_V_field(extremum, saddle)
-
-        # reconnect saddles and minima via cancelled path
-        for sad in new_saddles:
-            for mini in new_min:
-                self.min_conn[mini].append(sad)
-                self.saddle_conn[sad].append(mini)
-                self._update_paths(extremum, saddle, mini, sad)
-                self.Facelist[sad].append(tuple((mini,self.C[0][mini])))
-
-
-        for sad in new_saddles:
-            self.Paths[sad].pop(extremum,None)
-
-        # delete saddle and extremum from the conn lists
-        self.min_conn.pop(extremum)
-        self.saddle_conn.pop(saddle)
-        self.C[0].pop(extremum)
-        self.C[1].pop(saddle)
-        self.Paths.pop(saddle)
-        self.Facelist.pop(saddle)
-
-
-
-    elif np.array(extremum).shape == (self.N,):
-
-        new_saddles = []
-        for elt in self.max_conn[extremum]:
-            if elt != saddle:
-                new_saddles.append(elt)
-            
-            for index, sad_list_tup in enumerate(self.saddle_conn[elt]):
-                if np.array(sad_list_tup).shape == (self.N,):
-                    if sad_list_tup[0] == extremum[0] and sad_list_tup[1] == extremum[1] and sad_list_tup[2] == extremum[2]:
-                        self.saddle_conn[elt].pop(index)
-
-        new_max = []
-        for elt in self.saddle_conn[saddle]:
-            if np.array(elt).shape == (self.N,):
-                if elt != extremum:
-                    new_max.append(elt)
-                self.max_conn[elt].remove(saddle)
-                
-                for index, sad_tuple in enumerate(self.Facelist[elt]):
-                    if np.array(sad_tuple[0]).shape == (2,):
-                        if sad_tuple[0][0] == saddle[0] and sad_tuple[0][1] == saddle[1]:
-                            self.Facelist[elt].pop(index)
-            # delete connections from saddle to 0-cells
-            elif np.array(elt).shape == ():
-                self.min_conn[elt].remove(saddle)
-
-        # change the V field new V (needs to be done before the paths are changed
-        self._change_V_field(extremum, saddle)
-
-        # reconnect saddles and minima via cancelled path
-        for sad in new_saddles:
-            for maxi in new_max:
-                self.max_conn[maxi].append(sad)
-                self.saddle_conn[sad].append(maxi)
-                self._update_paths(extremum, saddle, maxi, sad)
-                self.Facelist[maxi].append(tuple((sad,self.C[1][sad])))
-
-        for maxi in new_max:
-            self.Paths[maxi].pop(saddle)
-
-
-        # delete saddle and extremum from the conn lists
-        self.max_conn.pop(extremum)
-        self.saddle_conn.pop(saddle)
-        self.C[2].pop(extremum)
-        self.C[1].pop(saddle)
-        self.Paths.pop(extremum)
-        self.Paths.pop(saddle)
-        self.Facelist.pop(extremum)
-        self.Facelist.pop(saddle)
-        '''
-
-
 def CancelCriticalPairs2(MorseComplex, threshold):
     start_eff = timeit.default_timer()
 
     CancelPairs = CancellationQueue()
-    
+    redMorseComplex = deepcopy(MorseComplex) 
+    redMorseComplex.persistence = threshold
     # fill queue
-    for crit_edge in MorseComplex.CritEdges.values():
-        closest_extremum = get_closest_extremum(crit_edge, MorseComplex.CritVertices, MorseComplex.CritFaces)
+    for crit_edge in redMorseComplex.CritEdges.values():
+        closest_extremum = get_closest_extremum(crit_edge, redMorseComplex.CritVertices, redMorseComplex.CritFaces)
         if closest_extremum != None:
             index, dim, dist = closest_extremum
             if dist < threshold:
-                CancelPairs.insert(tuple((dist, crit_edge)))
+                CancelPairs.insert(tuple((dist, id(crit_edge), crit_edge)))
     
     # work down queue
     while CancelPairs.notEmpty():
-        prio, saddle = CancelPairs.pop_front()
-        check = get_closest_extremum(saddle, MorseComplex.CritVertices, MorseComplex.CritFaces)
+        prio, obj_id, saddle = CancelPairs.pop_front()
+        check = get_closest_extremum(saddle, redMorseComplex.CritVertices, redMorseComplex.CritFaces)
         if check != None:
             closest, dim, dist = check
             if dist <= CancelPairs.check_distance():
-                cancel_one_critical_pair(saddle, closest, dim, MorseComplex)
+                if dim == 0:
+                    redMorseComplex = cancel_one_critical_pair_min(saddle, redMorseComplex.CritVertices[closest], redMorseComplex)
+                elif dim == 2:
+                    redMorseComplex = cancel_one_critical_pair_max(saddle, redMorseComplex.CritFaces[closest], redMorseComplex)
             else:
-                CancelPairs.insert(tuple((dist,saddle)))
-
-    time_eff = timeit.default_timer() - start_eff
-    print('Time cancel critical points:', time_eff)
+                CancelPairs.insert(tuple((dist, id(saddle), saddle)))
     
-        
-
-def _update_paths(self, extremum, saddle, new_extr, new_sad):
-    if np.array(extremum).shape == (self.N,):
-        path_to_saddle = self.Paths[new_extr][saddle]
-        path_to_reverse = self.Paths[extremum][saddle]
-        path_to_extremum = self.Paths[extremum][new_sad]
-
-        combined_path = path_to_saddle + path_to_reverse[::-1][1:-1] + path_to_extremum
-
-        self.Paths[new_extr][new_sad] = combined_path
-
-
-
-    elif np.array(extremum).shape == ():
-        path_to_extremum = self.Paths[new_sad][extremum]
-        path_to_reverse = self.Paths[saddle][extremum]
-        path_to_saddle = self.Paths[saddle][new_extr]
-
-        combined_path = path_to_extremum + path_to_reverse[::-1][1:-1] + path_to_saddle
-
-        self.Paths[new_sad][new_extr] = combined_path
-
-
-def _change_V_field(self, extremum, saddle):
-    if np.array(extremum).shape == (self.N,):
-        path = self.Paths[extremum][saddle][::-1]
-        for position, cell in enumerate(self.Paths[extremum][saddle][::-1]):
-            if np.array(cell).shape == (2,):
-                self.newV[cell] = path[position+1]
-
-                '''
-                maybe needs to be changed: issue if path splits  might occur, 
-                as the order is not necessarily right in that case
-                '''
-
-    elif np.array(extremum).shape == ():
-        path = self.Paths[saddle][extremum][::-1]
-        for position, cell in enumerate(self.Paths[saddle][extremum][::-1]):
-            if np.array(cell).shape == ():
-                self.newV[cell] = path[position+1]
-
-
-
-def _get_highest_value(self,cell):
-    if np.array(cell).shape == (self.N,) or np.array(cell).shape == (2,):
-        return max(self.data['star'][cell[0]][cell])
-    else:
-        return self.data['vertex'][cell]
-
-
+    time_eff = timeit.default_timer() - start_eff
+    print('Time cancel critical points with ', threshold, " persistence: ", time_eff)
+    return redMorseComplex
+    
