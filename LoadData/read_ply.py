@@ -6,6 +6,7 @@ import timeit
 from .Datastructure import Vertex, Edge, Face
 
 def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
+    start_total_time = timeit.default_timer()
     start_time = timeit.default_timer()
     
     rawdata = PlyData.read(filename)
@@ -52,6 +53,9 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
                 eindex+=1
                 
                 unique_edges.add(frozenset(tmp))
+                
+    end_total_time = timeit.default_timer() - start_total_time
+    print('Time read and prepare data:', end_total_time)
          
             
 

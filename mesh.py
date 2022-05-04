@@ -4,15 +4,14 @@ from ProcessLowerStarts2 import ProcessLowerStars2
 from ExtractMorseComplex2 import ExtractMorseComplex2
 from MorseAlgorithms.ReduceMorseComplex import CancelCriticalPairs2
 
+from PlotData.write_overlay_ply_file import write_overlay_ply_file
+
 import timeit
+import os
+import numpy as np
 
 class Mesh:
-    def __init__(self, simplicial=True, cubical=False):
-        if (simplicial and cubical) or (not simplicial and not cubical):
-            raise ValueError("Mesh needs to be either cubical or simplicial!")
-        self.simplicial = simplicial
-        self.cubical = cubical
-
+    def __init__(self):
         self.filename = None
 
         self.Vertices = {}
@@ -32,18 +31,13 @@ class Mesh:
         
         self.MorseComplex = None
         
-        self.reducedMorseComplexes = []
+        self.reducedMorseComplexes = {}
 
 
     def load_mesh_ply(self, filename, quality_index):
-        self.filename = filename
-        
-        start_time  = timeit.default_timer()
-        read_ply(self.filename, quality_index, self.Vertices, self.Edges, self.Faces)
-        
-        end_time = timeit.default_timer() - start_time
-        print('Time read and prepare data:', end_time)
-        
+        read_ply(filename, quality_index, self.Vertices, self.Edges, self.Faces)
+        self.filename = os.path.splitext(filename)[0]
+
     def info(self):
         print("Mesh Info")
         print("-------------------------------------")
@@ -90,14 +84,45 @@ class Mesh:
     def only_return_ReducedMorseComplex(self, persistence):
         if not self._flag_MorseComplex:
             raise ValueError('Need to call ExtractMorseComplex first, cannot reduce MorseComplex otherwise!')
+        elif persistence in self.reducedMorseComplexes.keys():
+            print("This persistence has already been calculated!")
+            print("You can access it via .reducedMorseComplexes[persistence] ") 
         else:
-            return CancelCriticalPairs2(self.MorseComplex, persistence)
+            # in these cases we need to calculate it from the original Morse Complex
+            if len(self.reducedMorseComplexes.keys())==0:
+                return CancelCriticalPairs2(self.MorseComplex, persistence)
+            elif min(self.reducedMorseComplexes.keys()) > persistence:
+                return CancelCriticalPairs2(self.MorseComplex, persistence)
+                
+            # else: choose the closest already calculated persistence and start from there
+            else:
+                key_array = np.array([list(self.reducedMorseComplexes.keys())])
+                closest_smaller = key_array[key_array < persistence].max()
+                return CancelCriticalPairs2(self.reducedMorseComplexes[closest_smaller], persistence)
         
     def ReducedMorseComplex(self, persistence):
         if not self._flag_MorseComplex:
             raise ValueError('Need to call ExtractMorseComplex first, cannot reduce MorseComplex otherwise!')
+        elif persistence in self.reducedMorseComplexes.keys():
+            print("This persistence has already been calculated!")
+            print("You can access it via .reducedMorseComplexes[persistence] ") 
         else:
-            self.reducedMorseComplexes.append(CancelCriticalPairs2(self.MorseComplex, persistence))
-        return self.reducedMorseComplexes[-1]
+            # in these cases we need to calculate it from the original Morse Complex
+            if len(self.reducedMorseComplexes.keys())==0:
+                self.reducedMorseComplexes[persistence] = CancelCriticalPairs2(self.MorseComplex, persistence)
+            elif min(self.reducedMorseComplexes.keys()) > persistence:
+                self.reducedMorseComplexes[persistence] = CancelCriticalPairs2(self.MorseComplex, persistence)
+                
+            # else: choose the closest already calculated persistence and start from there
+            else:
+                key_array = np.array([list(self.reducedMorseComplexes.keys())])
+                closest_smaller = key_array[key_array < persistence].max()
+                #print("Calculated reduced complex (",persistence,") from closest smaller already calculated persistence: ", closest_smaller)
+                self.reducedMorseComplexes[persistence] = CancelCriticalPairs2(self.reducedMorseComplexes[closest_smaller], persistence)
+                 
+        return self.reducedMorseComplexes[persistence]
+    
+    def plot_MorseComplex(self, MorseComplex, filename, path_color=[255,0,255]):
+        write_overlay_ply_file(MorseComplex, self.Vertices, self.Edges, self.Faces, filename, color_paths=path_color)
     
     
