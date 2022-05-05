@@ -130,5 +130,5 @@ def write_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_fil
             
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing overlay file:', time_writing_file)
+    print('Time writing overlay file for MorseComplex with ', MorseCpx.persistence,': ', time_writing_file)
     
