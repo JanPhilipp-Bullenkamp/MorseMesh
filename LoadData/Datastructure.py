@@ -97,7 +97,7 @@ class CritFace:
     
     
 class MorseComplex:
-    def __init__(self, persistence=None, filename=None):
+    def __init__(self, persistence=0, filename=None):
         self.CritVertices = {}
         self.CritEdges = {}
         self.CritFaces = {}
