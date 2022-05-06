@@ -4,7 +4,10 @@ from ProcessLowerStarts2 import ProcessLowerStars2
 from ExtractMorseComplex2 import ExtractMorseComplex2
 from MorseAlgorithms.ReduceMorseComplex import CancelCriticalPairs2
 
+from MorseCells import get_MorseCells
+
 from PlotData.write_overlay_ply_file import write_overlay_ply_file
+from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
 
 import timeit
 import os
@@ -32,6 +35,8 @@ class Mesh:
         self.MorseComplex = None
         
         self.reducedMorseComplexes = {}
+        
+        self.MorseCells = {}
 
 
     def load_mesh_ply(self, filename, quality_index):
@@ -124,5 +129,21 @@ class Mesh:
     
     def plot_MorseComplex(self, MorseComplex, filename, path_color=[255,0,255]):
         write_overlay_ply_file(MorseComplex, self.Vertices, self.Edges, self.Faces, filename, color_paths=path_color)
+        
+        
+    def ExtractMorseCells(self, MorseComplex):
+        if MorseComplex.persistence not in self.MorseCells.keys():
+            self.MorseCells[MorseComplex.persistence] = get_MorseCells(MorseComplex, self.Vertices, self.Edges, self.Faces)
+            return self.MorseCells[MorseComplex.persistence]
+        else:
+            print("MorseCells for the MorseComplex with this persistence have already been calculated!")
+            print("You can access the MorseCells dictionary via: .MorseCells[persistence]")
+            print("where the persistence can be retrieved from MorseComplex.persistence") 
+            
+    def plot_MorseCells(self, persistence, filename):
+        if persistence not in self.MorseCells.keys():
+            raise ValueError('No MorseCell calculated for this persistence!')
+        else:
+            write_cells_overlay_ply_file(self.MorseCells[persistence], self.Vertices, filename)
     
     
