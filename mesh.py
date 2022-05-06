@@ -16,6 +16,9 @@ import numpy as np
 class Mesh:
     def __init__(self):
         self.filename = None
+        
+        self.min = None
+        self.max = None
 
         self.Vertices = {}
         self.Edges = {}
@@ -40,19 +43,24 @@ class Mesh:
 
 
     def load_mesh_ply(self, filename, quality_index):
-        read_ply(filename, quality_index, self.Vertices, self.Edges, self.Faces)
+        min_val, max_val = read_ply(filename, quality_index, self.Vertices, self.Edges, self.Faces)
         self.filename = os.path.splitext(filename)[0]
+        self.min = min_val
+        self.max = max_val
 
     def info(self):
-        print("Mesh Info")
-        print("-------------------------------------")
-        print("Filename: ", self.filename)
-        print("Number of Vertices: ", len(self.Vertices))
-        print("Number of Edges: ", len(self.Edges))
-        print("Number of Faces: ", len(self.Faces))
-        print("-------------------------------------")
-        print("Euler characteristic: ", len(self.Vertices) + len(self.Faces) -len(self.Edges))
-        print("-------------------------------------")
+        print("+-------------------------------------------------------")
+        print("| Mesh Info")
+        print("+-------------------------------------------------------")
+        print("| Filename: ", self.filename)
+        print("| Morse function values range: ", [self.min,self.max])
+        print("+-------------------------------------------------------")
+        print("| Number of Vertices: ", len(self.Vertices))
+        print("| Number of Edges: ", len(self.Edges))
+        print("| Number of Faces: ", len(self.Faces))
+        print("+-------------------------------------------------------")
+        print("| Euler characteristic: ", len(self.Vertices) + len(self.Faces) -len(self.Edges))
+        print("+-------------------------------------------------------")
         
     def ProcessLowerStars(self):
         # reset if has been computed already

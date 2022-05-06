@@ -15,7 +15,9 @@ def get_closest_extremum(crit_edge, vert_dict, face_dict):
         # cannot cancel loops, so only if there is a single path we can add the extremum
         if nb==1:
             # take absolute value btw the two highest vertices of edge and face respectively
-            distances.append(tuple((face_ind, 2, abs(face_dict[face_ind].fun_val[0]-crit_edge.fun_val[0]))))
+            distances.append(tuple((face_ind, 2, np.log(len(face_dict[face_ind].paths[crit_edge.index]))* abs(face_dict[face_ind].fun_val[0]-crit_edge.fun_val[0])))) 
+            #print("2-1",len(face_dict[face_ind].paths[crit_edge.index]))
+            a = np.log(len(face_dict[face_ind].paths[crit_edge.index]))
                                
     # now add distances to all minima
     vert_counter = Counter(crit_edge.connected_minima)
@@ -23,8 +25,10 @@ def get_closest_extremum(crit_edge, vert_dict, face_dict):
         # cannot cancel loops, so only if there is a single path we can add the extremum
         if nb==1:
             # take absolute value btw the highest vertex of edge and the value of the vertex
-            distances.append(tuple((vert_ind, 0, abs(crit_edge.fun_val[0]-vert_dict[vert_ind].fun_val))))
-    
+            distances.append(tuple((vert_ind, 0, np.log(len(crit_edge.paths[vert_ind]))* abs(crit_edge.fun_val[0]-vert_dict[vert_ind].fun_val)))) #/len(crit_edge.paths[vert_ind])
+            #print("1-0",len(crit_edge.paths[vert_ind]))
+            b=np.log(len(crit_edge.paths[vert_ind]))
+            
     if sorted(distances, key=lambda item: item[2]):
         closest, dim, distance = sorted(distances, key=lambda item: item[2])[0] 
         return closest, dim, distance

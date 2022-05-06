@@ -111,16 +111,18 @@ class MorseComplex:
         
         
     def info(self):
-        print("MorseComplex Info")
-        print("-------------------------------------")
+        print("+-------------------------------------------------------")
+        print("| MorseComplex Info")
+        print("+-------------------------------------------------------")
         if self.filename != None:
-            print("Filename: ", self.filename)
+            print("| Filename: ", self.filename)
         if self.persistence != None:
-            print("Persistence of this reduced Complex: ", self.persistence)
-        print("Number of Vertices: ", len(self.CritVertices))
-        print("Number of Edges: ", len(self.CritEdges))
-        print("Number of Faces: ", len(self.CritFaces))
-        print("-------------------------------------")
-        print("Euler characteristic: ", len(self.CritVertices) - len(self.CritEdges) +len(self.CritFaces))
-        print("-------------------------------------")
+            print("| Persistence of this Complex: ", self.persistence)
+            print("+-------------------------------------------------------")
+        print("| Number of Vertices: ", len(self.CritVertices))
+        print("| Number of Edges: ", len(self.CritEdges))
+        print("| Number of Faces: ", len(self.CritFaces))
+        print("+-------------------------------------------------------")
+        print("| Euler characteristic: ", len(self.CritVertices) - len(self.CritEdges) +len(self.CritFaces))
+        print("+-------------------------------------------------------")
         
