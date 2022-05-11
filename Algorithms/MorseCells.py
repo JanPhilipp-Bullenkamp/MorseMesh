@@ -81,7 +81,8 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
                 visited.add(queue_elt.index)
                 
             cell_counter += 1
-            
+    # also store boundary points        
+    MorseCells["boundary"] = boundary_points
     
     end_time = timeit.default_timer() -start_time
     print("Time get MorseCells: ", end_time)

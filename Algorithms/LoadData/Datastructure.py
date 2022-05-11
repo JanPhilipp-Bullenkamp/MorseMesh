@@ -95,6 +95,31 @@ class CritFace:
     def __str__(self):
         return str(self.indices)
     
+class Separatrix:
+    def __init__(self, origin, destination, dimension, path, separatrix_persistence):
+        # integer indices
+        self.origin = origin
+        self.destination = destination
+        
+        # minimal lines: dim = 1
+        # maximal lines: dim = 2
+        if dimension == 1 or dimension == 2:
+            self.dimension = dimension
+        else:
+            raise ValueError('Dimension must be 1 (minimal line) or 2 (maximal line)!')
+        
+        # list
+        self.path = path
+        
+        # float
+        self.separatrix_persistence = separatrix_persistence
+        
+    def __str__(self):
+        if self.dimension == 1:
+            return "Minimal line from saddle" + str(self.origin) + " to minimum" + str(self.destination) + " in " + str(len(path)) + " pathpoints"
+        elif self.dimension == 2:
+            return "Maximal line from maximum" + str(self.origin) + " to saddle" + str(self.destination) + " in " + str(len(path)) + " pathpoints"
+    
     
 class MorseComplex:
     def __init__(self, persistence=0, filename=None):
@@ -102,6 +127,9 @@ class MorseComplex:
         self.CritEdges = {}
         self.CritFaces = {}
         
+        self.Separatrices = []
+        
+        self.maximalReduced = False
         self.persistence = persistence
         self.filename = filename
         

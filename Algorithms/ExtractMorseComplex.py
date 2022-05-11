@@ -1,8 +1,8 @@
 import numpy as np
 import timeit
-from MorseAlgorithms.Tree import Tree, Node
+from .Tree import Tree, Node
 
-from LoadData.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex
+from .LoadData.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex
 
 def potential_cells(p, cell, vert_dict, edge_dict):
     pot_alphas = set()
@@ -17,7 +17,7 @@ def potential_cells(p, cell, vert_dict, edge_dict):
                     
     return pot_alphas
 
-def ExtractMorseComplex2(vert_dict, edge_dict, face_dict, V12, V23, C):
+def ExtractMorseComplex(vert_dict, edge_dict, face_dict, V12, V23, C):
     start_eff = timeit.default_timer()
     
     initial_complex = MorseComplex()
