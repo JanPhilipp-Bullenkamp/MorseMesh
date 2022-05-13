@@ -4,7 +4,7 @@ import timeit
 from collections import Counter
 
 '''
-first part of this file: write salient edge overlay file
+first part of this file: write salient edge overlay file and improved overlay
 second part of this file: plot salient edge persistence histogram
 '''
 
@@ -92,10 +92,52 @@ def write_salient_edge_file(MorseCpx, vert_dict, edge_dict, face_dict, thresh, t
     print('Time writing overlay file for MorseComplex with ', MorseCpx.persistence,': ', time_writing_file)
     
     
-def plot_salient_edge_histogramm(Cplx, nb_bins = 15, log=False, save = False, filepath = None):
-    if not Cplx.maximalReduced:
-        raise ValueError('Cannot plot histogram, since complex is not maximal reduced (at least flag is not set).')
+def write_improved_salient_edge_file(MorseCpx, min_thresh, max_thresh, vert_dict, edge_dict, face_dict, thresh, target_file, color_paths=[0,0,0]):
+    start_timer = timeit.default_timer()
     
+    f = open(target_file + "_improved_overlay.ply", "w")
+    
+    path_vert = set()
+    path_edges = set()
+    path_faces = set()
+    
+    MorseCpx.Separatrices.sort(key=lambda x: x[0])
+    for pers, sepa in MorseCpx.Separatrices:
+         if pers > thresh:
+                if sepa.dimension == 1:
+                    if abs(vert_dict[sepa.path[-1]].fun_val) > min_thresh: 
+                        for i, elt in enumerate(sepa.path):
+                            if i%2==0:
+                                path_edges.add(elt)
+                            elif i%2==1:
+                                path_vert.add(elt)
+                    
+                elif sepa.dimension == 2:
+                    if abs(face_dict[sepa.path[0]].fun_val[0]) > max_thresh:
+                        for i, elt in enumerate(sepa.path):
+                            if i%2==0:
+                                path_faces.add(elt)
+                            elif i%2==1:
+                                path_edges.add(elt)
+            
+    nb_points = len(path_vert) + len(path_edges) + len(path_faces)
+    
+    write_header(f, nb_points)
+    
+    for ind in path_vert:
+        write_vertex(f, vert_dict[ind], vert_dict, color=color_paths)
+    for ind in path_edges:
+        write_edge(f, edge_dict[ind], vert_dict, color=color_paths)
+    for ind in path_faces:
+        write_face(f, face_dict[ind], vert_dict, color=color_paths)
+     
+          
+    f.close()
+    time_writing_file = timeit.default_timer() - start_timer
+    print('Time writing overlay file for MorseComplex with ', MorseCpx.persistence,': ', time_writing_file)
+    
+    
+def plot_salient_edge_histogramm(Cplx, nb_bins = 15, log=False, save = False, filepath = None):
     persistences = []
     for pers, sepa in Cplx.Separatrices:
         persistences.append(pers)

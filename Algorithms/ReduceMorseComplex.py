@@ -44,18 +44,18 @@ def compute_min_sad_persistence(path, min_maximum_val, vert_dict, edge_dict):
     distances = []
     for i, elt in enumerate(path):
         if i%2 == 0:
-            distances.append(min_maximum_val - edge_dict[elt].fun_val[0])
+            distances.append(min_maximum_val-edge_dict[elt].fun_val[0]) #min_maximum_val
         elif i%2 == 1:
-            distances.append(min_maximum_val - vert_dict[elt].fun_val)
+            distances.append(min_maximum_val-vert_dict[elt].fun_val) #min_maximum_val
     return sum(distances)
 
 def compute_max_sad_persistence(path, max_minimum_val, edge_dict, face_dict):
     distances = []
     for i, elt in enumerate(path):
         if i%2 == 0:
-            distances.append(face_dict[elt].fun_val[0] - max_minimum_val)
+            distances.append(face_dict[elt].fun_val[0]-max_minimum_val) #max_minimum_val
         elif i%2 == 1:
-            distances.append(edge_dict[elt].fun_val[0] - max_minimum_val)
+            distances.append(edge_dict[elt].fun_val[0]-max_minimum_val) #max_minimum_val
     return sum(distances)
             
 # saddle and minimum given as CritEdge and CritVertex objects

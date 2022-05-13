@@ -4,11 +4,11 @@ from Algorithms.ProcessLowerStars import ProcessLowerStars
 from Algorithms.ExtractMorseComplex import ExtractMorseComplex
 from Algorithms.ReduceMorseComplex import CancelCriticalPairs
 
-from Algorithms.MorseCells import get_MorseCells
+from Algorithms.MorseCells import get_MorseCells, create_CellConnectivityGraph
 
 from PlotData.write_overlay_ply_file import write_overlay_ply_file
 from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
-from PlotData.write_salient_edge_overlay import write_salient_edge_file, plot_salient_edge_histogramm
+from PlotData.write_salient_edge_overlay import write_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
 from PlotData.write_labels_txt import write_labels_txt_file
 
 import timeit
@@ -48,8 +48,9 @@ class Mesh:
         self.MorseCells = {}
 
 
-    def load_mesh_ply(self, filename, quality_index):
-        min_val, max_val = read_ply(filename, quality_index, self.Vertices, self.Edges, self.Faces)
+    def load_mesh_ply(self, filename, quality_index, inverted=False):
+        min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
+                                    self.Edges, self.Faces, inverted=inverted)
         self.filename = os.path.splitext(filename)[0]
         self.min = min_val
         self.max = max_val
@@ -88,7 +89,8 @@ class Mesh:
         if not self._flag_ProcessLowerStars:
             raise ValueError('Need to call ProcessLowerStars first, cannot calculate MorseComplex otherwise!')
         else:
-            return ExtractMorseComplex(self.Vertices, self.Edges, self.Faces, self.V12, self.V23, self.C)
+            return ExtractMorseComplex(self.Vertices, self.Edges, self.Faces, 
+                                       self.V12, self.V23, self.C)
     
     def ExtractMorseComplex(self):
         if not self._flag_ProcessLowerStars:
@@ -97,7 +99,8 @@ class Mesh:
             if self._flag_MorseComplex:
                 self.MorseComplex = None
 
-            self.MorseComplex = ExtractMorseComplex(self.Vertices, self.Edges, self.Faces, self.V12, self.V23, self.C)
+            self.MorseComplex = ExtractMorseComplex(self.Vertices, self.Edges, self.Faces, 
+                                                    self.V12, self.V23, self.C)
             self.MorseComplex.filename = self.filename
             self._flag_MorseComplex = True
         
@@ -110,15 +113,18 @@ class Mesh:
         else:
             # in these cases we need to calculate it from the original Morse Complex
             if len(self.reducedMorseComplexes.keys())==0:
-                return CancelCriticalPairs(self.MorseComplex, persistence, self.Vertices, self.Edges, self.Faces)
+                return CancelCriticalPairs(self.MorseComplex, persistence, 
+                                           self.Vertices, self.Edges, self.Faces)
             elif min(self.reducedMorseComplexes.keys()) > persistence:
-                return CancelCriticalPairs(self.MorseComplex, persistence, self.Vertices, self.Edges, self.Faces)
+                return CancelCriticalPairs(self.MorseComplex, persistence, 
+                                           self.Vertices, self.Edges, self.Faces)
                 
             # else: choose the closest already calculated persistence and start from there
             else:
                 key_array = np.array([list(self.reducedMorseComplexes.keys())])
                 closest_smaller = key_array[key_array < persistence].max()
-                return CancelCriticalPairs(self.reducedMorseComplexes[closest_smaller], persistence, self.Vertices, self.Edges, self.Faces)
+                return CancelCriticalPairs(self.reducedMorseComplexes[closest_smaller], persistence, 
+                                           self.Vertices, self.Edges, self.Faces)
         
     def ReducedMorseComplex(self, persistence):
         if not self._flag_MorseComplex:
@@ -129,26 +135,31 @@ class Mesh:
         else:
             # in these cases we need to calculate it from the original Morse Complex
             if len(self.reducedMorseComplexes.keys())==0:
-                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, self.Vertices, self.Edges, self.Faces)
+                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, 
+                                                                              self.Vertices, self.Edges, self.Faces)
                 if persistence >= self.range and not self._flag_SalientEdge:
                     self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
                     self.maximalReducedComplex.maximalReduced = True
                     self._flag_SalientEdge = True
-                    print("Persistence was higher than the range of function values, therefore this complex is maximally reduced and can be used for salient edge extraction.")
+                    print("Persistence was higher than the range of function values,") 
+                    print("therefore this complex is maximally reduced and can be used for salient edge extraction.")
             elif min(self.reducedMorseComplexes.keys()) > persistence:
-                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, self.Vertices, self.Edges, self.Faces)
+                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, 
+                                                                              self.Vertices, self.Edges, self.Faces)
                 
             # else: choose the closest already calculated persistence and start from there
             else:
                 key_array = np.array([list(self.reducedMorseComplexes.keys())])
                 closest_smaller = key_array[key_array < persistence].max()
-                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.reducedMorseComplexes[closest_smaller], persistence, self.Vertices, self.Edges, self.Faces)
+                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.reducedMorseComplexes[closest_smaller], 
+                                                                              persistence, self.Vertices, self.Edges, self.Faces)
                 
                 if persistence >= self.range and not self._flag_SalientEdge:
                     self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
                     self.maximalReducedComplex.maximalReduced = True
                     self._flag_SalientEdge = True
-                    print("Persistence was higher than the range of function values, therefore this complex is maximally reduced and can be used for salient edge extraction.")
+                    print("Persistence was higher than the range of function values,")
+                    print("therefore this complex is maximally reduced and can be used for salient edge extraction.")
                  
         return self.reducedMorseComplexes[persistence]
     
@@ -158,12 +169,19 @@ class Mesh:
         
     def ExtractMorseCells(self, MorseComplex):
         if MorseComplex.persistence not in self.MorseCells.keys():
-            self.MorseCells[MorseComplex.persistence] = get_MorseCells(MorseComplex, self.Vertices, self.Edges, self.Faces)
+            self.MorseCells[MorseComplex.persistence] = get_MorseCells(MorseComplex, self.Vertices, 
+                                                                       self.Edges, self.Faces)
             return self.MorseCells[MorseComplex.persistence]
         else:
             print("MorseCells for the MorseComplex with this persistence have already been calculated!")
             print("You can access the MorseCells dictionary via: .MorseCells[persistence]")
             print("where the persistence can be retrieved from MorseComplex.persistence") 
+            
+    def GetConnectivityGraph(self, persistence):
+        if persistence not in self.MorseCells.keys():
+            raise ValueError('No MorseCell calculated for this persistence!')
+        else:
+            return create_CellConnectivityGraph(self.MorseCells[persistence], self.Vertices, self.Edges)
             
     def plot_MorseCells(self, persistence, filename):
         if persistence not in self.MorseCells.keys():
@@ -178,18 +196,35 @@ class Mesh:
             write_labels_txt_file(self.MorseCells[persistence], filename)
             
     def plot_salient_edge_histogram(self, nb_bins = 15, log=False, filename = None):
+        if not self._flag_SalientEdge:
+            raise ValueError('Cannot plot histogram, since complex is not maximal reduced (at least flag is not set).')
         if filename == None:
             plot_salient_edge_histogramm(self.maximalReducedComplex, nb_bins, log=log)
         else:
-            plot_salient_edge_histogramm(self.maximalReducedComplex, nb_bins, log=log, save=True, filename=filename)
+            plot_salient_edge_histogramm(self.maximalReducedComplex, nb_bins, 
+                                         log=log, save=True, filename=filename)
             
     def plot_salient_edge(self, filename, thresh):
         if self._flag_SalientEdge:
-            write_salient_edge_file(self.maximalReducedComplex, self.Vertices, self.Edges, self.Faces, thresh, filename, color_paths=[255,0,255])
+            write_salient_edge_file(self.maximalReducedComplex, self.Vertices, self.Edges, self.Faces, 
+                                    thresh, filename, color_paths=[255,0,255])
         else:
             print("Need to calculate maximally reduced MorseComplex first for Salient Edges:")
             self.ReducedMorseComplex(self.range)
             
-            write_salient_edge_file(self.maximalReducedComplex, self.Vertices, self.Edges, self.Faces, thresh, filename, color_paths=[255,0,255])
+            write_salient_edge_file(self.maximalReducedComplex, self.Vertices, self.Edges, self.Faces, 
+                                    thresh, filename, color_paths=[255,0,255])
+            
+    def plot_improved_salient_edge(self, filename, thresh, min_thresh, max_thresh):
+        if self._flag_SalientEdge:
+            write_improved_salient_edge_file(self.maximalReducedComplex, min_thresh, max_thresh, self.Vertices, 
+                                             self.Edges, self.Faces, thresh, filename, color_paths=[255,0,255])
+        else:
+            print("Need to calculate maximally reduced MorseComplex first for Salient Edges:")
+            self.ReducedMorseComplex(self.range)
+            
+            write_improved_salient_edge_file(self.maximalReducedComplex, min_thresh, max_thresh, self.Vertices, 
+                                             self.Edges, self.Faces, thresh, filename, color_paths=[255,0,255])
+       
     
     
