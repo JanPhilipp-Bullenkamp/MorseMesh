@@ -1,5 +1,6 @@
 import numpy as np
 import timeit
+from collections import Counter
 
 def write_header(file):
     file.write("# +-------------------------------------------------------------------------------+\n")
@@ -9,85 +10,79 @@ def write_header(file):
     file.write("# | Format: Label No. | Number of Vertices | id1 x1 y1 z1 nx1 ny1 nz1 id2 x2 y2 z2 nx2 ny2 nz2 ... idN xN yN zN nxN nyN nzN\n")
     file.write("# +------------------------------------------------------------------------------------------------------------------------\n")
         
-def write_midpoint(file, elt, rawdata):
+def write_midpoint(file, elt, vert_dict):
     x,y,z = 0,0,0
-    for ind in elt:
-        x += rawdata.elements[0].data[ind][0]
-        y += rawdata.elements[0].data[ind][1]
-        z += rawdata.elements[0].data[ind][2]
-    x = round(x/len(elt), 8)
-    y = round(y/len(elt), 8)
-    z = round(z/len(elt), 8)
+    for ind in elt.indices:
+        x += vert_dict[ind].x
+        y += vert_dict[ind].y
+        z += vert_dict[ind].z
+    x = round(x/len(elt.indices), 8)
+    y = round(y/len(elt.indices), 8)
+    z = round(z/len(elt.indices), 8)
     file.write(" " + str(-1) + " " + str(x) + " " + str(y) + " " + str(z) + " " + str(1.0) + " " + str(0) + " " + str(0))
     
-def write_vertex(file, elt, rawdata):
-    x = rawdata.elements[0].data[elt][0]
-    y = rawdata.elements[0].data[elt][1]
-    z = rawdata.elements[0].data[elt][2]
-    file.write(" " + str(-1) + " " + str(x) + " " + str(y) + " " + str(z) + " " + str(1.0) + " " + str(0) + " " + str(0))
+def write_vertex(file, vert):
+    file.write(" " + str(-1) + " " + str(vert.x) + " " + str(vert.y) + " " + str(vert.z) + " " + str(1.0) + " " + str(0) + " " + str(0))
         
-def write_polyline(file, line, line_ind, rawdata):
+def write_polyline(file, line, line_dim, line_ind, vert_dict, edge_dict, face_dict):
     
     indices = []
-    for elt in line:
-        if isinstance(elt, np.int32):
-            if elt not in indices:
+    if line_dim == 0:  # so saddle to minimum
+        for count, elt in enumerate(line):
+            if count%2 == 1: # so vertex (edge-vert-edge-vert-... line)
                 indices.append(elt)
-                
-        elif np.array(elt).shape == (3,):
-            if elt not in indices:
-                indices.append(elt)
-                    
+    
+    if line_dim==1:  # so max to saddle
+        for count, elt in enumerate(line):
+            if count%2 == 0:  #so maximum (max-sad-max-sad-...)
+                indices.append(face_dict[elt])
+            elif count%2 == 1:  #so saddle
+                indices.append(edge_dict[elt])
+        
     file.write(str(line_ind) + " " + str(len(indices)))
     for ind in indices:
-        if isinstance(ind, np.int32):
-            write_vertex(file, ind, rawdata)
+        if line_dim==0:
+            write_vertex(file, vert_dict[elt])
                 
-        elif np.array(ind).shape == (3,):
-            write_midpoint(file, ind, rawdata)
+        elif line_dim==1:
+            write_midpoint(file, ind, vert_dict) # here ind is an edge or face object
     file.write("\n")
     
-def _elt_to_ind(elt):
-    if isinstance(elt, np.int32):
-        return elt
-    else:
-        return elt[0]
-    
-def write_polyline_simplified(file, line, line_ind, modulo_decimator, rawdata, thresh):
+def write_polyline_thresholded(file, line, line_dim, line_ind, thresh, vert_dict, edge_dict, face_dict):
     
     indices = []
-    count = 0
-    for elt in line:
-        if isinstance(elt, np.int32):
-            if elt not in indices and count%modulo_decimator == 0:
-                if rawdata.elements[0].data[elt][3] > thresh or len(indices) < 3:
+    if line_dim == 0:  # so saddle to minimum
+        for count, elt in enumerate(line):
+            if count%2 == 1: # so vertex (edge-vert-edge-vert-... line)
+                if vert_dict[elt].fun_val > thresh:
                     indices.append(elt)
-                    count+=1
                 else:
                     break
-            else:
-                count+=1
-        elif np.array(elt).shape == (3,):
-            if elt not in indices and count%modulo_decimator == 0:
-                if rawdata.elements[0].data[_elt_to_ind(elt)][3] > thresh or len(indices) < 3:
-                    indices.append(elt)
-                    count+=1
+    
+    if line_dim==1:  # so max to saddle
+        for count, elt in enumerate(line):
+            if count%2 == 0:  #so maximum (max-sad-max-sad-...)
+                if face_dict[elt].fun_val[0] > thresh:
+                    indices.append(face_dict[elt])
                 else:
                     break
-            else:
-                count+=1
+            elif count%2 == 1:  #so saddle
+                if edge_dict[elt].fun_val[0] > thresh:
+                    indices.append(edge_dict[elt])
+                else:
+                    break
                     
     file.write(str(line_ind) + " " + str(len(indices)))
     for ind in indices:
-        if isinstance(ind, np.int32):
-            write_vertex(file, ind, rawdata)
+        if line_dim==0:
+            write_vertex(file, vert_dict[elt])
                 
-        elif np.array(ind).shape == (3,):
-            write_midpoint(file, ind, rawdata)
+        elif line_dim==1:
+            write_midpoint(file, ind, vert_dict) # here ind is an edge or face object
     file.write("\n")
     
 
-def write_pline_file(C, Paths, rawdata, target_file):
+def write_pline_file(MorseComplex, vert_dict, edge_dict, face_dict, target_file):
     start_timer = timeit.default_timer()
     
     f = open(target_file + ".pline", "w")
@@ -96,35 +91,78 @@ def write_pline_file(C, Paths, rawdata, target_file):
     
     # write polylines
     line_ind=0
-    for keys in Paths.keys():
-        for line in Paths[keys].values():
-            write_polyline(f, line, line_ind, rawdata)
-            line_ind+=1
-            
+    # write max to saddle first
+    for critface in MorseComplex.CritFaces.values():
+        counts = Counter(critface.connected_saddles)
+        for sad, nb in counts.items():
+            if nb == 1:
+                line = critface.paths[sad]
+                write_polyline(f, line, 1, line_ind, vert_dict, edge_dict, face_dict)
+                line_ind+=1
+            elif nb == 2:
+                for i in range(2):
+                    line = critface.paths[sad][i]
+                    write_polyline(f, line, 1, line_ind, vert_dict, edge_dict, face_dict)
+                    line_ind+=1
+                
+    # now write sad to min
+    for critedge in MorseComplex.CritEdges.values():
+        counts = Counter(critedge.connected_minima)
+        for minimum, nb in counts.items():
+            if nb == 1:
+                line = critedge.paths[minimum]
+                write_polyline(f, line, 0, line_ind, vert_dict, edge_dict, face_dict)
+                line_ind+=1
+            elif nb == 2:
+                for i in range(2):
+                    line = critedge.paths[minimum][i]
+                    write_polyline(f, line, 0, line_ind, vert_dict, edge_dict, face_dict)
+                    line_ind+=1
+                
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
     print('Time writing pline file:', time_writing_file)
     
-def write_pline_file_simplified(C, Paths, rawdata, target_file):
+def write_pline_file_thresholded(MorseComplex, minimum_length, thresh, vert_dict, edge_dict, face_dict, target_file):
     start_timer = timeit.default_timer()
     
     f = open(target_file + ".pline", "w")
-    
-    # simplification parameters
-    minimum_length = 5
-    modulo_decimator = 3
-    thresh = 0.15
     
     write_header(f)
     
     # write polylines
     line_ind=0
-    for keys in Paths.keys():
-        for line in Paths[keys].values():
-            if len(line) > minimum_length:
-                if rawdata.elements[0].data[_elt_to_ind(line[0])][3] > thresh or rawdata.elements[0].data[_elt_to_ind(line[-1])][3] > thresh:
-                    write_polyline_simplified(f, line, line_ind, modulo_decimator, rawdata, thresh)
+    # write max to saddle first
+    for critface in MorseComplex.CritFaces.values():
+        counts = Counter(critface.connected_saddles)
+        for sad, nb in counts.items():
+            if nb == 1:
+                line = critface.paths[sad]
+                if len(line) > minimum_length:
+                    write_polyline_thresholded(f, line, 1, line_ind, thresh, vert_dict, edge_dict, face_dict)
                     line_ind+=1
+            elif nb == 2:
+                for i in range(2):
+                    line = critface.paths[sad][i]
+                    if len(line) > minimum_length:
+                        write_polyline_thresholded(f, line, 1, line_ind, thresh, vert_dict, edge_dict, face_dict)
+                        line_ind+=1
+                
+    # now write sad to min
+    for critedge in MorseComplex.CritEdges.values():
+        counts = Counter(critedge.connected_minima)
+        for minimum, nb in counts.items():
+            if nb == 1:
+                line = critedge.paths[minimum]
+                if len(line) > minimum_length:
+                    write_polyline_thresholded(f, line, 0, line_ind, thresh, vert_dict, edge_dict, face_dict)
+                    line_ind+=1
+            elif nb == 2:
+                for i in range(2):
+                    line = critedge.paths[minimum][i]
+                    if len(line) > minimum_length:
+                        write_polyline_thresholded(f, line, 0, line_ind, thresh, vert_dict, edge_dict, face_dict)
+                        line_ind+=1
             
     f.close()
     time_writing_file = timeit.default_timer() - start_timer

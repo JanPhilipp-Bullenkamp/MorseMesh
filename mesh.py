@@ -10,6 +10,7 @@ from PlotData.write_overlay_ply_file import write_overlay_ply_file
 from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
 from PlotData.write_salient_edge_overlay import write_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
 from PlotData.write_labels_txt import write_labels_txt_file
+from PlotData.write_pline_file import write_pline_file, write_pline_file_thresholded
 
 import timeit
 import os
@@ -126,7 +127,7 @@ class Mesh:
                 return CancelCriticalPairs(self.reducedMorseComplexes[closest_smaller], persistence, 
                                            self.Vertices, self.Edges, self.Faces)
         
-    def ReducedMorseComplex(self, persistence):
+    def ReduceMorseComplex(self, persistence):
         if not self._flag_MorseComplex:
             raise ValueError('Need to call ExtractMorseComplex first, cannot reduce MorseComplex otherwise!')
         elif persistence in self.reducedMorseComplexes.keys():
@@ -165,6 +166,14 @@ class Mesh:
     
     def plot_MorseComplex(self, MorseComplex, filename, path_color=[255,0,255]):
         write_overlay_ply_file(MorseComplex, self.Vertices, self.Edges, self.Faces, filename, color_paths=path_color)
+        
+    def plot_MorseComplex_pline(self, persistence, filename):
+        write_pline_file(self.reducedMorseComplexes[persistence], self.Vertices, self.Edges, self.Faces, filename)
+        
+    def plot_MorseComplex_thresholded_pline(self, persistence, filename, minimum_length=3, thresh=0.1):
+        write_pline_file_thresholded(self.reducedMorseComplexes[persistence], 
+                                     minimum_length, thresh, 
+                                     self.Vertices, self.Edges, self.Faces, filename)
         
         
     def ExtractMorseCells(self, MorseComplex):
@@ -210,7 +219,7 @@ class Mesh:
                                     thresh, filename, color_paths=[255,0,255])
         else:
             print("Need to calculate maximally reduced MorseComplex first for Salient Edges:")
-            self.ReducedMorseComplex(self.range)
+            self.ReduceMorseComplex(self.range)
             
             write_salient_edge_file(self.maximalReducedComplex, self.Vertices, self.Edges, self.Faces, 
                                     thresh, filename, color_paths=[255,0,255])
@@ -221,7 +230,7 @@ class Mesh:
                                              self.Edges, self.Faces, thresh, filename, color_paths=[255,0,255])
         else:
             print("Need to calculate maximally reduced MorseComplex first for Salient Edges:")
-            self.ReducedMorseComplex(self.range)
+            self.ReduceMorseComplex(self.range)
             
             write_improved_salient_edge_file(self.maximalReducedComplex, min_thresh, max_thresh, self.Vertices, 
                                              self.Edges, self.Faces, thresh, filename, color_paths=[255,0,255])

@@ -70,7 +70,8 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
     
     visited = set()
     MorseCells = {}
-    cell_counter = 0
+    # start with label number 1, cause 0 is used for unlabeld points in gigamesh
+    cell_counter = 1
     for vert_ind, vert in vert_dict.items():
         if vert_ind in boundary_points or vert_ind in visited:
             continue
@@ -96,6 +97,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
                         MorseCells[cell_counter]["set"].add(ind)
                         MorseCells[cell_counter]["boundary"].add(ind)
                         visited.add(ind)
+                        boundary_points.remove(ind)
                     elif ind not in boundary_points and ind in visited:
                         # if it is in set, all good
                         # if it is not in set: must be visited in another cell already, 
@@ -110,6 +112,23 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
             cell_counter += 1
     # also store boundary points /// not necessary anymore?        
     #MorseCells["boundary"] = boundary_points
+    rem_bd = set()
+    for left in boundary_points:
+        neighbors = get_neighbors(vert_dict[left], vert_dict, edge_dict)
+        labels = []
+        for ind in neighbors:
+            if ind not in boundary_points:
+                for label, val in MorseCells.items():
+                    if ind in val["set"]:
+                        labels.append(label)
+        if len(labels) > 0:
+            counts = Counter(labels)
+            max_label = [label for label, nb in sorted(counts.items(), key=lambda item: item[1])][-1]
+            MorseCells[max_label]["set"].add(left)
+            MorseCells[max_label]["boundary"].add(left)
+            rem_bd.add(left)
+        else:
+            print("No neighbor labels found for boundary point in getMorseCells function!")
     
     end_time = timeit.default_timer() -start_time
     print("Time get MorseCells: ", end_time)
