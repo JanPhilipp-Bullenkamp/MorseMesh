@@ -129,6 +129,9 @@ class MorseComplex:
         
         self.Separatrices = []
         
+        self._flag_BettiNumbers = False
+        self.BettiNumbers = None
+        
         self.maximalReduced = False
         self.persistence = persistence
         self.filename = filename
@@ -152,5 +155,7 @@ class MorseComplex:
         print("| Number of Faces: ", len(self.CritFaces))
         print("+-------------------------------------------------------")
         print("| Euler characteristic: ", len(self.CritVertices) - len(self.CritEdges) +len(self.CritFaces))
+        if self._flag_BettiNumbers:
+            print("| Betti numbers: ", self.BettiNumbers)
         print("+-------------------------------------------------------")
         

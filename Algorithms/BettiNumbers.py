@@ -6,24 +6,36 @@ from collections import Counter
 def BettiViaPairCells(MorseComplex):
     start_eff = timeit.default_timer()
     
-    partner = pair_cells(MorseComplex)
+    partner0, partner1, partner2 = pair_cells(MorseComplex)
 
     betti = np.zeros(3)
-    for p in range(3):
-        for key in C[p].keys():
-            if np.array(partner[key]).size == 0:
-                betti[p] += 1
+    for cell in MorseComplex.CritVertices.keys():
+        if np.array(partner0[cell]).size == 0:
+            betti[0] += 1
+    for cell in MorseComplex.CritEdges.keys():
+        if np.array(partner1[cell]).size == 0:
+            betti[1] += 1
+    for cell in MorseComplex.CritFaces.keys():
+        if np.array(partner2[cell]).size == 0:
+            betti[2] += 1
     
     time_eff = timeit.default_timer() -start_eff
     print('Time Betti numbers:', time_eff)  
-    return betti, partner
+    return betti, partner0, partner1, partner2
 
 
 def pair_cells(MorseComplex):
     
-    partner = {}
-    cascade = {}
-    dell_cascade = {}
+    partner0 = {}
+    cascade0 = {}
+    
+    partner1 = {}
+    cascade1 = {}
+    dell_cascade1 = {}
+    
+    partner2 = {}
+    cascade2 = {}
+    dell_cascade2 = {}
     
     M = {}
     M[0] = {k: v for k, v in sorted(MorseComplex.CritVertices.items(), key=lambda item: item[1].fun_val)}
@@ -31,90 +43,87 @@ def pair_cells(MorseComplex):
     M[2] = {k: v for k, v in sorted(MorseComplex.CritFaces.items(), key=lambda item: item[1].fun_val)}
     
     for sigma in M[0].keys():
-        partner[sigma] = []
-        cascade[sigma] = [sigma]
+        partner0[sigma] = []
+        cascade0[sigma] = [sigma]
         
     for sigma in M[1].keys():
-        partner[sigma] = []
-        cascade[sigma] = [sigma]
-        dell_cascade[sigma] = Dell()
-        dell_cascade[sigma].add(M[1][sigma], MorseComplex, 1)
+        partner1[sigma] = []
+        cascade1[sigma] = [sigma]
+        dell_cascade1[sigma] = Dell()
+        dell_cascade1[sigma].add(M[1][sigma], 1)
         
-        eliminate_boundaries(sigma, cascade, partner, dell_cascade, MorseComplex, 1)
+        eliminate_boundaries(sigma, cascade1, partner1, partner0, dell_cascade1, MorseComplex, 1)
             
-        if dell_cascade[sigma].nonzero():
-            tau = dell_cascade[sigma].youngest()
+        if dell_cascade1[sigma].nonzero():
+            tau = dell_cascade1[sigma].youngest(MorseComplex, 1)
 
-            partner[tau] = sigma
-            partner[sigma] = tau
+            partner0[tau] = sigma
+            partner1[sigma] = tau
+            
+    for sigma in M[2].keys():
+        partner2[sigma] = []
+        cascade2[sigma] = [sigma]
+        dell_cascade2[sigma] = Dell()
+        dell_cascade2[sigma].add(M[2][sigma], 2)
+        
+        eliminate_boundaries(sigma, cascade2, partner2, partner1, dell_cascade2, MorseComplex, 2)
+            
+        if dell_cascade2[sigma].nonzero():
+            tau = dell_cascade2[sigma].youngest(MorseComplex, 2)
 
-    for p in range(3):
-        for sigma in M[p].keys():
-            
-            partner[sigma] = []
-            cascade[sigma] = [sigma]
-            dell_cascade[sigma] = Dell()
-            dell_cascade[sigma].add(M[p][sigma], MorseComplex, p)
-            
-            eliminate_boundaries(sigma, cascade, partner, dell_cascade, MorseComplex)
-            
-            if dell_cascade[sigma].nonzero():
-                tau = dell_cascade[sigma].youngest()
+            partner1[tau] = sigma
+            partner2[sigma] = tau
 
-                partner[tau] = sigma
-                partner[sigma] = tau
-                
-    return partner
+    return partner0, partner1, partner2
 
 
 class Dell:
     def __init__(self): 
-        self.dell0 = set()
-        self.dell1 = set()
+        self.dell = set()
   
     # for checking if the dell is empty 
     def nonzero(self): 
-        return (len(self.dell0) + len(self.dell1) + len(self.dell2)) != 0
+        return len(self.dell) != 0
   
     # for adding an element to dell 
-    def add(self, critElt, MorseComplex, p):
+    def add(self, critElt, p):
         if p==1:
             for elt in critElt.connected_minima:
-                if elt in self.dell0:
-                    self.dell0.remove(MorseComplex.CritVertices[elt])
+                if elt in self.dell:
+                    self.dell.remove(elt)
                 else:
-                    self.dell0.add(MorseComplex.CritVertices[elt])
+                    self.dell.add(elt)
         elif p==2:
             for elt in critElt.connected_saddles:
-                if elt in self.dell1:
-                    self.dell1.remove(MorseComplex.CritEdges[elt])
+                if elt in self.dell:
+                    self.dell.remove(elt)
                 else:
-                    self.dell1.add(MorseComplex.CritEdges[elt])
+                    self.dell.add(elt)
         
-    def copy(self, dell_list):
-        for elt in dell_list:
+    def copy(self, dell_set):
+        for elt in dell_set:
             if elt in self.dell:
                 self.dell.remove(elt)
             else:
-                self.dell.add(tuple((elt)))
+                self.dell.add(elt)
         return self.dell
     
-    def youngest(self, p):
+    def youngest(self, MorseComplex, p):
         if p==1:
-            return sorted(self.dell0, key=lambda item: item.fun_val)[-1][0]
+            return sorted(self.dell, key=lambda item: MorseComplex.CritVertices[item].fun_val)[-1]
         elif p==2:
-            return sorted(self.dell1, key=lambda item: item.fun_val)[-1][0]
+            return sorted(self.dell, key=lambda item: MorseComplex.CritEdges[item].fun_val)[-1]
 
 
-def eliminate_boundaries(sigma, cascade, partner, dell_cascade, MorseComplex, p):
+def eliminate_boundaries(sigma, cascade, partner, partner_below, dell_cascade, MorseComplex, p):
     while dell_cascade[sigma].nonzero():
-        tau = dell_cascade[sigma].youngest(p).index
+        tau = dell_cascade[sigma].youngest(MorseComplex, p)
         
-        if not partner[tau]:
+        if not partner_below[tau]:
             return
         else:
-            cascade[sigma] += cascade[partner[tau]]
+            cascade[sigma] += cascade[partner_below[tau]]
             
-            dell_cascade[sigma].copy(dell_cascade[partner[tau]].dell)
+            dell_cascade[sigma].copy(dell_cascade[partner_below[tau]].dell)
 
 

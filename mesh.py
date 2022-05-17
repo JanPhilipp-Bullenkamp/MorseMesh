@@ -3,8 +3,11 @@ from Algorithms.LoadData.read_ply import read_ply
 from Algorithms.ProcessLowerStars import ProcessLowerStars
 from Algorithms.ExtractMorseComplex import ExtractMorseComplex
 from Algorithms.ReduceMorseComplex import CancelCriticalPairs
+from Algorithms.BettiNumbers import BettiViaPairCells
 
 from Algorithms.MorseCells import get_MorseCells, create_CellConnectivityGraph
+
+from Algorithms.PersistenceDiagram import PersistenceDiagram
 
 from PlotData.write_overlay_ply_file import write_overlay_ply_file
 from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
@@ -31,6 +34,10 @@ class Mesh:
         self._flag_ProcessLowerStars = False
         self._flag_MorseComplex = False
         self._flag_SalientEdge = False
+        self._flag_BettiNumbers = False
+        
+        self.partners = None  # filled by betti numbers calculation (for persistence diagram needed)
+        self.BettiNumbers = None
 
         self.V12 = {}
         self.V23 = {}
@@ -69,6 +76,8 @@ class Mesh:
         print("| Number of Faces: ", len(self.Faces))
         print("+-------------------------------------------------------")
         print("| Euler characteristic: ", len(self.Vertices) + len(self.Faces) -len(self.Edges))
+        if self._flag_BettiNumbers:
+            print("| Betti numbers: ", self.BettiNumbers)
         print("+-------------------------------------------------------")
         
     def ProcessLowerStars(self):
@@ -234,6 +243,25 @@ class Mesh:
             
             write_improved_salient_edge_file(self.maximalReducedComplex, min_thresh, max_thresh, self.Vertices, 
                                              self.Edges, self.Faces, thresh, filename, color_paths=[255,0,255])
-       
+    
+    def calculate_BettiNumbers(self):
+        if not self._flag_BettiNumbers:
+            betti, partner0, partner1, partner2 = BettiViaPairCells(self.MorseComplex)
+            self.BettiNumbers = betti
+            self.MorseComplex.BettiNumbers = betti
+            self.MorseComplex._flag_BettiNumbers = True
+            
+            self.partner = {}
+            self.partner[0] = partner0
+            self.partner[1] = partner1
+            self.partner[2] = partner2
+            self._flag_BettiNumbers = True
+        print("Betti Numbers: ", betti)
+        
+    def plot_PersistenceDiagram(self, pointsize = 4, save = False, filepath = None):
+        if self._flag_BettiNumbers:
+            PersistenceDiagram(self.MorseComplex, self.partner, self.max, self.min, pointsize = pointsize, save = save, filepath = filepath)
+        else:
+            raise ValueError('Can not calculate Persistence Diagram before Betti Numbers!')
     
     

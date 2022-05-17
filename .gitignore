@@ -3,11 +3,7 @@ Data/
 __pycache__/
 Algorithms/LoadData/__pycache__/
 Algorithms/LoadData/.ipynb_checkpoints/
-MeshSizeReduction/__pycache__/
-MeshSizeReduction.ipynb_checkpoints/
-MorseAlgorithms/__pycache__/
-MorseAlgorithms/.ipynb_checkpoints/
-PlotData/__pycache__/
-PlotData/.ipynb_checkpoints/
 Algorithms/__pycache__/
 Algorithms/.ipynb_checkpoints/
+PlotData/__pycache__/
+PlotData/.ipynb_checkpoints/
