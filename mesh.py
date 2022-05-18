@@ -9,7 +9,7 @@ from Algorithms.MorseCells import get_MorseCells, create_CellConnectivityGraph
 
 from Algorithms.PersistenceDiagram import PersistenceDiagram
 
-from PlotData.write_overlay_ply_file import write_overlay_ply_file
+from PlotData.write_overlay_ply_file import write_overlay_ply_file, write_overlay_ply_file_thresholded
 from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
 from PlotData.write_salient_edge_overlay import write_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
 from PlotData.write_labels_txt import write_labels_txt_file
@@ -175,6 +175,9 @@ class Mesh:
     
     def plot_MorseComplex(self, MorseComplex, filename, path_color=[255,0,255]):
         write_overlay_ply_file(MorseComplex, self.Vertices, self.Edges, self.Faces, filename, color_paths=path_color)
+        
+    def plot_MorseComplex_thresholded(self, MorseComplex, filename, threshold, path_color=[255,0,255]):
+        write_overlay_ply_file_thresholded(MorseComplex, self.Vertices, self.Edges, self.Faces, filename, threshold, color_paths=path_color)
         
     def plot_MorseComplex_pline(self, persistence, filename):
         write_pline_file(self.reducedMorseComplexes[persistence], self.Vertices, self.Edges, self.Faces, filename)
