@@ -1,3 +1,13 @@
+def compute_weight_saledge(points, sal_points):
+    edge = 0
+    noedge = 0
+    for ind in points:
+        if ind in sal_points:
+            edge += 1
+        else:
+            noedge += 1
+    return edge/(edge+noedge)
+
 class ConnComp():
     def __init__(self, label):
         self.label = label
@@ -61,3 +71,61 @@ class Graph():
         for comp in rem_comp:
             self.conncomps.pop(comp)
         return Mesh
+    
+    def merge_and_update(self, label1, label2, MorseCell, saledge_points):
+        # want to remove label2, 
+        # update weights of the new combined label1
+        # update the MorseCell dict accordingly
+        #print("Merge", label1, "and", label2, "with weight", self.conncomps[label1][label2], "should be equal to",self.conncomps[label2][label1])
+        MorseCell[label1]["set"].update(MorseCell[label2]["set"])
+        MorseCell[label1]["boundary"].update(MorseCell[label2]["boundary"])
+        MorseCell[label1]["neighbors"].pop(label2)
+        MorseCell[label2]["neighbors"].pop(label1)
+        # go over old neighbors of label2 and either combine with label1 or add new neighbor
+        for neighb, elts in MorseCell[label2]["neighbors"].items():
+            if neighb in MorseCell[label1]["neighbors"].keys():
+                MorseCell[label1]["neighbors"][neighb].update(elts)
+                MorseCell[neighb]["neighbors"][label1].update(elts)
+                # need to recompute weights
+                self.conncomps[label1][neighb] = compute_weight_saledge(MorseCell[label1]["neighbors"][neighb], saledge_points) 
+                self.conncomps[neighb][label1] = compute_weight_saledge(MorseCell[label1]["neighbors"][neighb], saledge_points) 
+            else:
+                MorseCell[label1]["neighbors"][neighb] = elts
+                MorseCell[neighb]["neighbors"][label1] = elts
+                self.conncomps[label1][neighb] = self.conncomps[label2][neighb] #copy weight from label2
+                self.conncomps[neighb][label1] = self.conncomps[label2][neighb] #copy weight from label2
+                
+            # delete label 2 from all neighbors
+            MorseCell[neighb]["neighbors"].pop(label2)
+            self.conncomps[neighb].pop(label2)
+            
+        # now remove label2 objects
+        MorseCell.pop(label2)
+        self.conncomps[label1].pop(label2)
+        self.conncomps.pop(label2)
+        return MorseCell
+            
+    
+    def simplify_cells(self, MorseCell, thresh, saledge_points):
+        
+        merge_list = []
+        for label in self.conncomps.keys():
+            # weight is % of edge points (btw 0 and 1)
+            if sorted(self.conncomps[label].items(), key=lambda item: item[1]):
+                lowest_nei, lowest_weight = [tuple((neighb, weight)) for neighb, weight in sorted(self.conncomps[label].items(), key=lambda item: item[1])][0]
+
+                if lowest_weight < thresh:
+                    merge_list.append(tuple((label, lowest_nei)) )
+                
+        visited = set()
+        for lb1, lb2 in merge_list:
+            if lb1 not in visited and lb2 not in visited:
+                MorseCell = self.merge_and_update(lb1, lb2, MorseCell, saledge_points)
+                visited.add(lb1)
+                visited.add(lb2)
+            
+        return MorseCell
+            
+                
+        
+        

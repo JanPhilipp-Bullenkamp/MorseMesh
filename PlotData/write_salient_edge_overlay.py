@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import timeit
 from collections import Counter
 
+from .bd_points_compare import write_overlay_bd
+
 '''
 first part of this file: write salient edge overlay file and improved overlay
 second part of this file: plot salient edge persistence histogram
@@ -52,28 +54,35 @@ def write_face(file, face, vert_dict, color=[0,0,0]):
 def write_salient_edge_file(MorseCpx, vert_dict, edge_dict, face_dict, thresh, target_file, color_paths=[0,0,0]):
     start_timer = timeit.default_timer()
     
-    f = open(target_file + "_overlay.ply", "w")
+    f = open(target_file + "_maxPers_thresh" + str(thresh) + "_OverlaySalientEdge.ply", "w")
     
     path_vert = set()
     path_edges = set()
     path_faces = set()
     
-    MorseCpx.Separatrices.sort(key=lambda x: x[0])
+    compare = set()
+    
     for pers, sepa in MorseCpx.Separatrices:
          if pers > thresh:
                 if sepa.dimension == 1:
                     for i, elt in enumerate(sepa.path):
                         if i%2==0:
                             path_edges.add(elt)
+                            compare.update(edge_dict[elt].indices)
                         elif i%2==1:
                             path_vert.add(elt)
+                            compare.add(elt)
                     
                 elif sepa.dimension == 2:
                     for i, elt in enumerate(sepa.path):
                         if i%2==0:
                             path_faces.add(elt)
+                            compare.update(face_dict[elt].indices)
                         elif i%2==1:
                             path_edges.add(elt)
+                            compare.update(edge_dict[elt].indices)
+                            
+    write_overlay_bd(compare, vert_dict, "compare_with_sal_edge_plot")
             
     nb_points = len(path_vert) + len(path_edges) + len(path_faces)
     
@@ -89,19 +98,18 @@ def write_salient_edge_file(MorseCpx, vert_dict, edge_dict, face_dict, thresh, t
           
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing overlay file for MorseComplex with ', MorseCpx.persistence,': ', time_writing_file)
+    print('Time writing salient edge overlay file for maximally reduced MC and threshold', thresh, ': ', time_writing_file)
     
     
 def write_improved_salient_edge_file(MorseCpx, min_thresh, max_thresh, vert_dict, edge_dict, face_dict, thresh, target_file, color_paths=[0,0,0]):
     start_timer = timeit.default_timer()
     
-    f = open(target_file + "_improved_overlay.ply", "w")
+    f = open(target_file + "_maxPers_thresh" + str(thresh) + "_ImprovedOverlaySalientEdge.ply", "w")
     
     path_vert = set()
     path_edges = set()
     path_faces = set()
     
-    MorseCpx.Separatrices.sort(key=lambda x: x[0])
     for pers, sepa in MorseCpx.Separatrices:
          if pers > thresh:
                 if sepa.dimension == 1:
@@ -134,7 +142,7 @@ def write_improved_salient_edge_file(MorseCpx, min_thresh, max_thresh, vert_dict
           
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing overlay file for MorseComplex with ', MorseCpx.persistence,': ', time_writing_file)
+    print('Time writing improved salient edge overlay file for maximally reduced MC and threshold', thresh, ': ', time_writing_file)
     
     
 def plot_salient_edge_histogramm(Cplx, nb_bins = 15, log=False, save = False, filepath = None):

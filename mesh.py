@@ -5,13 +5,15 @@ from Algorithms.ExtractMorseComplex import ExtractMorseComplex
 from Algorithms.ReduceMorseComplex import CancelCriticalPairs
 from Algorithms.BettiNumbers import BettiViaPairCells
 
-from Algorithms.MorseCells import get_MorseCells, create_CellConnectivityGraph
+from Algorithms.MorseCells import get_MorseCells, create_CellConnectivityGraph, create_SalientEdgeCellConnectivityGraph
+from Algorithms.SalientEdgeIndices import get_salient_edge_indices
 
 from Algorithms.PersistenceDiagram import PersistenceDiagram
 
 from PlotData.write_overlay_ply_file import write_overlay_ply_file, write_overlay_ply_file_thresholded
 from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
 from PlotData.write_salient_edge_overlay import write_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
+from PlotData.write_salient_edge_pline import write_salient_edge_pline
 from PlotData.write_labels_txt import write_labels_txt_file
 from PlotData.write_pline_file import write_pline_file, write_pline_file_thresholded
 
@@ -236,6 +238,18 @@ class Mesh:
             write_salient_edge_file(self.maximalReducedComplex, self.Vertices, self.Edges, self.Faces, 
                                     thresh, filename, color_paths=[255,0,255])
             
+    def plot_salient_edge_pline(self, filename, thresh):
+        if self._flag_SalientEdge:
+            write_salient_edge_pline(self.maximalReducedComplex, self.Vertices, self.Edges, self.Faces, 
+                                    thresh, filename)
+        else:
+            print("Need to calculate maximally reduced MorseComplex first for Salient Edges:")
+            self.ReduceMorseComplex(self.range)
+            
+            write_salient_edge_pline(self.maximalReducedComplex, self.Vertices, self.Edges, self.Faces, 
+                                    thresh, filename)
+            
+            
     def plot_improved_salient_edge(self, filename, thresh, min_thresh, max_thresh):
         if self._flag_SalientEdge:
             write_improved_salient_edge_file(self.maximalReducedComplex, min_thresh, max_thresh, self.Vertices, 
@@ -266,5 +280,16 @@ class Mesh:
             PersistenceDiagram(self.MorseComplex, self.partner, self.max, self.min, pointsize = pointsize, save = save, filepath = filepath)
         else:
             raise ValueError('Can not calculate Persistence Diagram before Betti Numbers!')
+            
+            
+    def SalientEdgeConnectivityGraph(self, thresh, persistence):
+        if persistence not in self.MorseCells.keys():
+            raise ValueError('No MorseCell calculated for this persistence!')
+        elif not self._flag_SalientEdge:
+            raise ValueError('Need maximally reduced complex for salient edges!')
+        else:
+            salient_edge_points = get_salient_edge_indices(self.maximalReducedComplex, thresh, self.Vertices, self.Edges, self.Faces)
+            
+            return create_SalientEdgeCellConnectivityGraph(self.MorseCells[persistence], salient_edge_points, self.Vertices, self.Edges), salient_edge_points
     
     

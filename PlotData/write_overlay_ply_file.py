@@ -46,7 +46,7 @@ def write_face(file, face, vert_dict, color=[0,0,0]):
 def write_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_file, color_paths=[0,0,0]):
     start_timer = timeit.default_timer()
     
-    f = open(target_file + "_overlay.ply", "w")
+    f = open(target_file + "_pers" + str(MorseCpx.persistence) + "_OverlayMorseComplex.ply", "w")
     
     path_vert = set()
     path_edges = set()
@@ -136,7 +136,7 @@ def write_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_fil
 def write_overlay_ply_file_thresholded(MorseCpx, vert_dict, edge_dict, face_dict, target_file, abs_thresh, color_paths=[0,0,0]):
     start_timer = timeit.default_timer()
     
-    f = open(target_file + "_overlay.ply", "w")
+    f = open(target_file + "_pers" + str(MorseCpx.persistence) + "_thresh" + str(abs_thresh) + "_OverlayThreshMorseComplex.ply", "w")
     
     path_vert = set()
     path_edges = set()
@@ -221,5 +221,5 @@ def write_overlay_ply_file_thresholded(MorseCpx, vert_dict, edge_dict, face_dict
             
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing overlay file for MorseComplex with ', MorseCpx.persistence,': ', time_writing_file)
+    print('Time writing thresholded overlay file for MorseComplex with', MorseCpx.persistence,'and', abs_thresh, 'threshold:', time_writing_file)
     
