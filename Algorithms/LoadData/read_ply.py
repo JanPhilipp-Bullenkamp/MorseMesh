@@ -63,5 +63,3 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
     
     return min(vals), max(vals) 
             
-
-

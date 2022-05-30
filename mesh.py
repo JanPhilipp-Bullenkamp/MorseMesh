@@ -1,5 +1,6 @@
 from Algorithms.LoadData.Datastructure import Vertex, Edge, Face
 from Algorithms.LoadData.read_ply import read_ply
+from Algorithms.LoadData.read_funvals import read_funvals
 from Algorithms.ProcessLowerStars import ProcessLowerStars
 from Algorithms.ExtractMorseComplex import ExtractMorseComplex
 from Algorithms.ReduceMorseComplex import CancelCriticalPairs
@@ -14,12 +15,14 @@ from PlotData.write_overlay_ply_file import write_overlay_ply_file, write_overla
 from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
 from PlotData.write_salient_edge_overlay import write_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
 from PlotData.write_salient_edge_pline import write_salient_edge_pline
-from PlotData.write_labels_txt import write_labels_txt_file
+from PlotData.write_labels_txt import write_labels_txt_file, write_funval_thresh_labels_txt_file
 from PlotData.write_pline_file import write_pline_file, write_pline_file_thresholded
+from PlotData.plot_fun_val_statistics import plot_fun_val_histogramm
 
 import timeit
 import os
 import numpy as np
+from copy import deepcopy
 
 class Mesh:
     def __init__(self):
@@ -56,6 +59,8 @@ class Mesh:
         self.maximalReducedComplex = None
         
         self.MorseCells = {}
+        
+        self.Segmentation = {}
 
 
     def load_mesh_ply(self, filename, quality_index, inverted=False):
@@ -65,6 +70,18 @@ class Mesh:
         self.min = min_val
         self.max = max_val
         self.range = max_val - min_val
+        
+    def load_new_funvals(self, filename):
+        min_val, max_val = read_funvals(filename, self.Vertices, self.Edges, self.Faces)
+        self.min = min_val
+        self.max = max_val
+        self.range = max_val - min_val
+        
+    def plot_funval_histogram(self, nb_bins = 15, log=False, save = False, filepath = None):
+        plot_fun_val_histogramm(self.Vertices, nb_bins = nb_bins, log=log, save = save, filepath = filepath)
+        
+    def write_funval_thresh_labels(self, thresh, filename):
+        write_funval_thresh_labels_txt_file(self.Vertices, thresh, filename)
 
     def info(self):
         print("+-------------------------------------------------------")
@@ -153,8 +170,7 @@ class Mesh:
                     self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
                     self.maximalReducedComplex.maximalReduced = True
                     self._flag_SalientEdge = True
-                    print("Persistence was higher than the range of function values,") 
-                    print("therefore this complex is maximally reduced and can be used for salient edge extraction.")
+                    print("Persistence was high enough that this complex is maximally reduced.")
             elif min(self.reducedMorseComplexes.keys()) > persistence:
                 self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, 
                                                                               self.Vertices, self.Edges, self.Faces)
@@ -170,8 +186,7 @@ class Mesh:
                     self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
                     self.maximalReducedComplex.maximalReduced = True
                     self._flag_SalientEdge = True
-                    print("Persistence was higher than the range of function values,")
-                    print("therefore this complex is maximally reduced and can be used for salient edge extraction.")
+                    print("Persistence was high enough that this complex is maximally reduced.")
                  
         return self.reducedMorseComplexes[persistence]
     
@@ -282,14 +297,54 @@ class Mesh:
             raise ValueError('Can not calculate Persistence Diagram before Betti Numbers!')
             
             
-    def SalientEdgeConnectivityGraph(self, thresh, persistence):
+    def SalientEdgeSegmentation(self, persistence, thresh,  edge_percent):
         if persistence not in self.MorseCells.keys():
             raise ValueError('No MorseCell calculated for this persistence!')
         elif not self._flag_SalientEdge:
-            raise ValueError('Need maximally reduced complex for salient edges!')
+            print("Need maximally reduced complex for salient edges!")
+            print("Computing maximally reduced complex ...")
+            self.ReduceMorseComplex(self.range)
+        
+        if persistence not in self.Segmentation.keys():
+            self.Segmentation[persistence] = {}
+            
+        if thresh not in self.Segmentation[persistence].keys():
+            self.Segmentation[persistence][thresh] = {}
+            
+        if edge_percent in self.Segmentation[persistence][thresh].keys():
+            print("Segmentation for these parameters has been calculated already: Persistence", persistence, ", SalientEdge Threshold",thresh, ", Edge Percentage", edge_percent)
         else:
             salient_edge_points = get_salient_edge_indices(self.maximalReducedComplex, thresh, self.Vertices, self.Edges, self.Faces)
             
-            return create_SalientEdgeCellConnectivityGraph(self.MorseCells[persistence], salient_edge_points, self.Vertices, self.Edges), salient_edge_points
+            Cells = deepcopy(self.MorseCells[persistence])
+            
+            self.Segmentation[persistence][thresh][edge_percent] = {}
+            self.Segmentation[persistence][thresh][edge_percent]["Graph"] = create_SalientEdgeCellConnectivityGraph(Cells, 
+                                                                                                                    salient_edge_points,
+                                                                                                                    self.Vertices,
+                                                                                                                    self.Edges)
+            # merge cells 40 iterations:
+            for i in range(40):
+                Cells = self.Segmentation[persistence][thresh][edge_percent]["Graph"].simplify_cells(Cells, edge_percent, salient_edge_points)
+            # remove small components:
+            Cells = self.Segmentation[persistence][thresh][edge_percent]["Graph"].remove_small_components(Cells, size_thresh=300)
+            
+            self.Segmentation[persistence][thresh][edge_percent]["Cells"] = Cells
+            
+            print("Segmented for",persistence, "persistence Complex with", thresh, "salient edge threshold and", edge_percent*100, "% edge percentage merging threshold")
+            print("Got ",len(self.Segmentation[persistence][thresh][edge_percent]["Graph"].conncomps),"differnt cell labels")
+        
+        return self.Segmentation[persistence][thresh][edge_percent]
+    
+    def write_SegmentationLabels(self, persistence, thresh, edge_percent, filename):
+        if persistence not in self.Segmentation.keys():
+            raise ValueError('Segmentation for this persistence has not been calculated!')
+        if thresh not in self.Segmentation[persistence].keys():
+            raise ValueError('Segmentation for this salient edge threshold has not been calculated!')
+        if edge_percent not in self.Segmentation[persistence][thresh].keys():
+            raise ValueError('Segmentation for this edge percentage threshold has not been calculated!')
+        else:
+            write_labels_txt_file(self.Segmentation[persistence][thresh][edge_percent]["Cells"], 
+                                  filename+"_"+str(persistence)+"P_"+str(thresh)+"T_"+str(edge_percent)+"EP_smallRem")
     
     

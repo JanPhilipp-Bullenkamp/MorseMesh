@@ -41,22 +41,23 @@ class Graph():
             if label1 not in self.conncomps[label2].keys():
                 self.conncomps[label2][label1] = weight
                 
-    def remove_small_components(self, Mesh, persistence, size_thresh):
+    def remove_small_components(self, MorseCell, size_thresh):
         rem_comp = set()
         for key, val in self.conncomps.items():
-            lowest_weight_label = [neighb for neighb, v in sorted(val.items(), key=lambda item: abs(item[1]))][0]
-            if len(Mesh.MorseCells[persistence][key]["set"]) < size_thresh:
-                for nei in self.conncomps[key].keys():
-                    self.conncomps[nei].pop(key)
-                    rem_comp.add(key)
-                Mesh.MorseCells[persistence][lowest_weight_label]["set"].update(Mesh.MorseCells[persistence][key]["set"])
-                Mesh.MorseCells[persistence][lowest_weight_label]["boundary"].update(Mesh.MorseCells[persistence][key]["boundary"])
-                Mesh.MorseCells[persistence].pop(key)
+            if [neighb for neighb, v in sorted(val.items(), key=lambda item: abs(item[1]))]:
+                lowest_weight_label = [neighb for neighb, v in sorted(val.items(), key=lambda item: abs(item[1]))][0]
+                if len(MorseCell[key]["set"]) < size_thresh:
+                    for nei in self.conncomps[key].keys():
+                        self.conncomps[nei].pop(key)
+                        rem_comp.add(key)
+                    MorseCell[lowest_weight_label]["set"].update(MorseCell[key]["set"])
+                    MorseCell[lowest_weight_label]["boundary"].update(MorseCell[key]["boundary"])
+                    MorseCell.pop(key)
         for comp in rem_comp:
             self.conncomps.pop(comp)
-        return Mesh
+        return MorseCell
     
-    def remove_weak_edges(self, Mesh, persistence, absolute_threshold):
+    def remove_weak_edges(self, MorseCell, absolute_threshold):
         rem_comp = set()
         for key, val in self.conncomps.items():
             if len(val.keys()) != 0:
@@ -65,12 +66,12 @@ class Graph():
                     for nei in self.conncomps[key].keys():
                         self.conncomps[nei].pop(key)
                         rem_comp.add(key)
-                    Mesh.MorseCells[persistence][neighb]["set"].update(Mesh.MorseCells[persistence][key]["set"])
-                    Mesh.MorseCells[persistence][neighb]["boundary"].update(Mesh.MorseCells[persistence][key]["boundary"])
-                    Mesh.MorseCells[persistence].pop(key)
+                    MorseCell[neighb]["set"].update(MorseCell[key]["set"])
+                    MorseCell[neighb]["boundary"].update(MorseCell[key]["boundary"])
+                    MorseCell.pop(key)
         for comp in rem_comp:
             self.conncomps.pop(comp)
-        return Mesh
+        return MorseCell
     
     def merge_and_update(self, label1, label2, MorseCell, saledge_points):
         # want to remove label2, 

@@ -125,8 +125,8 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
         for elt in rem_bd:
             boundary_points.remove(elt)
             
-    print("Bd pts",len(boundary_points))
-    write_overlay_bd(visited_bd, vert_dict, "test_bd_pts")
+    #print("Bd pts",len(boundary_points))
+    #write_overlay_bd(visited_bd, vert_dict, "test_bd_pts")
     end_time = timeit.default_timer() -start_time
     print("Time get MorseCells: ", end_time)
     return MorseCells
@@ -174,8 +174,8 @@ def fill_cell_neighbors(MorseCells, vert_dict, edge_dict):
                             
                     else:
                         ct +=1
-    write_overlay_bd(pts, vert_dict, "test_fill_cell_neighbors")
-    print("Nb of not found labels: ", ct)
+    #write_overlay_bd(pts, vert_dict, "test_fill_cell_neighbors")
+    #print("Nb of not found labels: ", ct)
     return MorseCells
 
 def compute_weight(points, vert_dict):
@@ -188,7 +188,6 @@ def create_CellConnectivityGraph(MorseCells, vert_dict, edge_dict):
     start_time = timeit.default_timer()
     
     MorseCells = fill_cell_neighbors(MorseCells, vert_dict, edge_dict)
-    
     # create graph with all labels
     ConnGraph = Graph()
     for label in MorseCells.keys():
@@ -219,7 +218,7 @@ def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dic
     
     MorseCells = fill_cell_neighbors(MorseCells, vert_dict, edge_dict)
     
-    write_overlay_bd(salient_points, vert_dict, "test_salient_points")
+    #write_overlay_bd(salient_points, vert_dict, "test_salient_points")
     
     # create graph with all labels
     ConnGraph = Graph()
