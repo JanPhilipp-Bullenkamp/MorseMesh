@@ -2,7 +2,7 @@ from collections import Counter
 import timeit
 from .plot_bdpts import write_overlay_bd
 
-from .weight_metrics import compute_weight_saledge
+from .weight_metrics import compute_weight_saledge, compute_weight_normals, compute_weight_normalvariance
 '''
 first part: get MorseCells
 second part: get connectivity graph
@@ -193,10 +193,18 @@ def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dic
         cc = ConnComp(label)
         ConnGraph.add_ConnComp(cc)
         
+    var = []
     for label, cell in MorseCells.items():
         for neighbor_label, points in cell["neighbors"].items():
             weight = compute_weight_saledge(points, salient_points)
-            ConnGraph.add_weightedEdge(label, neighbor_label, weight)
+            weight_normal = compute_weight_normals(cell["set"], MorseCells[neighbor_label]["set"], vert_dict)
+            weight_var = compute_weight_normalvariance(points, vert_dict)
+            var.append(weight_var)
+            ConnGraph.add_weightedEdge(label, neighbor_label, (weight+weight_normal)/2)
+            
+    print("av",sum(var)/len(var))
+    print("max",max(var))
+    print("min",min(var))
         
     end_time = timeit.default_timer() -start_time
     print("Time get weighted ConnectivityGraph: ", end_time)
