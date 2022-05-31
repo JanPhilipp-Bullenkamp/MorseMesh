@@ -8,6 +8,9 @@ class Vertex:
         self.quality = quality
         self.fun_val = fun_val
         self.index = index
+        
+        self.theta = None
+        self.phi = None
 
         self.star = {}
         self.star["F"] = []

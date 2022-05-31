@@ -5,9 +5,6 @@ def write_header(file):
     file.write("# +-----------------------------------------------------+\n")
     file.write("# | txt file with labels                                |\n")
     file.write("# +-----------------------------------------------------+\n")
-    #file.write("# | all labels increased by +1, so that we can give     |\n")
-    #file.write("# | label = 0 for boundary points (unlabelled points)   |\n")
-    #file.write("# +-----------------------------------------------------+\n")
     file.write("# | Format: index label                                 |\n")
     file.write("# +-----------------------------------------------------+\n")
     

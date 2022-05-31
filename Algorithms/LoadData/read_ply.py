@@ -63,3 +63,21 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
     
     return min(vals), max(vals) 
             
+    
+def read_normals_from_ply(filename, vertices_dict):
+    start_total_time = timeit.default_timer()
+    start_time = timeit.default_timer()
+    
+    rawdata = PlyData.read(filename)
+    
+    end_time = timeit.default_timer() - start_time
+    print('Time read normals data file:', end_time) 
+    
+    for ind, pt in enumerate(rawdata['vertex']):
+        vertices_dict[ind].nx = rawdata['vertex']['nx'][ind]
+        vertices_dict[ind].ny = rawdata['vertex']['ny'][ind]
+        vertices_dict[ind].nz = rawdata['vertex']['nz'][ind]
+                
+    end_total_time = timeit.default_timer() - start_total_time
+    print('Time read normals:', end_total_time)
+    

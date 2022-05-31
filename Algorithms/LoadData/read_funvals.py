@@ -2,8 +2,6 @@ import numpy as np
 from collections import Counter
 import timeit
 
-from .Datastructure import Vertex, Edge, Face
-
 def read_funvals(filename, vertices_dict, edges_dict, faces_dict):
     start_total_time = timeit.default_timer()
     

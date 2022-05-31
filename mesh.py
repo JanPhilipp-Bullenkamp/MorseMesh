@@ -1,5 +1,5 @@
 from Algorithms.LoadData.Datastructure import Vertex, Edge, Face
-from Algorithms.LoadData.read_ply import read_ply
+from Algorithms.LoadData.read_ply import read_ply, read_normals_from_ply
 from Algorithms.LoadData.read_funvals import read_funvals
 from Algorithms.ProcessLowerStars import ProcessLowerStars
 from Algorithms.ExtractMorseComplex import ExtractMorseComplex
@@ -76,6 +76,9 @@ class Mesh:
         self.min = min_val
         self.max = max_val
         self.range = max_val - min_val
+        
+    def load_normals_ply(self, filename):
+        read_normals_from_ply(filename, self.Vertices)
         
     def plot_funval_histogram(self, nb_bins = 15, log=False, save = False, filepath = None):
         plot_fun_val_histogramm(self.Vertices, nb_bins = nb_bins, log=log, save = save, filepath = filepath)
