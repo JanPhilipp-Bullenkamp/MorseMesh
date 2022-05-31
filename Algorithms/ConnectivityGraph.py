@@ -1,12 +1,4 @@
-def compute_weight_saledge(points, sal_points):
-    edge = 0
-    noedge = 0
-    for ind in points:
-        if ind in sal_points:
-            edge += 1
-        else:
-            noedge += 1
-    return edge/(edge+noedge)
+from .weight_metrics import compute_weight_saledge
 
 class ConnComp():
     def __init__(self, label):
