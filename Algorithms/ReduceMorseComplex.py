@@ -4,7 +4,7 @@ import timeit
 from copy import deepcopy
 
 from .CancellationQueue import CancellationQueue
-
+from .LoadData.Datastructure import Separatrix
 
 def get_closest_extremum(crit_edge, vert_dict, face_dict):
     distances = []
@@ -14,35 +14,66 @@ def get_closest_extremum(crit_edge, vert_dict, face_dict):
     for face_ind, nb in face_counter.items():
         # cannot cancel loops, so only if there is a single path we can add the extremum
         if nb==1:
+            # check for valuebale edge-min connections:
+            min_dist = []
+            for elt in crit_edge.connected_minima:
+                min_dist.append(vert_dict[elt].fun_val)
             # take absolute value btw the two highest vertices of edge and face respectively
-            distances.append(tuple((face_ind, 2, abs(face_dict[face_ind].fun_val[0]-crit_edge.fun_val[0]))))
+            distances.append(tuple((face_ind, 2, abs(face_dict[face_ind].fun_val[0]-crit_edge.fun_val[0])))) 
                                
     # now add distances to all minima
     vert_counter = Counter(crit_edge.connected_minima)
     for vert_ind, nb in vert_counter.items():
         # cannot cancel loops, so only if there is a single path we can add the extremum
         if nb==1:
+            #check for valuable max-edge connections:
+            max_dist = []
+            for elt in crit_edge.connected_maxima:
+                max_dist.append(face_dict[elt].fun_val[0])
+                
             # take absolute value btw the highest vertex of edge and the value of the vertex
-            distances.append(tuple((vert_ind, 0, abs(crit_edge.fun_val[0]-vert_dict[vert_ind].fun_val))))
-    
+            distances.append(tuple((vert_ind, 0, abs(crit_edge.fun_val[0]-vert_dict[vert_ind].fun_val)))) 
+            
     if sorted(distances, key=lambda item: item[2]):
         closest, dim, distance = sorted(distances, key=lambda item: item[2])[0] 
         return closest, dim, distance
     else: 
         return None
+    
+def compute_min_sad_persistence(path, min_maximum_val, vert_dict, edge_dict):
+    distances = []
+    for i, elt in enumerate(path):
+        if i%2 == 0:
+            distances.append(edge_dict[elt].fun_val[0]) #min_maximum_val
+        elif i%2 == 1:
+            distances.append(vert_dict[elt].fun_val) #min_maximum_val
+    return sum(distances)/len(distances)
 
+def compute_max_sad_persistence(path, max_minimum_val, edge_dict, face_dict):
+    distances = []
+    for i, elt in enumerate(path):
+        if i%2 == 0:
+            distances.append(face_dict[elt].fun_val[0]) #max_minimum_val
+        elif i%2 == 1:
+            distances.append(edge_dict[elt].fun_val[0]) #max_minimum_val
+    return sum(distances)/len(distances)
+            
 # saddle and minimum given as CritEdge and CritVertex objects
-def cancel_one_critical_pair_min(saddle, minimum, MorseComplex):
+def cancel_one_critical_pair_min(saddle, minimum, MorseComplex, vert_dict, edge_dict):
     """
     Cancels a saddle and minimum pair of the MorseComplex
         saddle: a CritEdge object
         minimum: a CritVertex object
         MorseComplex: a MorseComplex object, that will be changed accordingly
     """
+    #list of the maximal function values connected to saddle that is about to be cancelled
+    #we require the minimum of this list for separatrix persistence later
+    maximal_values_list = []
     # cut paths between old saddle and its connected maxima, as we cancel the saddle
     # saddle can be twice in the connection list, but paths would be stored under one key only,
     # therefore pop key and both will be removed (need None argument for second iteration)
     for conn_max in saddle.connected_maxima:
+        maximal_values_list.append(MorseComplex.CritFaces[conn_max].fun_val[0])
         MorseComplex.CritFaces[conn_max].connected_saddles.remove(saddle.index)
         MorseComplex.CritFaces[conn_max].paths.pop(saddle.index, None)
         
@@ -55,6 +86,13 @@ def cancel_one_critical_pair_min(saddle, minimum, MorseComplex):
     for conn_min in saddle.connected_minima:
         if conn_min != minimum.index:
             new_minima.append(conn_min)
+            
+    # save original path for separatrix persistence for later:
+    original_path = saddle.paths[minimum.index]
+    minimal_line_persistence = compute_min_sad_persistence(original_path, min(maximal_values_list), vert_dict, edge_dict)
+    
+    minimal_line = Separatrix(saddle.index, minimum.index, 1, original_path, minimal_line_persistence)
+    MorseComplex.Separatrices.append(tuple((minimal_line_persistence, minimal_line)))
     
     # save the inverted path between sadle and minimum:
     # reverse path and remove first and last elt (min and saddle otherwise duplicated)
@@ -114,16 +152,20 @@ def cancel_one_critical_pair_min(saddle, minimum, MorseComplex):
     return MorseComplex
 
 
-def cancel_one_critical_pair_max(saddle, maximum, MorseComplex):
+def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, edge_dict, face_dict):
     """
     Cancels a saddle and maximum pair of the MorseComplex
         saddle: a CritEdge object
         maximum: a CritFace object
         MorseComplex: a MorseComplex object, that will be changed accordingly
     """
+    #list of the minimal function values connected to saddle that is about to be cancelled
+    #we require the maximum of this list for separatrix persistence later
+    minimal_values_list = []
     # cut paths between old saddle and its connected minima, as we cancel the saddle
     # saddle can be twice in the connection list
     for conn_min in saddle.connected_minima:
+        minimal_values_list.append(MorseComplex.CritVertices[conn_min].fun_val)
         MorseComplex.CritVertices[conn_min].connected_saddles.remove(saddle.index)
         
     # find new saddles and maxima:
@@ -135,6 +177,13 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex):
     for conn_max in saddle.connected_maxima:
         if conn_max != maximum.index:
             new_maxima.append(conn_max)
+            
+    # save original path for separatrix persistence for later:
+    original_path = maximum.paths[saddle.index]
+    maximal_line_persistence = compute_max_sad_persistence(original_path, max(minimal_values_list), edge_dict, face_dict)
+    
+    maximal_line = Separatrix(maximum.index, saddle.index, 2, original_path, maximal_line_persistence)
+    MorseComplex.Separatrices.append(tuple((maximal_line_persistence, maximal_line)))
     
     # save the inverted path between sadle and maximum:
     # reverse path and remove first and last elt (max and saddle otherwise duplicated)
@@ -209,7 +258,7 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex):
     
     return MorseComplex
             
-def CancelCriticalPairs2(MorseComplex, threshold):
+def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict):
     start_eff = timeit.default_timer()
 
     CancelPairs = CancellationQueue()
@@ -231,11 +280,11 @@ def CancelCriticalPairs2(MorseComplex, threshold):
             closest, dim, dist = check
             if dist <= CancelPairs.check_distance():
                 if dim == 0:
-                    redMorseComplex = cancel_one_critical_pair_min(saddle, redMorseComplex.CritVertices[closest], redMorseComplex)
+                    redMorseComplex = cancel_one_critical_pair_min(saddle, redMorseComplex.CritVertices[closest], redMorseComplex, vert_dict, edge_dict)
                 elif dim == 2:
-                    redMorseComplex = cancel_one_critical_pair_max(saddle, redMorseComplex.CritFaces[closest], redMorseComplex)
+                    redMorseComplex = cancel_one_critical_pair_max(saddle, redMorseComplex.CritFaces[closest], redMorseComplex, edge_dict, face_dict)
             else:
-                CancelPairs.insert(tuple((dist, id(saddle), saddle)))
+                CancelPairs.insert(tuple((dist, obj_id, saddle)))
     
     time_eff = timeit.default_timer() - start_eff
     print('Time cancel critical points with ', threshold, " persistence: ", time_eff)

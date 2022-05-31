@@ -40,13 +40,14 @@ def write_cells_overlay_ply_file(MorseCells, vert_dict, target_file):
     
     nb_points = 0
     for cell in MorseCells.values():
-        nb_points += len(cell)
+        nb_points += len(cell["set"])
         
     write_header(f, nb_points)
     
-    for key, cells in MorseCells.items():
-        cell_color = color_list[key%len(color_list)]
-        for ind in cells:
+    for label, cells in MorseCells.items():
+        # if label != "boundary":  # not necessary anymore?
+        cell_color = color_list[label%len(color_list)]
+        for ind in cells["set"]:
             write_vertex(f, ind, vert_dict, color=cell_color)
             
     f.close()

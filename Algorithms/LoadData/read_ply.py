@@ -5,7 +5,7 @@ import timeit
 
 from .Datastructure import Vertex, Edge, Face
 
-def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
+def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inverted=False):
     start_total_time = timeit.default_timer()
     start_time = timeit.default_timer()
     
@@ -17,7 +17,11 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
     vals = []
     for vindex, pt in enumerate(rawdata['vertex']):
         vert = Vertex(x=pt[0], y=pt[1], z=pt[2], quality=pt[quality_index], index=vindex)
-        vert.fun_val = vert.quality
+        if inverted:
+            vert.fun_val = -1 * vert.quality
+        else:
+            vert.fun_val = vert.quality
+        #vert.fun_val = np.sqrt((vert.x)**2 + (vert.y)**2 + (vert.z)**2)
         vals.append(vert.fun_val)
         vertices_dict[vindex] = vert
         
@@ -56,7 +60,24 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict):
                 
     end_total_time = timeit.default_timer() - start_total_time
     print('Time read and prepare data:', end_total_time)
-         
+    
+    return min(vals), max(vals) 
             
-
-
+    
+def read_normals_from_ply(filename, vertices_dict):
+    start_total_time = timeit.default_timer()
+    start_time = timeit.default_timer()
+    
+    rawdata = PlyData.read(filename)
+    
+    end_time = timeit.default_timer() - start_time
+    print('Time read normals data file:', end_time) 
+    
+    for ind, pt in enumerate(rawdata['vertex']):
+        vertices_dict[ind].nx = rawdata['vertex']['nx'][ind]
+        vertices_dict[ind].ny = rawdata['vertex']['ny'][ind]
+        vertices_dict[ind].nz = rawdata['vertex']['nz'][ind]
+                
+    end_total_time = timeit.default_timer() - start_total_time
+    print('Time read normals:', end_total_time)
+    

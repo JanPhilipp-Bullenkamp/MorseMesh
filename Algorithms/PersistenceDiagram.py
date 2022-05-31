@@ -2,10 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def Persistence_Diagram(M, partner, maxval, minval, pointsize = 4, save = False, filepath = None):
+def PersistenceDiagram(MorseComplex, partner, maxval, minval, pointsize = 4, save = False, filepath = None):
     points = {}
-    #maxval=0.4
-    #minval=-0.25
+    M = {}
+    M[0] = MorseComplex.CritVertices
+    M[1] = MorseComplex.CritEdges
+    M[2] = MorseComplex.CritFaces
+    
     for p in range(3):
         points[p] = {}
         points[p]['x'] = []
@@ -13,17 +16,18 @@ def Persistence_Diagram(M, partner, maxval, minval, pointsize = 4, save = False,
         points[p]['infinite cycles'] = []
         
         for key in M[p].keys():
-            if np.array(partner[key]).size == p + 2:
+            if np.array(partner[p][key]).size == 1:
+                if p == 0: # 0-1 persistence
+                    points[p]['x'].append(M[p][key].fun_val)
+                    points[p]['y'].append(M[p+1][partner[p][key]].fun_val[0])
+                if p == 2: # 1-2 persistence
+                    points[p-1]['x'].append(M[p-1][partner[p][key]].fun_val[0])
+                    points[p-1]['y'].append(M[p][key].fun_val[0])
+            elif np.array(partner[p][key]).size == 0:
                 if p == 0:
-                    points[p]['x'].append(M[p][key])
+                    points[p]['infinite cycles'].append(M[p][key].fun_val)
                 else:
-                    points[p]['x'].append(max(M[p][key]))
-                points[p]['y'].append(max(M[p+1][partner[key]]))
-            elif np.array(partner[key]).size == 0:
-                if p == 0:
-                    points[p]['infinite cycles'].append(M[p][key])
-                else:
-                    points[p]['infinite cycles'].append(max(M[p][key]))
+                    points[p]['infinite cycles'].append(M[p][key].fun_val[0])
 
     linsp = np.linspace(minval, maxval, 1000)
     plt.plot(linsp, linsp, color='black', linewidth=0.4)
