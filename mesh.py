@@ -7,7 +7,7 @@ from Algorithms.ReduceMorseComplex import CancelCriticalPairs
 from Algorithms.BettiNumbers import BettiViaPairCells
 
 from Algorithms.MorseCells import get_MorseCells, create_SalientEdgeCellConnectivityGraph
-from Algorithms.SalientEdgeIndices import get_salient_edge_indices
+from Algorithms.SalientEdgeIndices import get_salient_edge_indices, get_salient_edge_indices_dual_thr
 
 from Algorithms.PersistenceDiagram import PersistenceDiagram
 
