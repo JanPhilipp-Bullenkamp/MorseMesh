@@ -1,12 +1,4 @@
-def compute_weight_saledge(points, sal_points):
-    edge = 0
-    noedge = 0
-    for ind in points:
-        if ind in sal_points:
-            edge += 1
-        else:
-            noedge += 1
-    return edge/(edge+noedge)
+from .weight_metrics import compute_weight_saledge, compute_weight_normals
 
 class ConnComp():
     def __init__(self, label):
@@ -73,7 +65,7 @@ class Graph():
             self.conncomps.pop(comp)
         return MorseCell
     
-    def merge_and_update(self, label1, label2, MorseCell, saledge_points):
+    def merge_and_update(self, label1, label2, MorseCell, saledge_points, vert_dict):
         # want to remove label2, 
         # update weights of the new combined label1
         # update the MorseCell dict accordingly
@@ -88,8 +80,13 @@ class Graph():
                 MorseCell[label1]["neighbors"][neighb].update(elts)
                 MorseCell[neighb]["neighbors"][label1].update(elts)
                 # need to recompute weights
-                self.conncomps[label1][neighb] = compute_weight_saledge(MorseCell[label1]["neighbors"][neighb], saledge_points) 
-                self.conncomps[neighb][label1] = compute_weight_saledge(MorseCell[label1]["neighbors"][neighb], saledge_points) 
+                weight_saledge = compute_weight_saledge(MorseCell[label1]["neighbors"][neighb], saledge_points)
+                weight_normals = compute_weight_normals(MorseCell[label1]["set"], MorseCell[neighb]["set"], vert_dict)
+                self.conncomps[label1][neighb] = (weight_saledge+weight_normals)/2
+                self.conncomps[neighb][label1] = (weight_saledge+weight_normals)/2
+                '''TODO
+                compute weights new every time due to changed mean normal
+                   TODO'''
             else:
                 MorseCell[label1]["neighbors"][neighb] = elts
                 MorseCell[neighb]["neighbors"][label1] = elts
@@ -107,7 +104,7 @@ class Graph():
         return MorseCell
             
     
-    def simplify_cells(self, MorseCell, thresh, saledge_points):
+    def simplify_cells(self, MorseCell, thresh, saledge_points, vert_dict):
         
         merge_list = []
         for label in self.conncomps.keys():
@@ -121,7 +118,7 @@ class Graph():
         visited = set()
         for lb1, lb2 in merge_list:
             if lb1 not in visited and lb2 not in visited:
-                MorseCell = self.merge_and_update(lb1, lb2, MorseCell, saledge_points)
+                MorseCell = self.merge_and_update(lb1, lb2, MorseCell, saledge_points, vert_dict)
                 visited.add(lb1)
                 visited.add(lb2)
             

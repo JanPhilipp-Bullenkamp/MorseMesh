@@ -6,8 +6,8 @@ from Algorithms.ExtractMorseComplex import ExtractMorseComplex
 from Algorithms.ReduceMorseComplex import CancelCriticalPairs
 from Algorithms.BettiNumbers import BettiViaPairCells
 
-from Algorithms.MorseCells import get_MorseCells, create_CellConnectivityGraph, create_SalientEdgeCellConnectivityGraph
-from Algorithms.SalientEdgeIndices import get_salient_edge_indices
+from Algorithms.MorseCells import get_MorseCells, create_SalientEdgeCellConnectivityGraph
+from Algorithms.SalientEdgeIndices import get_salient_edge_indices, get_salient_edge_indices_dual_thr
 
 from Algorithms.PersistenceDiagram import PersistenceDiagram
 
@@ -326,13 +326,17 @@ class Mesh:
                                                                                                                     salient_edge_points,
                                                                                                                     self.Vertices,
                                                                                                                     self.Edges)
+            start_time = timeit.default_timer()
             # merge cells 40 iterations:
             for i in range(40):
-                Cells = self.Segmentation[persistence][thresh][edge_percent]["Graph"].simplify_cells(Cells, edge_percent, salient_edge_points)
+                Cells = self.Segmentation[persistence][thresh][edge_percent]["Graph"].simplify_cells(Cells, edge_percent, salient_edge_points, self.Vertices)
             # remove small components:
             Cells = self.Segmentation[persistence][thresh][edge_percent]["Graph"].remove_small_components(Cells, size_thresh=300)
             
             self.Segmentation[persistence][thresh][edge_percent]["Cells"] = Cells
+            
+            end_time = timeit.default_timer() - start_time
+            print('Time merging and simplifying Cells:', end_time)
             
             print("Segmented for",persistence, "persistence Complex with", thresh, "salient edge threshold and", edge_percent*100, "% edge percentage merging threshold")
             print("Got ",len(self.Segmentation[persistence][thresh][edge_percent]["Graph"].conncomps),"differnt cell labels")
