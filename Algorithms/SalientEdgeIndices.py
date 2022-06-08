@@ -1,6 +1,7 @@
 import timeit
 
-def get_salient_edge_indices(MorseComplex, thresh, vert_dict, edge_dict, face_dict):
+def get_salient_edge_indices(MorseComplex, thresh, 
+                             vert_dict, edge_dict, face_dict):
     start_timer = timeit.default_timer()
     
     sal_edge = set()
@@ -24,7 +25,9 @@ def get_salient_edge_indices(MorseComplex, thresh, vert_dict, edge_dict, face_di
     print('Time getting salient edge points for ',thresh, 'threshold:', time)                        
     return sal_edge
 
-def get_salient_edge_indices_dual_thr(MorseComplex, thresh_high, thresh_low, vert_dict, edge_dict, face_dict):
+def get_salient_edge_indices_dual_thr(MorseComplex, 
+                                      thresh_high, thresh_low, 
+                                      vert_dict, edge_dict, face_dict):
     start_timer = timeit.default_timer()
     
     strong_edge = set()
