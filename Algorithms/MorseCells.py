@@ -130,7 +130,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
     #print("Bd pts",len(boundary_points))
     #write_overlay_bd(visited_bd, vert_dict, "test_bd_pts")
     end_time = timeit.default_timer() -start_time
-    print("Time get MorseCells: ", end_time)
+    print("Time get MorseCells for ", MorseComplex.persistence,"persistence: ", end_time)
     return MorseCells
 
 
@@ -202,9 +202,9 @@ def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dic
             var.append(weight_var)
             ConnGraph.add_weightedEdge(label, neighbor_label, (weight+weight_normal)/2)
             
-    print("av",sum(var)/len(var))
-    print("max",max(var))
-    print("min",min(var))
+    #print("av",sum(var)/len(var))
+    #print("max",max(var))
+    #print("min",min(var))
         
     end_time = timeit.default_timer() -start_time
     print("Time get weighted ConnectivityGraph: ", end_time)

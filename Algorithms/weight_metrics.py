@@ -37,7 +37,8 @@ def compute_weight_normals(set1, set2, vert_dict):
     cos_angle = np.dot(mean_n1, mean_n2)/(np.linalg.norm(mean_n1)*np.linalg.norm(mean_n2))
     
     # transfers [-1,1] to [0,2] to [0,1] to [0,1] (last conversion cause 0 should be good)
-    return 1-(cos_angle+1)/2
+    # test with sqrt
+    return np.sqrt(1-(cos_angle+1)/2)
 
 # idea: calculate variance of normals on boundary (high variance means many normal direction shifts, low variance menas mostly flat)
 def compute_weight_normalvariance(points, vert_dict):

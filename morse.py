@@ -26,6 +26,7 @@ import timeit
 import os
 import numpy as np
 from copy import deepcopy
+import itertools
 
 from mesh import Mesh
 
@@ -400,3 +401,21 @@ class Morse(Mesh):
         #write_overlay_bd(strong_edge, self.Vertices, "test_"+str(thresh_low)+"-"+str(thresh_high))            
         #print("Added", added, "points by weak threshold in", thresh_low, thresh_high)
         return strong_edge
+    
+    def Pipeline(self, filename, filename_normals, quality_index, inverted, 
+                 persistences, high_thresh, low_thresh, merge_thresh):
+        
+        self.load_mesh_ply(filename, quality_index, inverted)
+        self.load_normals_ply(filename_normals)
+        self.ProcessLowerStars()
+        self.ExtractMorseComplex()
+        self.ReduceMorseComplex(self.range)
+        
+        for pers in persistences:
+            self.ReduceMorseComplex(pers)
+            self.ExtractMorseCells(pers)
+            
+            for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
+                if high > low:
+                    self.SalientEdgeSegmentation_DualThresh(pers, high, low, merge)
+                    self.write_DualSegmentationLabels(pers, high, low, merge, str(self.filename))
