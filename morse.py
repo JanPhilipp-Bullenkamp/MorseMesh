@@ -34,9 +34,9 @@ class Morse(Mesh):
     def __init__(self):
         super().__init__()
 
-    def load_mesh_ply(self, filename, quality_index, inverted=False):
+    def load_mesh_ply(self, filename, quality_index, inverted=False, load_normals=False):
         min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
-                                    self.Edges, self.Faces, inverted=inverted)
+                                    self.Edges, self.Faces, inverted=inverted, load_normals=load_normals)
         self.filename = os.path.splitext(filename)[0]
         self.min = min_val
         self.max = max_val
@@ -402,11 +402,12 @@ class Morse(Mesh):
         #print("Added", added, "points by weak threshold in", thresh_low, thresh_high)
         return strong_edge
     
-    def Pipeline(self, filename, filename_normals, quality_index, inverted, 
+    def Pipeline(self, filename, filename_normals, quality_index, inverted, load_normals, 
                  persistences, high_thresh, low_thresh, merge_thresh):
         
-        self.load_mesh_ply(filename, quality_index, inverted)
-        self.load_normals_ply(filename_normals)
+        self.load_mesh_ply(filename, quality_index, inverted, load_normals)
+        if not load_normals:
+            self.load_normals_ply(filename_normals)
         self.ProcessLowerStars()
         self.ExtractMorseComplex()
         self.ReduceMorseComplex(self.range)
