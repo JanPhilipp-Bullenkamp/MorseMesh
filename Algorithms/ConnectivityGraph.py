@@ -49,6 +49,22 @@ class Graph():
             self.conncomps.pop(comp)
         return MorseCell
     
+    def remove_small_enclosures(self, MorseCell, relative_size_thresh=0.5):
+        rem_comp = set()
+        for enclosed in self.conncomps.keys():
+            if len(self.conncomps[enclosed].keys()) == 1:
+                surrounding = next(iter(self.conncomps[enclosed]))
+                
+                if len(MorseCell[enclosed]["set"])/len(MorseCell[surrounding]["set"]) < relative_size_thresh:
+                    self.conncomps[surrounding].pop(enclosed)
+                    rem_comp.add(enclosed)
+                    MorseCell[surrounding]["set"].update(MorseCell[enclosed]["set"])
+                    MorseCell.pop(enclosed)
+        for comp in rem_comp:
+            self.conncomps.pop(comp)
+        return MorseCell
+        
+    
     def remove_weak_edges(self, MorseCell, absolute_threshold):
         rem_comp = set()
         for key, val in self.conncomps.items():
@@ -81,9 +97,13 @@ class Graph():
                 MorseCell[neighb]["neighbors"][label1].update(elts)
                 # need to recompute weights
                 weight_saledge = compute_weight_saledge(MorseCell[label1]["neighbors"][neighb], saledge_points)
-                weight_normals = compute_weight_normals(MorseCell[label1]["set"], MorseCell[neighb]["set"], vert_dict)
-                self.conncomps[label1][neighb] = (weight_saledge+weight_normals)/2
-                self.conncomps[neighb][label1] = (weight_saledge+weight_normals)/2
+                ''' Normals weight commented out, needs further work'''
+                #weight_normals = compute_weight_normals(MorseCell[label1]["set"], MorseCell[neighb]["set"], vert_dict)
+                #self.conncomps[label1][neighb] = (weight_saledge+weight_normals)/2
+                #self.conncomps[neighb][label1] = (weight_saledge+weight_normals)/2
+                self.conncomps[label1][neighb] = weight_saledge
+                self.conncomps[neighb][label1] = weight_saledge
+                
                 '''TODO
                 compute weights new every time due to changed mean normal
                    TODO'''

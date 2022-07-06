@@ -53,7 +53,7 @@ def get_neighbors(vert, vert_dict, edge_dict):
     return neighbors_ind
                 
 
-def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
+def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborhood=True):
     start_time = timeit.default_timer()
     # boundary_points stored in a set. contains all vert that are either boundary themselves
     # or contained in a boundary edge or face
@@ -130,7 +130,15 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
     #print("Bd pts",len(boundary_points))
     #write_overlay_bd(visited_bd, vert_dict, "test_bd_pts")
     end_time = timeit.default_timer() -start_time
-    print("Time get MorseCells: ", end_time)
+    print("Time get MorseCells for ", MorseComplex.persistence,"persistence: ", end_time)
+    
+    if fill_neighborhood:
+        start_time2 = timeit.default_timer()
+
+        MorseCells = fill_cell_neighbors(MorseCells, vert_dict, edge_dict)
+
+        end_time2 = timeit.default_timer() -start_time2
+        print("Time fill neighbors for MorseCells: ", end_time2)
     return MorseCells
 
 
@@ -183,9 +191,10 @@ def fill_cell_neighbors(MorseCells, vert_dict, edge_dict):
 def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dict, edge_dict):
     start_time = timeit.default_timer()
     
-    MorseCells = fill_cell_neighbors(MorseCells, vert_dict, edge_dict)
-    
-    #write_overlay_bd(salient_points, vert_dict, "test_salient_points")
+    ''' MOVED to get_Morse cells, as that is only called once for each persistence, 
+        sal edge creation is called multiple times usually. 
+        Was very computation heavy i think (badly implemented probably)'''
+    #MorseCells = fill_cell_neighbors(MorseCells, vert_dict, edge_dict) 
     
     # create graph with all labels
     ConnGraph = Graph()
@@ -197,14 +206,7 @@ def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dic
     for label, cell in MorseCells.items():
         for neighbor_label, points in cell["neighbors"].items():
             weight = compute_weight_saledge(points, salient_points)
-            weight_normal = compute_weight_normals(cell["set"], MorseCells[neighbor_label]["set"], vert_dict)
-            weight_var = compute_weight_normalvariance(points, vert_dict)
-            var.append(weight_var)
-            ConnGraph.add_weightedEdge(label, neighbor_label, (weight+weight_normal)/2)
-            
-    print("av",sum(var)/len(var))
-    print("max",max(var))
-    print("min",min(var))
+            ConnGraph.add_weightedEdge(label, neighbor_label, weight)
         
     end_time = timeit.default_timer() -start_time
     print("Time get weighted ConnectivityGraph: ", end_time)

@@ -5,7 +5,7 @@ import timeit
 
 from .Datastructure import Vertex, Edge, Face
 
-def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inverted=False):
+def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inverted=False, load_normals=False):
     start_total_time = timeit.default_timer()
     start_time = timeit.default_timer()
     
@@ -17,6 +17,10 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
     vals = []
     for vindex, pt in enumerate(rawdata['vertex']):
         vert = Vertex(x=pt[0], y=pt[1], z=pt[2], quality=pt[quality_index], index=vindex)
+        if load_normals:
+            vert.nx = rawdata['vertex']['nx'][vindex]
+            vert.ny = rawdata['vertex']['ny'][vindex]
+            vert.nz = rawdata['vertex']['nz'][vindex]
         if inverted:
             vert.fun_val = -1 * vert.quality
         else:
