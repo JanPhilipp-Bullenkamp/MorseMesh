@@ -28,10 +28,10 @@ def write_labels_txt_file(label_dict, target_file):
     write_header(f)
     
     # write labels
-    for label, indices in label_dict.items():
+    for label, indices in enumerate(label_dict.values()):
         #if label != "boundary":
         for index in indices["set"]:
-            f.write(str(index) + " " + str(label) + "\n")
+            f.write(str(index) + " " + str(label+1) + "\n")
             
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
@@ -45,10 +45,10 @@ def write_labels_params_txt_file(label_dict, target_file, pers, thr_high, thr_lo
     write_header_params(f, pers, thr_high, thr_low, merge_thr)
     
     # write labels
-    for label, indices in label_dict.items():
+    for label, indices in enumerate(label_dict.values()):
         #if label != "boundary":
         for index in indices["set"]:
-            f.write(str(index) + " " + str(label) + "\n")
+            f.write(str(index) + " " + str(label+1) + "\n")
             
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
