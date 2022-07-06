@@ -15,7 +15,7 @@ from PlotData.write_overlay_ply_file import write_overlay_ply_file, write_overla
 from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
 from PlotData.write_salient_edge_overlay import write_salient_edge_file, write_dual_thresh_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
 from PlotData.write_salient_edge_pline import write_salient_edge_pline
-from PlotData.write_labels_txt import write_labels_txt_file, write_funval_thresh_labels_txt_file
+from PlotData.write_labels_txt import write_labels_txt_file, write_labels_params_txt_file, write_funval_thresh_labels_txt_file
 from PlotData.write_pline_file import write_pline_file, write_pline_file_thresholded
 from PlotData.plot_fun_val_statistics import plot_fun_val_histogramm
 
@@ -51,8 +51,9 @@ class Morse(Mesh):
     def load_normals_ply(self, filename):
         read_normals_from_ply(filename, self.Vertices)
         
-    def plot_funval_histogram(self, nb_bins = 15, log=False, save = False, filepath = None):
-        plot_fun_val_histogramm(self.Vertices, nb_bins = nb_bins, log=log, save = save, filepath = filepath)
+    def plot_funval_histogram(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
+        stats = plot_fun_val_histogramm(self.Vertices, nb_bins = nb_bins, log=log, save = save, filepath = filepath, show = show)
+        return stats
         
     def write_funval_thresh_labels(self, thresh, filename):
         write_funval_thresh_labels_txt_file(self.Vertices, thresh, filename)
@@ -339,6 +340,59 @@ class Morse(Mesh):
         
         return self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]
     
+    def SalientEdgeSegmentation_DualThresh_improved(self, persistence, thresh_high, thresh_low,  edge_percent):
+        if persistence not in self.MorseCells.keys():
+            raise ValueError('No MorseCell calculated for this persistence!')
+        elif not self._flag_SalientEdge:
+            print("Need maximally reduced complex for salient edges!")
+            print("Computing maximally reduced complex ...")
+            self.ReduceMorseComplex(self.range)
+        
+        if persistence not in self.SegmentationDual.keys():
+            self.SegmentationDual[persistence] = {}
+            
+        if thresh_high not in self.SegmentationDual[persistence].keys():
+            self.SegmentationDual[persistence][thresh_high] = {}
+            
+        if thresh_low not in self.SegmentationDual[persistence][thresh_high].keys():
+            self.SegmentationDual[persistence][thresh_high][thresh_low] = {}
+            
+        if edge_percent in self.SegmentationDual[persistence][thresh_high][thresh_low].keys():
+            print("Segmentation for these parameters has been calculated already: Persistence", persistence, ", SalientEdge Threshold",thresh_high, thresh_low, ", Edge Percentage", edge_percent)
+        else:
+            salient_edge_points = self.dual_thresh_edges(thresh_high, thresh_low)
+            
+            Cells = deepcopy(self.MorseCells[persistence])
+            
+            self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent] = {}
+            if not "Graph" in self.SegmentationDual[persistence][thresh_high][thresh_low]:
+                self.SegmentationDual[persistence][thresh_high][thresh_low]["Graph"] = create_SalientEdgeCellConnectivityGraph(Cells, 
+                                                                                                                        salient_edge_points,
+                                                                                                                        self.Vertices,
+                                                                                                                        self.Edges)
+            self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Graph"] = deepcopy(self.SegmentationDual[persistence][thresh_high][thresh_low]["Graph"])
+            
+            start_time = timeit.default_timer()
+            # merge cells 40 iterations:
+            for i in range(40):
+                Cells = self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Graph"].simplify_cells(Cells, edge_percent, salient_edge_points, self.Vertices)
+            # remove small components:
+            Cells = self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Graph"].remove_small_components(Cells, size_thresh=300)
+            
+            # remove enclosures
+            Cells = self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Graph"].remove_small_enclosures(Cells)
+            
+            
+            self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Cells"] = Cells
+            
+            end_time = timeit.default_timer() - start_time
+            print('Time merging and simplifying Cells:', end_time)
+            
+            #print("Segmented for",persistence, "persistence Complex with", thresh_high, thresh_low, "salient edge threshold and", edge_percent*100, "% edge percentage merging threshold")
+            #print("Got ",len(self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Graph"].conncomps),"differnt cell labels")
+        
+        return self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]
+    
     def write_SegmentationLabels(self, persistence, thresh, edge_percent, filename):
         if persistence not in self.Segmentation.keys():
             raise ValueError('Segmentation for this persistence has not been calculated!')
@@ -360,8 +414,9 @@ class Morse(Mesh):
         if edge_percent not in self.SegmentationDual[persistence][thresh_high][thresh_low].keys():
             raise ValueError('Segmentation for this edge percentage threshold has not been calculated!')
         else:
-            write_labels_txt_file(self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Cells"], 
-                                  filename+"_"+str(persistence)+"P_"+str(thresh_high)+"-"+str(thresh_low)+"T_"+str(edge_percent)+"EP_smallRem")
+            write_labels_params_txt_file(self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Cells"], 
+                                         filename+"_"+str(persistence)+"P_"+str(thresh_high)+"-"+str(thresh_low)+"T_"+str(edge_percent)+"EP_smallRem",
+                                        persistence, thresh_high, thresh_low, edge_percent)
             
     def _get_neighbors(self, vert):
         neighbors_ind = set()
@@ -402,21 +457,83 @@ class Morse(Mesh):
         #print("Added", added, "points by weak threshold in", thresh_low, thresh_high)
         return strong_edge
     
-    def Pipeline(self, filename, filename_normals, quality_index, inverted, load_normals, 
+    def Pipeline(self, infilename, outfilename, quality_index, inverted, 
                  persistences, high_thresh, low_thresh, merge_thresh):
         
-        self.load_mesh_ply(filename, quality_index, inverted, load_normals)
-        if not load_normals:
-            self.load_normals_ply(filename_normals)
-        self.ProcessLowerStars()
-        self.ExtractMorseComplex()
-        self.ReduceMorseComplex(self.range)
+        with open(outfilename+"_timings.txt", "w") as f:
+            t1 = timeit.default_timer()
+            self.load_mesh_ply(infilename, quality_index, inverted)
+            t2 = timeit.default_timer()
+            f.write("ReadData: "+str(t2-t1)+"\n")
+            self.ProcessLowerStars()
+            t3 = timeit.default_timer()
+            f.write("ProcessLowerStars: "+str(t3-t2)+"\n")
+            self.ExtractMorseComplex()
+            t4 = timeit.default_timer()
+            f.write("ExtractMorseComplex: "+str(t4-t3)+"\n")
+            self.ReduceMorseComplex(self.range)
+            t5 = timeit.default_timer()
+            f.write("ReduceMaximally: "+str(t5-t4)+"\n")
+
+            for pers in persistences:
+                t6 = timeit.default_timer()
+                self.ReduceMorseComplex(pers)
+                t7 = timeit.default_timer()
+                f.write("\tReduce "+str(pers)+": "+str(t7-t6)+"\n")
+                self.ExtractMorseCells(pers)
+                t8 = timeit.default_timer()
+                f.write("\tMorseCells "+str(pers)+": "+str(t8-t7)+"\n")
+                
+                f.write("\t\tSegmentation (high,low,merge): time\n")
+                for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
+                    if high > low and high-low<0.04: # <0.04 only for this run
+                        t9 = timeit.default_timer()
+                        self.SalientEdgeSegmentation_DualThresh(pers, high, low, merge)
+                        t10 = timeit.default_timer()
+                        f.write("\t\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
+                        self.write_DualSegmentationLabels(pers, high, low, merge, outfilename)
+                        
+    def Pipeline_semiAuto(self, infilename, outfilename, quality_index, inverted, 
+                          merge_thresh):
         
-        for pers in persistences:
-            self.ReduceMorseComplex(pers)
-            self.ExtractMorseCells(pers)
+        with open(outfilename+"_timings.txt", "w") as f:
+            t1 = timeit.default_timer()
+            self.load_mesh_ply(infilename, quality_index, inverted)
+            t2 = timeit.default_timer()
+            f.write("ReadData: "+str(t2-t1)+"\n")
+            self.ProcessLowerStars()
+            t3 = timeit.default_timer()
+            f.write("ProcessLowerStars: "+str(t3-t2)+"\n")
+            self.ExtractMorseComplex()
+            t4 = timeit.default_timer()
+            f.write("ExtractMorseComplex: "+str(t4-t3)+"\n")
+            self.ReduceMorseComplex(self.range)
+            t5 = timeit.default_timer()
+            f.write("ReduceMaximally: "+str(t5-t4)+"\n")
             
-            for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
-                if high > low:
-                    self.SalientEdgeSegmentation_DualThresh(pers, high, low, merge)
-                    self.write_DualSegmentationLabels(pers, high, low, merge, str(self.filename))
+            # automated threshold finding (parameters might need changes)
+            stats = self.plot_funval_histogram(nb_bins = 3, show = False)
+            sorted_funvals = sorted(stats['fun_vals'])
+            newlen_pers=int(0.08*len(sorted_funvals))
+            newlen_high_thresh=int(0.065*len(sorted_funvals))
+            newlen_low_thresh=int(0.09*len(sorted_funvals))
+            
+            pers = sorted_funvals[-newlen_pers]
+            high_thresh = sorted_funvals[-newlen_high_thresh]
+            low_thresh = sorted_funvals[-newlen_low_thresh]
+
+            t6 = timeit.default_timer()
+            self.ReduceMorseComplex(pers)
+            t7 = timeit.default_timer()
+            f.write("\tReduce "+str(pers)+": "+str(t7-t6)+"\n")
+            self.ExtractMorseCells(pers)
+            t8 = timeit.default_timer()
+            f.write("\tMorseCells "+str(pers)+": "+str(t8-t7)+"\n")
+
+            f.write("\t\tSegmentation (high,low,merge): time\n")
+            for merge in merge_thresh:
+                t9 = timeit.default_timer()
+                self.SalientEdgeSegmentation_DualThresh(pers, high_thresh, low_thresh, merge)
+                t10 = timeit.default_timer()
+                f.write("\t\t"+str(high_thresh)+" "+str(low_thresh)+" "+str(merge)+": "+str(t10-t9)+"\n")
+                self.write_DualSegmentationLabels(pers, high_thresh, low_thresh, merge, outfilename)

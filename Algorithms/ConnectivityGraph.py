@@ -97,9 +97,13 @@ class Graph():
                 MorseCell[neighb]["neighbors"][label1].update(elts)
                 # need to recompute weights
                 weight_saledge = compute_weight_saledge(MorseCell[label1]["neighbors"][neighb], saledge_points)
-                weight_normals = compute_weight_normals(MorseCell[label1]["set"], MorseCell[neighb]["set"], vert_dict)
-                self.conncomps[label1][neighb] = (weight_saledge+weight_normals)/2
-                self.conncomps[neighb][label1] = (weight_saledge+weight_normals)/2
+                ''' Normals weight commented out, needs further work'''
+                #weight_normals = compute_weight_normals(MorseCell[label1]["set"], MorseCell[neighb]["set"], vert_dict)
+                #self.conncomps[label1][neighb] = (weight_saledge+weight_normals)/2
+                #self.conncomps[neighb][label1] = (weight_saledge+weight_normals)/2
+                self.conncomps[label1][neighb] = weight_saledge
+                self.conncomps[neighb][label1] = weight_saledge
+                
                 '''TODO
                 compute weights new every time due to changed mean normal
                    TODO'''

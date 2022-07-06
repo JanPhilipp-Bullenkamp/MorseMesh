@@ -55,7 +55,7 @@ def write_salient_edge_file(MorseCpx, vert_dict, edge_dict, face_dict,
                             thresh, target_file, color_paths=[0,0,0]):
     start_timer = timeit.default_timer()
     
-    f = open(target_file + "_maxPers_thresh" + str(thresh) + "_OverlaySalientEdge.ply", "w")
+    f = open(target_file + "_SepThr" + str(thresh) + "_OverlaySalientEdge.ply", "w")
     
     path_vert = set()
     path_edges = set()
@@ -207,7 +207,6 @@ def write_improved_salient_edge_file(MorseCpx, min_thresh, max_thresh, vert_dict
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
     print('Time writing improved salient edge overlay file for maximally reduced MC and threshold', thresh, ': ', time_writing_file)
-    
     
 def plot_salient_edge_histogramm(Cplx, nb_bins = 15, log=False, save = False, filepath = None):
     persistences = []
