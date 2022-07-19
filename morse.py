@@ -486,7 +486,7 @@ class Morse(Mesh):
                 
                 f.write("\t\tSegmentation (high,low,merge): time\n")
                 for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
-                    if high > low and high-low<0.04: # <0.04 only for this run
+                    if high > low:
                         t9 = timeit.default_timer()
                         self.SalientEdgeSegmentation_DualThresh(pers, high, low, merge)
                         t10 = timeit.default_timer()
