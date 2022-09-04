@@ -42,16 +42,7 @@ def get_boundary(MorseComplex, edge_dict, face_dict):
                         if count%2 == 0: # add all faces
                             bd_points.update(face_dict[elt].indices)
                         
-    return bd_points
-
-def get_neighbors(vert, vert_dict, edge_dict):
-    neighbors_ind = set()
-    for star_edge in vert.star["E"]:
-        neighbors_ind.update(edge_dict[star_edge].indices)
-        
-    neighbors_ind.remove(vert.index)
-    return neighbors_ind
-                
+    return bd_points                
 
 def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborhood=True):
     start_time = timeit.default_timer()
@@ -77,12 +68,11 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
             queue.add(vert)
             
             while len(queue) != 0:
-                # pop one elt from queue and find the neighbors
+                # pop one elt from queue
                 queue_elt = queue.pop()
-                neighbors_indices = get_neighbors(queue_elt, vert_dict, edge_dict)
                 
                 # add elts to queue if they are not boundary
-                for ind in neighbors_indices:
+                for ind in queue_elt.neighbors:
                     if ind not in boundary_points and ind not in visited:
                         queue.add(vert_dict[ind])
                     elif ind in boundary_points and ind not in visited:
@@ -109,9 +99,8 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
     while len(boundary_points) != 0:
         rem_bd = set()
         for left in boundary_points:
-            neighbors = get_neighbors(vert_dict[left], vert_dict, edge_dict)
             labels = []
-            for ind in neighbors:
+            for ind in vert_dict[left].neighbors:
                 if ind not in boundary_points:
                     for label, val in MorseCells.items():
                         if ind in val["set"]:
@@ -159,10 +148,9 @@ def fill_cell_neighbors(MorseCells, vert_dict, edge_dict):
     for label, cell in MorseCells.items():
         # check all boundary points 
         for bd_point in cell["boundary"]:
-            neighbors = get_neighbors(vert_dict[bd_point], vert_dict, edge_dict)
             # for all neighbors of bd points, check which label they have and add new labels to neighbors, 
             # also storing the boundary points from both sides (for connectivity calculation later)
-            for ind in neighbors:
+            for ind in vert_dict[bd_point].neighbors:
                 if ind not in cell["set"]:
                     ind_label = find_label(ind, MorseCells)
                     if ind_label != -1:

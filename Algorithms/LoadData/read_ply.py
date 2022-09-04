@@ -50,6 +50,9 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
             tmp_ind = tmp.pop(i)
             vertices_dict[tmp_ind].star["F"].append(findex)
             
+            vertices_dict[tmp_ind].neighbors.add(tmp[0])
+            vertices_dict[tmp_ind].neighbors.add(tmp[1])
+            
             if set(tmp) not in unique_edges:
                 edge = Edge(indices=set(tmp), index=eindex)
                 edge.set_fun_val(vertices_dict)

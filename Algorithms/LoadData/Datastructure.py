@@ -15,6 +15,7 @@ class Vertex:
         self.star = {}
         self.star["F"] = []
         self.star["E"] = []
+        self.neighbors = set()
         
     def __str__(self):
         return str(self.index)
