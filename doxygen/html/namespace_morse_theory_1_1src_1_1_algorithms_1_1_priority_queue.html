@@ -83,22 +83,22 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue_1_1_priority_queue.html">PriorityQueue</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Priority Queue class used for a queue sorted after function values.  <a href="class_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue_1_1_priority_queue.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ac330dde54ea9beef0756aef3f3878bd4"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue.html#ac330dde54ea9beef0756aef3f3878bd4">compare_heights</a> (small, big)</td></tr>
+<tr class="memdesc:ac330dde54ea9beef0756aef3f3878bd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares two tuples of sorted values.  <a href="namespace_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue.html#ac330dde54ea9beef0756aef3f3878bd4">More...</a><br /></td></tr>
 <tr class="separator:ac330dde54ea9beef0756aef3f3878bd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05b539d40fcba94c9a6fa60fe57ec4f8"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue.html#a05b539d40fcba94c9a6fa60fe57ec4f8">merge</a> (left, right, merged)</td></tr>
+<tr class="memdesc:a05b539d40fcba94c9a6fa60fe57ec4f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Merges two arrays together sorted after their priority.  <a href="namespace_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue.html#a05b539d40fcba94c9a6fa60fe57ec4f8">More...</a><br /></td></tr>
 <tr class="separator:a05b539d40fcba94c9a6fa60fe57ec4f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a703ee3b121db5d72dfdaaad063f04ee0"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue.html#a703ee3b121db5d72dfdaaad063f04ee0">merge_sort</a> (arr)</td></tr>
+<tr class="memdesc:a703ee3b121db5d72dfdaaad063f04ee0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sorts a given array recursively using merge sort.  <a href="namespace_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue.html#a703ee3b121db5d72dfdaaad063f04ee0">More...</a><br /></td></tr>
 <tr class="separator:a703ee3b121db5d72dfdaaad063f04ee0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><pre class="fragment">!!!!!!!
-\todo should implement heapq as well
-!!!!!!!!!!
-</pre> </div><h2 class="groupheader">Function Documentation</h2>
+<h2 class="groupheader">Function Documentation</h2>
 <a id="ac330dde54ea9beef0756aef3f3878bd4" name="ac330dde54ea9beef0756aef3f3878bd4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac330dde54ea9beef0756aef3f3878bd4">&#9670;&#160;</a></span>compare_heights()</h2>
 
@@ -124,6 +124,18 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Compares two tuples of sorted values. </p>
+<p >Compares two sorted tuples of possibly different length and returns True if the second one is considered larger and False if the first one is considered larger. Tuples are higher if their highest (first) value is larger than the highest value of the other tuple and shorter tuples are higher than longer if all values are equal up to the length of the shorter tuple. For example the following tuples are sorted from high to low:</p>
+<p >(4), (4,3), (3,2,2), (3,2,1), (2), (2,9), (2,7), (2,9,15)</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">small</td><td>First tuple to be compared. </td></tr>
+    <tr><td class="paramname">big</td><td>Second tuple to be compared.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if small is smaller than big according to the metric. False otherwise. </dd></dl>
 
 </div>
 </div>
@@ -159,6 +171,16 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Merges two arrays together sorted after their priority. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">left</td><td>The left array to be merged. </td></tr>
+    <tr><td class="paramname">right</td><td>The right array to be merged. @merged The original array that needs to be sorted.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The merge sorted array. </dd></dl>
+
 </div>
 </div>
 <a id="a703ee3b121db5d72dfdaaad063f04ee0" name="a703ee3b121db5d72dfdaaad063f04ee0"></a>
@@ -176,6 +198,15 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sorts a given array recursively using merge sort. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">arr</td><td>The array to be sorted</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The sorted array. </dd></dl>
 
 </div>
 </div>

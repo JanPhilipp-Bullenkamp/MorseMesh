@@ -33,6 +33,28 @@ class Vertex:
       and "E", which can store the adjacent edge-indices in a list
     - a set .neighbors to store the neighbors of the vertex
     """
+    ## @var x 
+    # The x coordinate. Should be a float or None.
+    ##  @var y 
+    # The y coordinate. Should be a float or None.
+    ##  @var z 
+    # The z coordinate. Should be a float or None.
+    ##  @var quality 
+    # The quality field. Should be a float or None.
+    ##  @var fun_val 
+    # The function value used for the Morse function. Should be a float or None.
+    ##  @var index 
+    # The index of the vertex. Should be an int or None.
+    
+    ##  @var theta 
+    # An angle for a normal direction e.g. Should be a float or None.
+    ##  @var phi 
+    # An angle for a normal direction e.g. Should be a float or None.
+    
+    ##  @var star 
+    # The surrounding faces "F" and edges "E" in a dictionary with keys "F" and "E".
+    ##  @var neighbors 
+    # A set containing all neighbor vertices (their indices).
     
     def __init__(self, x=None, y=None, z=None,
                 quality=None, fun_val=None,
@@ -65,29 +87,6 @@ class Vertex:
         @return A string of the index of the vertex.
         """
         return str(self.index)
-    
-    ## @var x 
-    # The x coordinate. Should be a float or None.
-    ##  @var y 
-    # The y coordinate. Should be a float or None.
-    ##  @var z 
-    # The z coordinate. Should be a float or None.
-    ##  @var quality 
-    # The quality field. Should be a float or None.
-    ##  @var fun_val 
-    # The function value used for the Morse function. Should be a float or None.
-    ##  @var index 
-    # The index of the vertex. Should be an int or None.
-    
-    ##  @var theta 
-    # An angle for a normal direction e.g. Should be a float or None.
-    ##  @var phi 
-    # An angle for a normal direction e.g. Should be a float or None.
-    
-    ##  @var star 
-    # The surrounding faces "F" and edges "E" in a dictionary with keys "F" and "E".
-    ##  @var neighbors 
-    # A set containing all neighbor vertices (their indices).
 
 class Edge:
     """! @brief Edge class used for normal edges.
@@ -99,6 +98,12 @@ class Edge:
     vertices and storing them in a list, sorted such that the higher function value
     is at the first position.    
     """
+    ## @var indices
+    # A set of two indices representing the edge
+    ## @var fun_val
+    # A sorted list of two floats, where the first value is the highest
+    ## @var index
+    # The index of this edge (edge-index)
     
     def __init__(self, indices=None, index=None):
         """! The Constructor of an Edge.
@@ -128,13 +133,6 @@ class Edge:
         @return A string of the index of the edge.
         """
         return str(self.indices)
-    
-    ## @var indices
-    # A set of two indices representing the edge
-    ## @var fun_val
-    # A sorted list of two floats, where the first value is the highest
-    ## @var index
-    # The index of this edge (edge-index)
 
 class Face:
     """! @brief Face class used for normal faces.
@@ -146,6 +144,12 @@ class Face:
     vertices and storing them in a list, sorted such that the highest function value
     is at the first position.    
     """
+    ## @var indices
+    # A set of three indices representing the face
+    ## @var fun_val
+    # A sorted list of three floats, where the first value is the highest
+    ## @var index
+    # The index of this face (face-index)
     
     def __init__(self, indices=None, index=None):
         """! The Constructor of a Face.
@@ -177,14 +181,6 @@ class Face:
         """
         return str(self.indices)
     
-    ## @var indices
-    # A set of three indices representing the face
-    ## @var fun_val
-    # A sorted list of three floats, where the first value is the highest
-    ## @var index
-    # The index of this face (face-index)
-    
-    
 class CritVertex:
     """! @brief CritVertex class used for critical vertices.
     
@@ -192,6 +188,13 @@ class CritVertex:
     contains a list with saddles (critical edges) connected to this critical 
     vertex (.connected_saddles).
     """
+    ## @var index
+    # The index of the original Vertex that now becomes a critical vertex.
+    ## @var fun_val
+    # The function value of the original Vertex that now becomes a critical vertex.
+    ## @var connected_saddles
+    # A list with saddles (critical edges) which are connected to this critical vertex
+    # via separatrices.
     
     def __init__(self, vert):
         """! The Constructor of a CritVertex.
@@ -208,14 +211,6 @@ class CritVertex:
         """
         return str(self.index)
     
-    ## @var index
-    # The index of the original Vertex that now becomes a critical vertex.
-    ## @var fun_val
-    # The function value of the original Vertex that now becomes a critical vertex.
-    ## @var connected_saddles
-    # A list with saddles (critical edges) which are connected to this critical vertex
-    # via separatrices.
-
 class CritEdge:
     """! @brief CritEdge class used for critical edges.
     
@@ -224,6 +219,21 @@ class CritEdge:
     connected to this critical edge (.connected_minima and .connected_maxima). Also contains
     a paths dictionary (.paths) (?needed for MorseComplex computations?).
     """
+    ## @var indices
+    # The indices representing the original edge that now becomes a critical edge.
+    ## @var index
+    # The index of the original Edge that now becomes a critical edge.
+    ## @var fun_val
+    # The function values list of the original Edge that now becomes a critical edge.
+    ## @var connected_minima
+    # A list with minima (critical vertices) which are connected to this critical edge
+    # via separatrices.
+    ## @var connected_maxima
+    # A list with maxima (critical faces) which are connected to this critical edge
+    # via separatrices.
+    ## @var paths
+    # A dictionary used in MorseComplex computation, to create the breadth first search
+    # to find the critical vertices that are connected to this edge.
     
     def __init__(self, edge):
         """! The Constructor of a CritEdge.
@@ -245,22 +255,6 @@ class CritEdge:
         """
         return str(self.indices)
     
-    ## @var indices
-    # The indices representing the original edge that now becomes a critical edge.
-    ## @var index
-    # The index of the original Edge that now becomes a critical edge.
-    ## @var fun_val
-    # The function values list of the original Edge that now becomes a critical edge.
-    ## @var connected_minima
-    # A list with minima (critical vertices) which are connected to this critical edge
-    # via separatrices.
-    ## @var connected_maxima
-    # A list with maxima (critical faces) which are connected to this critical edge
-    # via separatrices.
-    ## @var paths
-    # A dictionary used in MorseComplex computation, to create the breadth first search
-    # to find the critical vertices that are connected to this edge.
-        
 class CritFace:
     """! @brief CritFace class used for critical faces.
     
@@ -269,6 +263,18 @@ class CritFace:
     vertex (.connected_saddles) and a paths dictionary (.paths) (?needed for 
     MorseComplex computations?).
     """
+    ## @var indices
+    # The indices representing the original face that now becomes a critical face.
+    ## @var index
+    # The index of the original Face that now becomes a critical face.
+    ## @var fun_val
+    # The function values list of the original Face that now becomes a critical face.
+    ## @var connected_saddles
+    # A list with saddles (critical edges) which are connected to this critical face
+    # via separatrices.
+    ## @var paths
+    # A dictionary used in MorseComplex computation, to create the breadth first search
+    # to find the critical edges that are connected to this face.
     
     def __init__(self, face):
         """! The Constructor of a CritFace.
@@ -289,19 +295,6 @@ class CritFace:
         """
         return str(self.indices)
     
-    ## @var indices
-    # The indices representing the original face that now becomes a critical face.
-    ## @var index
-    # The index of the original Face that now becomes a critical face.
-    ## @var fun_val
-    # The function values list of the original Face that now becomes a critical face.
-    ## @var connected_saddles
-    # A list with saddles (critical edges) which are connected to this critical face
-    # via separatrices.
-    ## @var paths
-    # A dictionary used in MorseComplex computation, to create the breadth first search
-    # to find the critical edges that are connected to this face.
-    
 class Separatrix:
     """! @brief Separatrix class used for separatrices from maxima to saddles and from saddles to minima.
     
@@ -310,6 +303,18 @@ class Separatrix:
     0-/1-simplices) and a float for the separatrix persistence, that gives a value for the significance 
     of this separatrix line.
     """
+    ## @var origin 
+    # The higher dimensional critical simplex where this separatrix starts from.
+    ## @var destination 
+    # The lower dimensional critical simplex where this separatrix is going to.
+    ## @var dimension 
+    # Can be 1 or 2: 1 for minimal lines (saddle-minimum) and 2 for maximal lines:
+    # (maximum-saddle).
+    ## @var path 
+    # A list containing the alternating (1-2-1-2... or 0-1-0-1...) indices of a vertex/edge/face 
+    # that give the path from the origin to the destination.
+    ## @var separatrix_persistence 
+    # A float that gives a measure of importance for this separatrix.
     
     def __init__(self, origin, destination, dimension, path, separatrix_persistence):
         """! The Constructor of a Separatrix.
@@ -347,19 +352,6 @@ class Separatrix:
         elif self.dimension == 2:
             return "Maximal line from maximum" + str(self.origin) + " to saddle" + str(self.destination) + " in " + str(len(path)) + " pathpoints"
         
-    ## @var origin 
-    # The higher dimensional critical simplex where this separatrix starts from.
-    ## @var destination 
-    # The lower dimensional critical simplex where this separatrix is going to.
-    ## @var dimension 
-    # Can be 1 or 2: 1 for minimal lines (saddle-minimum) and 2 for maximal lines:
-    # (maximum-saddle).
-    ## @var path 
-    # A list containing the alternating (1-2-1-2... or 0-1-0-1...) indices of a vertex/edge/face 
-    # that give the path from the origin to the destination.
-    ## @var separatrix_persistence 
-    # A float that gives a measure of importance for this separatrix.
-    
     
 class MorseComplex:
     """! @brief A Morse Complex, that stores a reduced skeleton of the original mesh/simplicial complex and has the same topology.
@@ -370,7 +362,25 @@ class MorseComplex:
     of the mesh which can be noise reduced using a parameter called persistence. The topologicallly relveant Betti numbers can be 
     stored as well.
     """
-    
+    ## @var CritVertices
+    # A dictionary storing the critical vertices. Key is the vertex index and value the CritVertex class object.
+    ## @var CritEdges
+    # A dictionary storing the critical edges. Key is an edge index and value the CritEdge class object.
+    ## @var CritFaces
+    # A dictionary storing the critical faces. Key is the face index and value the CritFace class object.
+    ## @var Separatrices
+    # A list storing the Separatrix class objects.
+    ## @var _flag_BettiNumbers
+    # Boolean wether the Betti numbers have been calculated or not.
+    ## @var BettiNumbers
+    # Betti Numbers if calculated, otherwise None.
+    ## @var maximalReduced
+    # Boolean wether this complex is maximally reduced, e.g. no more cancellations are possible and the persistence is maximal.
+    ## @var persistence
+    # The persistence level up to which this complex has been reduced to.
+    ## @var filename
+    # The filenmae of the underlying mesh.
+        
     def __init__(self, persistence=0, filename=None):
         """! The Constructor of a MorseComplex.
         @param persistence The persistence up to which this complex has been reduced to. Optional, default is 0 (not reduced at all).
@@ -415,23 +425,4 @@ class MorseComplex:
         if self._flag_BettiNumbers:
             print("| Betti numbers: ", self.BettiNumbers)
         print("+-------------------------------------------------------")
-        
-    ## @var CritVertices
-    # A dictionary storing the critical vertices. Key is the vertex index and value the CritVertex class object.
-    ## @var CritEdges
-    # A dictionary storing the critical edges. Key is an edge index and value the CritEdge class object.
-    ## @var CritFaces
-    # A dictionary storing the critical faces. Key is the face index and value the CritFace class object.
-    ## @var Separatrices
-    # A list storing the Separatrix class objects.
-    ## @var _flag_BettiNumbers
-    # Boolean wether the Betti numbers have been calculated or not.
-    ## @var BettiNumbers
-    # Betti Numbers if calculated, otherwise None.
-    ## @var maximalReduced
-    # Boolean wether this complex is maximally reduced, e.g. no more cancellations are possible and the persistence is maximal.
-    ## @var persistence
-    # The persistence level up to which this complex has been reduced to.
-    ## @var filename
-    # The filenmae of the underlying mesh.
         

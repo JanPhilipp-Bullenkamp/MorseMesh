@@ -22,7 +22,7 @@ import timeit
 
 from .Datastructure import Vertex, Edge, Face
 
-def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inverted=False, load_normals=False):
+def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inverted=False):
     """! @brief Reads a ply file and writes the simplicial complex into vertices, edges and faces dictionaries.
     
     @details This function reads the given ply file and fills the given vertices dictionary, edges dictionary 
@@ -38,7 +38,6 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
     @param faces_dict The faces dictionary to be filled with faces.
     @param inverted Optional boolean: whether the Morse function values (quality values) should be multiplied with -1. 
            Doing this flips maxima and minima, default is False
-    @param load_normals Optional boolena: whether to load normals into the mesh as well. Default is False.
     
     @return Despite filling the dictionaries, returns the minimum and maximum function value as min, max.
     """
@@ -53,10 +52,6 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
     vals = []
     for vindex, pt in enumerate(rawdata['vertex']):
         vert = Vertex(x=pt[0], y=pt[1], z=pt[2], quality=pt[quality_index], index=vindex)
-        if load_normals:
-            vert.nx = rawdata['vertex']['nx'][vindex]
-            vert.ny = rawdata['vertex']['ny'][vindex]
-            vert.nz = rawdata['vertex']['nz'][vindex]
         if inverted:
             vert.fun_val = -1 * vert.quality
         else:

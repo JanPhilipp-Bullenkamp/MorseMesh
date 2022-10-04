@@ -26,46 +26,47 @@
 # - Currently worked on.
 
 
+# import stuff
+from src.Algorithms.LoadData.Datastructure import Vertex, Edge, Face
+from src.Algorithms.LoadData.read_ply import read_ply
+from src.Algorithms.LoadData.read_funvals import read_funvals
+from src.Algorithms.ProcessLowerStars import ProcessLowerStars
+from src.Algorithms.ExtractMorseComplex import ExtractMorseComplex
+from src.Algorithms.ReduceMorseComplex import CancelCriticalPairs
+from src.Algorithms.BettiNumbers import BettiViaPairCells
 
-from Algorithms.LoadData.Datastructure import Vertex, Edge, Face
-from Algorithms.LoadData.read_ply import read_ply, read_normals_from_ply
-from Algorithms.LoadData.read_funvals import read_funvals
-from Algorithms.ProcessLowerStars import ProcessLowerStars
-from Algorithms.ExtractMorseComplex import ExtractMorseComplex
-from Algorithms.ReduceMorseComplex import CancelCriticalPairs
-from Algorithms.BettiNumbers import BettiViaPairCells
+from src.Algorithms.MorseCells import get_MorseCells, create_SalientEdgeCellConnectivityGraph
+from src.Algorithms.SalientEdgeIndices import get_salient_edge_indices, get_salient_edge_indices_dual_thr
 
-from Algorithms.MorseCells import get_MorseCells, create_SalientEdgeCellConnectivityGraph
-from Algorithms.SalientEdgeIndices import get_salient_edge_indices, get_salient_edge_indices_dual_thr
+from src.Algorithms.PersistenceDiagram import PersistenceDiagram
 
-from Algorithms.PersistenceDiagram import PersistenceDiagram
+from src.PlotData.write_overlay_ply_file import write_overlay_ply_file, write_overlay_ply_file_thresholded
+from src.PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
+from src.PlotData.write_salient_edge_overlay import write_salient_edge_file, write_dual_thresh_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
+from src.PlotData.write_salient_edge_pline import write_salient_edge_pline
+from src.PlotData.write_labels_txt import write_labels_txt_file, write_labels_params_txt_file, write_funval_thresh_labels_txt_file
+from src.PlotData.write_pline_file import write_pline_file, write_pline_file_thresholded
+from src.PlotData.plot_fun_val_statistics import plot_fun_val_histogramm
 
-from PlotData.write_overlay_ply_file import write_overlay_ply_file, write_overlay_ply_file_thresholded
-from PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
-from PlotData.write_salient_edge_overlay import write_salient_edge_file, write_dual_thresh_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
-from PlotData.write_salient_edge_pline import write_salient_edge_pline
-from PlotData.write_labels_txt import write_labels_txt_file, write_labels_params_txt_file, write_funval_thresh_labels_txt_file
-from PlotData.write_pline_file import write_pline_file, write_pline_file_thresholded
-from PlotData.plot_fun_val_statistics import plot_fun_val_histogramm
+from src.Algorithms.plot_bdpts import write_overlay_bd
 
+from src.mesh import Mesh
 
-from Algorithms.plot_bdpts import write_overlay_bd
-
+# import libraries
 import timeit
 import os
 import numpy as np
 from copy import deepcopy
 import itertools
 
-from mesh import Mesh
 
 class Morse(Mesh):
     def __init__(self):
         super().__init__()
 
-    def load_mesh_ply(self, filename, quality_index, inverted=False, load_normals=False):
+    def load_mesh_ply(self, filename, quality_index, inverted=False):
         min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
-                                    self.Edges, self.Faces, inverted=inverted, load_normals=load_normals)
+                                    self.Edges, self.Faces, inverted=inverted)
         self.filename = os.path.splitext(filename)[0]
         self.min = min_val
         self.max = max_val
@@ -76,9 +77,6 @@ class Morse(Mesh):
         self.min = min_val
         self.max = max_val
         self.range = max_val - min_val
-        
-    def load_normals_ply(self, filename):
-        read_normals_from_ply(filename, self.Vertices)
         
     def plot_funval_histogram(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
         stats = plot_fun_val_histogramm(self.Vertices, nb_bins = nb_bins, log=log, save = save, filepath = filepath, show = show)

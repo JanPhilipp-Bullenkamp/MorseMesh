@@ -3,7 +3,7 @@ var searchData=
   ['range_0',['range',['../class_morse_theory_1_1src_1_1mesh_1_1_mesh.html#a5a95c5aa27dc12b07af34405942b7849',1,'MorseTheory.src.mesh.Mesh.range()'],['../class_morse_theory_1_1src_1_1morse_1_1_morse.html#a5a95c5aa27dc12b07af34405942b7849',1,'MorseTheory.src.morse.Morse.range()']]],
   ['read_5ffunvals_1',['read_funvals',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_load_data_1_1read__funvals.html#a7a6255a10bd8de64c36b6d98f8ba5c34',1,'MorseTheory::src::Algorithms::LoadData::read_funvals']]],
   ['read_5ffunvals_2epy_2',['read_funvals.py',['../read__funvals_8py.html',1,'']]],
-  ['read_5fply_3',['read_ply',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_load_data_1_1read__ply.html#aac48cec07eeb12dc10faa5c4fdad9440',1,'MorseTheory::src::Algorithms::LoadData::read_ply']]],
+  ['read_5fply_3',['read_ply',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_load_data_1_1read__ply.html#a68ff6334ee631308d343f8a3dd0ddc74',1,'MorseTheory::src::Algorithms::LoadData::read_ply']]],
   ['read_5fply_2epy_4',['read_ply.py',['../read__ply_8py.html',1,'']]],
   ['reducedmorsecomplexes_5',['reducedMorseComplexes',['../class_morse_theory_1_1src_1_1mesh_1_1_mesh.html#a1b9eba7de0c4168125c635c530b072e8',1,'MorseTheory::src::mesh::Mesh']]],
   ['reducemorsecomplex_6',['ReduceMorseComplex',['../class_morse_theory_1_1src_1_1morse_1_1_morse.html#a88c3896df33bcb9e04995b5907bf6ed9',1,'MorseTheory::src::morse::Morse']]],
