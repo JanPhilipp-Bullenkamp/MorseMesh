@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['get_5fboundary_0',['get_boundary',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_morse_cells.html#aa921160dcec8267b24dd6cf791230f2d',1,'MorseTheory::src::Algorithms::MorseCells']]],
-  ['get_5fclosest_5fextremum_1',['get_closest_extremum',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_reduce_morse_complex.html#a45fc7f8c79cfb7232d8ba4f1cc11799a',1,'MorseTheory::src::Algorithms::ReduceMorseComplex']]],
-  ['get_5fmorsecells_2',['get_MorseCells',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_morse_cells.html#aa12b002538598fc98aef27a7a0bc3170',1,'MorseTheory::src::Algorithms::MorseCells']]],
-  ['get_5fsalient_5fedge_5findices_3',['get_salient_edge_indices',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_salient_edge_indices.html#acd8b3b00b7ae5fc5513ac3e1fc4a38c9',1,'MorseTheory::src::Algorithms::SalientEdgeIndices']]],
-  ['get_5fsalient_5fedge_5findices_5fdual_5fthr_4',['get_salient_edge_indices_dual_thr',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_salient_edge_indices.html#a887e943fa26e21a3922d4ba9c818f56c',1,'MorseTheory::src::Algorithms::SalientEdgeIndices']]],
-  ['getconnectivitygraph_5',['GetConnectivityGraph',['../class_morse_theory_1_1src_1_1morse_1_1_morse.html#a9737db0e02d520af8b4efc9c9a56a072',1,'MorseTheory::src::morse::Morse']]]
+  ['get_5fboundary_362',['get_boundary',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1MorseCells.html#a10402754a7d6c62e6d627ebf8185e648',1,'MorseTheory::src::Algorithms::MorseCells']]],
+  ['get_5fclosest_5fextremum_363',['get_closest_extremum',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1ReduceMorseComplex.html#a069643be098d21abdbda9a1270ded35d',1,'MorseTheory::src::Algorithms::ReduceMorseComplex']]],
+  ['get_5fmorsecells_364',['get_MorseCells',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1MorseCells.html#a772fd0cacf8f078bf38113af2c44c9d6',1,'MorseTheory::src::Algorithms::MorseCells']]],
+  ['get_5fsalient_5fedge_5findices_365',['get_salient_edge_indices',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1SalientEdgeIndices.html#a160bbd4ac7c7ec703fb24f35a0a9d1a8',1,'MorseTheory::src::Algorithms::SalientEdgeIndices']]],
+  ['get_5fsalient_5fedge_5findices_5fdual_5fthr_366',['get_salient_edge_indices_dual_thr',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1SalientEdgeIndices.html#af227e90c25ddcc2d753ea3efc0c83c25',1,'MorseTheory::src::Algorithms::SalientEdgeIndices']]],
+  ['getconnectivitygraph_367',['GetConnectivityGraph',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a9737db0e02d520af8b4efc9c9a56a072',1,'MorseTheory::src::morse::Morse']]]
 ];

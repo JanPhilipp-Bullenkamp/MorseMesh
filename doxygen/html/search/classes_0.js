@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['cancellationqueue_0',['CancellationQueue',['../class_morse_theory_1_1src_1_1_algorithms_1_1_cancellation_queue_1_1_cancellation_queue.html',1,'MorseTheory::src::Algorithms::CancellationQueue']]],
-  ['conncomp_1',['ConnComp',['../class_morse_theory_1_1src_1_1_algorithms_1_1_connectivity_graph_1_1_conn_comp.html',1,'MorseTheory::src::Algorithms::ConnectivityGraph']]],
-  ['critedge_2',['CritEdge',['../class_morse_theory_1_1src_1_1_algorithms_1_1_load_data_1_1_datastructure_1_1_crit_edge.html',1,'MorseTheory::src::Algorithms::LoadData::Datastructure']]],
-  ['critface_3',['CritFace',['../class_morse_theory_1_1src_1_1_algorithms_1_1_load_data_1_1_datastructure_1_1_crit_face.html',1,'MorseTheory::src::Algorithms::LoadData::Datastructure']]],
-  ['critvertex_4',['CritVertex',['../class_morse_theory_1_1src_1_1_algorithms_1_1_load_data_1_1_datastructure_1_1_crit_vertex.html',1,'MorseTheory::src::Algorithms::LoadData::Datastructure']]]
+  ['cancellationqueue_252',['CancellationQueue',['../classMorseTheory_1_1src_1_1Algorithms_1_1CancellationQueue_1_1CancellationQueue.html',1,'MorseTheory::src::Algorithms::CancellationQueue']]],
+  ['conncomp_253',['ConnComp',['../classMorseTheory_1_1src_1_1Algorithms_1_1ConnectivityGraph_1_1ConnComp.html',1,'MorseTheory::src::Algorithms::ConnectivityGraph']]],
+  ['critedge_254',['CritEdge',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1CritEdge.html',1,'MorseTheory::src::Algorithms::LoadData::Datastructure']]],
+  ['critface_255',['CritFace',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1CritFace.html',1,'MorseTheory::src::Algorithms::LoadData::Datastructure']]],
+  ['critvertex_256',['CritVertex',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1CritVertex.html',1,'MorseTheory::src::Algorithms::LoadData::Datastructure']]]
 ];

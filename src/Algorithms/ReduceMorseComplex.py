@@ -247,7 +247,7 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, edge_dict, face_
                 
             else:
                 print("More than 2 paths between new_max and saddle or max and new_saddle, shouldnt be possible!")
-                raise RuntimeError
+                #raise RuntimeError
                 
     # needs to be put out of new_max loop, otherwise repeated to often
     for new_sad, nb_sad in new_saddles_counts.items():

@@ -1,23 +1,66 @@
+##
+# @file ExtractMorseComplex.py
+#
+# @brief Contains the ExtractMorseComplex function described in Robins et al. (DOI: 10.1109/TPAMI.2011.95)
+# https://www.researchgate.net/publication/51131057_Theory_and_Algorithms_for_Constructing_Discrete_Morse_Complexes_from_Grayscale_Digital_Images
+#
+# @section libraries_ExtractMorseComplex Libraries/Modules
+# - numpy standard library
+# - timeit standard library
+#   - timing functions
+# - Datastructure module (local)
+#   - need CritVertex, CritEdge, CritFace, MorseComplex structures
+# - Tree module (local)
+#   - need Tree for path finding to get adjacency between critical cells in the MS complex
+
+#Imports
 import numpy as np
 import timeit
-from .Tree import Tree, Node
 
+from .Tree import Tree, Node
 from .LoadData.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex
 
 def potential_cells(p, cell, vert_dict, edge_dict):
+    """! @brief Gives the faces(vert/edges) of a cell needed for finding a path from critical cell to critical cell.
+    
+    @param p Dimension of the cell we are looking at (1 if edge, 2 for face).
+    @ param cell The cell we want to get potential faces of.
+    @param vert_dict Dictionary containing all vertices.
+    @param edges_dict Dictionary containing all edges.
+    
+    @return pot_alphas Returns a set of possible next cells.
+    """
     pot_alphas = set()
     if p == 1:
         for ind in cell.indices:
             pot_alphas.add(ind)
-    else:
+    elif p ==2:
         for ind in cell.indices:
             for edge_ind in vert_dict[ind].star["E"]:
                 if edge_dict[edge_ind].indices.issubset(cell.indices):
                     pot_alphas.add(edge_ind)
+    else:
+        raise AssertionError("Unexpected value of p! Should be 1 for edges and 2 for faces, but got:", p)
                     
     return pot_alphas
 
 def ExtractMorseComplex(vert_dict, edge_dict, face_dict, V12, V23, C):
+    """! @brief The function described in Robins et al. 2011, that returns a Morse Complex.
+    
+    @details Loops over all critical edges and faces and follows the paths indicated by the gradient field 
+    that start at each critical cell. This gives the adjacencies of the cells and their paths between each 
+    other, giving us the Morse Complex as well as the Separatrices and thereby represents the surface in 
+    a reduced skelton.
+    
+    @param vert_dict The dictionary containing all vertices.
+    @param edge_dict The dictionary containing all edges.
+    @param face_dict The dictionary containing all faces.
+    @param C The dictionary containing all critical vertices, edges and faces.
+    @param V12 The dictionary containing all pairings between edges and vertices.
+    @param V23 The dictionary containing all pairings between faces and edges.
+    
+    @return initial_complex The initial (unreduced) Morse complex.
+    """
     start_eff = timeit.default_timer()
     
     initial_complex = MorseComplex()

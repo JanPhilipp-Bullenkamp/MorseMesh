@@ -54,6 +54,8 @@ class PriorityQueue(object):
     def pop_key(self,key):
         """! @brief Removes an element from the queue.
         @param key The key of the element to be removed from the queue.
+        
+        @return The function value of the key that is popped.
         """
         for i, tup in enumerate(self.queue):
             if tup[0] == key:

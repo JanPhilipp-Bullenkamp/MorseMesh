@@ -1,3 +1,19 @@
+##
+# @file ProcessLowerStars.py
+#
+# @brief Contains the ProcessLowerStars function described in Robins et al. (DOI: 10.1109/TPAMI.2011.95)
+# https://www.researchgate.net/publication/51131057_Theory_and_Algorithms_for_Constructing_Discrete_Morse_Complexes_from_Grayscale_Digital_Images
+#
+# @section libraries_ProcessLowerStars Libraries/Modules
+# - numpy standard library
+# - collections standard library
+#   - need Counter and deque
+# - timeit standard library
+#   - timing functions
+# - PriorityQueue module (local)
+#   - PriorityQueue
+
+#Imports
 from .PriorityQueue import PriorityQueue
 
 import numpy as np
@@ -5,6 +21,16 @@ import timeit
 from collections import Counter, deque
 
 def lower_star(vertex, edges_dict, faces_dict):
+    """! @brief Extracts the lower star of a vertex.
+    @details Contains the vertex and all edges and faces with lower function values than the vertex.
+    
+    @param vertex The vertex we want to get the lower star of.
+    @param edges_dict Dictionary containing all edges.
+    @param faces_dict Dictionary containing all faces.
+    
+    @return lower_star A dictionary containing the keys 'vertex', 'edges' and 'faces' which each
+    contain key value pairs of index and function values. The edges and faces are sorted by function values.
+    """
     # x a vertex
     # data star is list of heights and indices of all cells having x as subset
     
@@ -28,6 +54,15 @@ def lower_star(vertex, edges_dict, faces_dict):
     return lower_star
 
 def num_unpaired_faces(face, PQzero, edges_dict, faces_dict):
+    """! @brief Gives the number of unpaired faces of a face, so the number of edges of a face that are not paired.
+    
+    @param face The face we want to get the number of unpaired faces of.
+    @param PQzero The Priority Queue with 0 unpaired faces.
+    @param edges_dict The dictionary containing all edges.
+    @param faces_dict The dictionary containing all faces.
+    
+    @return number Returns the number of faces (edges) of a face (triangle) that have not been paired.
+    """
     # checks number of faces in PQzero ( should be equal to number of unpaired faces in lower star, 
     # since all edges from lower star go to PQzero or are paired/ added to C and removed from PQzero)
     number = 0
@@ -38,12 +73,36 @@ def num_unpaired_faces(face, PQzero, edges_dict, faces_dict):
     return number
 
 def pair(face, PQzero, edges_dict, faces_dict):
+    """! @brief Returns a pair of face and edge.
+    
+    @param face The face that should be paired (which has exactly one unpaired face).
+    @param PQzero The Priority Queue with 0 unpaired faces.
+    @param edges_dict The dictionary containing all edges.
+    @param faces_dict The dictionary containing all faces.
+    
+    @return key, PQzero.pop_key(key) A tuple of the edge that is paired with this face and the function value of the edge.
+    """
     for key in PQzero.keys():
         if len(edges_dict[key].indices) ==2:
             if (edges_dict[key].indices).issubset(faces_dict[face].indices):
                 return key, PQzero.pop_key(key)
 
 def ProcessLowerStars(vertices_dict, edges_dict, faces_dict, C, V12, V23):
+    """! @brief The function described in Robins et al. 2011, that returns a discrete gradient vector field.
+    
+    @details Loops over all vertices, calculates their lower stars and pairs up as many edge-vertex (V12) or 
+    face-edge (V23) pairs as possible. Simplices that cannot be paired will become critical simplices and 
+    are stored in C.
+    
+    @param vertices_dict The dictionary containing all vertices.
+    @param edges_dict The dictionary containing all edges.
+    @param faces_dict The dictionary containing all faces.
+    @param C The dictionary that will store all critical vertices, edges and faces.
+    @param V12 The dictionary that will store pairings between edges and vertices.
+    @param V23 The dictionary that will store pairings between faces and edges.
+    
+    @return Updated C, V12 and V23.
+    """
     start_eff = timeit.default_timer()
     
     for vertex in vertices_dict.values():
