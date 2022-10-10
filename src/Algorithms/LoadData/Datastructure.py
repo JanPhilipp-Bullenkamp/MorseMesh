@@ -217,7 +217,7 @@ class CritEdge:
     @details Stores the indices, function values and edge-index of a critical edge. Further 
     contains a list with minima and a list with maxima (critical vertices and faces) 
     connected to this critical edge (.connected_minima and .connected_maxima). Also contains
-    a paths dictionary (.paths) (?needed for MorseComplex computations?).
+    a paths list containing the separatrices starting here.
     """
     ## @var indices
     # The indices representing the original edge that now becomes a critical edge.
@@ -232,8 +232,7 @@ class CritEdge:
     # A list with maxima (critical faces) which are connected to this critical edge
     # via separatrices.
     ## @var paths
-    # A dictionary used in MorseComplex computation, to create the breadth first search
-    # to find the critical vertices that are connected to this edge.
+    # List of separatrices to the connected Minima
     
     def __init__(self, edge):
         """! The Constructor of a CritEdge.
@@ -247,7 +246,26 @@ class CritEdge:
         self.connected_minima = []
         self.connected_maxima = []
         
-        self.paths = {}
+        self.paths = []
+        
+    def get_separatrices_to_min(self, minimum):
+        sepa_to_min = []
+        for sep in self.paths():
+            if sep.destination == minimum:
+                sepa_to_min.append(sep)
+        if len(sepa_to_min) == 0:
+            raise AssertionError("Unexpected length of list. Should be at least one separatrix to this minimum here, but got None.")
+        else:
+            return sepa_to_min
+    
+    def remove_connected_minima(self, minimum):
+        self.connected_minima = [elt for elt in self.connected_minima if elt != minimum]
+    
+    def update_paths_from_old_to_new_minimum(self, old_minimum, new_minimum, path_to_be_added):
+        for sep in self.paths:
+            if sep.destination == old_minimum:
+                sep.extend_to_new_destination(new_minimum, path_to_be_added)
+                self.connected_minima.append(new_minimum)
         
     def __str__(self):
         """! Retrieves the index of the critical edge.
@@ -260,8 +278,7 @@ class CritFace:
     
     @details Stores the indices, function values and face-index of a critical face. 
     Further contains a list with saddles (critical edges) connected to this critical 
-    vertex (.connected_saddles) and a paths dictionary (.paths) (?needed for 
-    MorseComplex computations?).
+    vertex (.connected_saddles) and a paths list containing the separatrices starting here.
     """
     ## @var indices
     # The indices representing the original face that now becomes a critical face.
@@ -273,8 +290,7 @@ class CritFace:
     # A list with saddles (critical edges) which are connected to this critical face
     # via separatrices.
     ## @var paths
-    # A dictionary used in MorseComplex computation, to create the breadth first search
-    # to find the critical edges that are connected to this face.
+    # List of Separatrices to the connected saddles.
     
     def __init__(self, face):
         """! The Constructor of a CritFace.
@@ -287,7 +303,26 @@ class CritFace:
         
         self.connected_saddles = []
         
-        self.paths = {}
+        self.paths = []
+        
+    def get_separatrices_to_sad(self, saddle):
+        sepa_to_sad = []
+        for sep in self.paths():
+            if sep.destination == saddle:
+                sepa_to_sad.append(sep)
+        if len(sepa_to_min) == 0:
+            raise AssertionError("Unexpected length of list. Should be at least one separatrix to this saddle here, but got None.")
+        else:
+            return sepa_to_sad
+        
+    def remove_connected_saddles(self, saddle):
+        self.connected_saddles = [elt for elt in self.connected_saddles if elt != saddle]
+        
+    def remove_separatrices_and_connected_saddle_to_saddle(self, saddle):
+        for sep in self.paths:
+            if sep.destination == saddle:
+                self.paths.remove(sep)
+        self.connected_saddles = [elt for elt in self.connected_saddles if elt != saddle]
         
     def __str__(self):
         """! Retrieves the index of the critical face.
@@ -316,7 +351,7 @@ class Separatrix:
     ## @var separatrix_persistence 
     # A float that gives a measure of importance for this separatrix.
     
-    def __init__(self, origin, destination, dimension, path, separatrix_persistence):
+    def __init__(self, origin, destination, dimension, path, separatrix_persistence = None):
         """! The Constructor of a Separatrix.
         @param origin The higher dimensional critical simplex where this separatrix starts from.
         @param destination The lower dimensional critical simplex where this separatrix is going to.
@@ -342,6 +377,22 @@ class Separatrix:
         
         # float
         self.separatrix_persistence = separatrix_persistence
+        
+    def set_separatrix_persistence(self, separatrix_persistence):
+        """! @brief Adds the separatrix persistence for this separatrix.
+        @param separatrix_persistence A float that gives a measure of importance for this separatrix.
+        """
+        self.separatrix_persistence = separatrix_persistence
+        
+    def from_to(self):
+        """! @brief Gives origin and destination of the separatrix.
+        @return origin, destination of the separatrix.
+        """
+        return self.origin, self.destination
+        
+    def extend_to_new_destination(self, new_destination, path_to_be_added):
+        self.destination = new_destination
+        self.path + path_to_be_added
         
     def __str__(self):
         """! Retrieves information on this separatrix.

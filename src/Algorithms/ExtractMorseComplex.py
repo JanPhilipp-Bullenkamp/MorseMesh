@@ -18,7 +18,7 @@ import numpy as np
 import timeit
 
 from .Tree import Tree, Node
-from .LoadData.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex
+from .LoadData.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex, Separatrix
 
 def potential_cells(p, cell, vert_dict, edge_dict):
     """! @brief Gives the faces(vert/edges) of a cell needed for finding a path from critical cell to critical cell.
@@ -145,10 +145,11 @@ def ExtractMorseComplex(vert_dict, edge_dict, face_dict, V12, V23, C):
                 path.append(itnode.data)
                 path.append(C_index)
                 face = path[0]
-                if face not in crit_cell.paths.keys():
-                    crit_cell.paths[face] = path[::-1]
-                else:
-                    crit_cell.paths[face] = [crit_cell.paths[face], path[::-1]]
+                crit_cell.paths.append(Separatrix(origin=crit_cell, destination=face, dimension=p, path=path[::-1]))
+                #if face not in crit_cell.paths.keys():
+                #    crit_cell.paths[face] = path[::-1]
+                #else:
+                #    crit_cell.paths[face] = [crit_cell.paths[face], path[::-1]]
                 
             if p == 1:
                 initial_complex.CritEdges[C_index] = crit_cell
