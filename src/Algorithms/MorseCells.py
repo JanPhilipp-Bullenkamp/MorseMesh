@@ -14,37 +14,20 @@ def get_boundary(MorseComplex, edge_dict, face_dict):
     for vert_ind in MorseComplex.CritVertices.keys():
         bd_points.add(vert_ind)
     for edge in MorseComplex.CritEdges.values():
-        minima = Counter(edge.connected_minima)
-        for mini, nb in minima.items():
-            if nb == 1:
-                for count, elt in enumerate(edge.paths[mini]):
-                    # only need to add edge indices, cause the vertices in between are alread considered then
-                    if count%2 == 0:
-                        bd_points.update(edge_dict[elt].indices)
-            if nb == 2:
-                for i in range(2):
-                    for count, elt in enumerate(edge.paths[mini][i]):
-                        # only need to add edge indices, cause the vertices in between are alread considered then
-                        if count%2 == 0:
-                            bd_points.update(edge_dict[elt].indices)
+        for minimal_sepa in edge.paths:
+            for count, elt in enumerate(minimal_sepa.path):
+                # only need to add edge indices, cause the vertices in between are alread considered then
+                if count%2 == 0:
+                    bd_points.update(edge_dict[elt].indices)
                         
     # only add faces of the path, as edges should be contained that way already
     '''new: only one of the faces added as bd'''
     for face in MorseComplex.CritFaces.values():
-        saddles = Counter(face.connected_saddles)
-        for sad, nb in saddles.items():
-            if nb==1:
-                for count, elt in enumerate(face.paths[sad]):
-                    if count%2 == 0: # add all faces
-                        ''' old: bd_points.update(face_dict[elt].indices)'''
-                        bd_points.add(next(iter(face_dict[elt].indices)))
-            if nb==2:
-                for i in range(2):
-                    for count, elt in enumerate(face.paths[sad][i]):
-                        if count%2 == 0: # add all faces
-                            ''' old: bd_points.update(face_dict[elt].indices)'''
-                            bd_points.add(next(iter(face_dict[elt].indices)))
-                        
+        for maximal_sepa in face.paths:
+            for count, elt in enumerate(maximal_sepa.path):
+                if count%2 == 0: # add all faces
+                    ''' old: bd_points.update(face_dict[elt].indices)'''
+                    bd_points.add(next(iter(face_dict[elt].indices)))
     return bd_points                
 
 def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborhood=True):
@@ -98,7 +81,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
                 
             cell_counter += 1
             
-    
+    '''
     while len(boundary_points) != 0:
         rem_bd = set()
         for left in boundary_points:
@@ -118,9 +101,9 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
             
         for elt in rem_bd:
             boundary_points.remove(elt)
-            
-    #print("Bd pts",len(boundary_points))
-    #write_overlay_bd(visited_bd, vert_dict, "test_bd_pts")
+      '''      
+    print("Bd pts",len(boundary_points))
+    write_overlay_bd(visited_bd, vert_dict, "../../Data/test_bd_pts")
     end_time = timeit.default_timer() -start_time
     print("Time get MorseCells for ", MorseComplex.persistence,"persistence: ", end_time)
     

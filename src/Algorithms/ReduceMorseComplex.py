@@ -39,210 +39,116 @@ def get_closest_extremum(crit_edge, vert_dict, face_dict):
         return closest, dim, distance
     else: 
         return None
-    
-def compute_min_sad_persistence(path, vert_dict, edge_dict):
-    distances = []
-    for i, elt in enumerate(path):
-        if i%2 == 0:
-            distances.append(edge_dict[elt].fun_val[0])
-        elif i%2 == 1:
-            distances.append(vert_dict[elt].fun_val)
-    return sum(distances)/len(distances)
-
-def compute_max_sad_persistence(path, edge_dict, face_dict):
-    distances = []
-    for i, elt in enumerate(path):
-        if i%2 == 0:
-            distances.append(face_dict[elt].fun_val[0])
-        elif i%2 == 1:
-            distances.append(edge_dict[elt].fun_val[0])
-    return sum(distances)/len(distances)
             
 # saddle and minimum given as CritEdge and CritVertex objects
-def cancel_one_critical_pair_min(saddle, minimum, MorseComplex, vert_dict, edge_dict):
+def cancel_one_critical_pair_min(saddle, minimum, MorseComplex, vert_dict, edge_dict, face_dict):
     """
     Cancels a saddle and minimum pair of the MorseComplex
         saddle: a CritEdge object
         minimum: a CritVertex object
         MorseComplex: a MorseComplex object, that will be changed accordingly
     """
-    #list of the maximal function values connected to saddle that is about to be cancelled
-    #we require the minimum of this list for separatrix persistence later
-    #maximal_values_list = []
-    # cut paths between old saddle and its connected maxima, as we cancel the saddle
-    # saddle can be twice in the connection list, but paths would be stored under one key only,
-    # therefore pop key and both will be removed (need None argument for second iteration)
+    # remove saddle from connected faces
+    MorseComplex.remove_edge_from_face_connections_and_delete_sepas(saddle.index)
+    
+    # remove separatrices with destination saddle
     for conn_max in saddle.connected_maxima:
-        #maximal_values_list.append(MorseComplex.CritFaces[conn_max].fun_val[0])
-        MorseComplex.CritFaces[conn_max].remove_separatrices_and_connected_saddle_to_saddle(saddle.index)
+        MorseComplex.remove_separatrix_from_face_to_edge(conn_max, saddle.index)
         
-    # find new saddles and minima:
-    new_saddles = []
+    # find new saddles and minimmum (can only be one minimum, 
+    # since saddle can only connect to one vert twice or two vert once
+    # and one vert already is the minimum to be cancelled
+    new_saddles = set()
     for conn_sad in minimum.connected_saddles:
         if conn_sad != saddle.index:
-            new_saddles.append(conn_sad)
-    new_minima = []
+            new_saddles.add(conn_sad)
+    new_minimum = None
     for conn_min in saddle.connected_minima:
         if conn_min != minimum.index:
-            new_minima.append(conn_min)
+            new_minimum = conn_min
             
-    # save original path for separatrix persistence for later:
-    # (should be only one separatrix stored in paths list, so take [0] and access path of separatrix object
-    original_path = saddle.paths[0].path
-    minimal_line_persistence = compute_min_sad_persistence(original_path, vert_dict, edge_dict)
-    
-    minimal_line = Separatrix(saddle.index, minimum.index, 1, original_path, minimal_line_persistence)
-    MorseComplex.Separatrices.append(tuple((minimal_line_persistence, minimal_line)))
-    
-    # save the inverted path between sadle and minimum:
-    # reverse path and remove first and last elt (min and saddle otherwise duplicated)
-    inverted_cropped_path = saddle.paths[0].path[1:-1][::-1]
-    
-    new_saddles_counts = Counter(new_saddles)
-    new_minima_counts = Counter(new_minima)
-    for new_sad, nb_sad in new_saddles_counts.items():
-        # save separatrices from new saddle to old minimum 
-        # (want to pop the minimum from the new saddle paths afterwards)
-        new_saddle_to_old_min = MorseComplex.CritEdges[new_sad].get_separatrices_to_min(minimum.index)
-        
-        # remove all instances of minimum from new saddles connections and paths
-        MorseComplex.CritEdges[new_sad].remove_connected_minima(minimum.index)
+    # sanity check (should have found the new minimum)
+    if new_minimum == None:
+        raise ValueError('Did not find the new minimum to connect to! Shouldnt happen.')
             
-        # now loop over new minima to connect new paths and remove saddle from new min connections
-        for new_min, nb_min in new_minima_counts.items():
-            # nb_min should be one, as the saddle can only connect to two minima, or one minimum twice 
-            # and one is the one we want to cancel to, so it should be one path two 2 minima
-            if nb_min == 1:
-                # extends all paths from new sad to old min to now extend to the new min (also adds to the connected_minima
-                MorseComplex.CritEdges[new_sad].update_paths_from_old_to_new_minimum(minimum.index, new_min, inverted_cropped_path + saddle.paths[0].path)
-                                                                                     
-                if nb_sad == 1:
-                    MorseComplex.CritVertices[new_min].connected_saddles.append(new_sad)
-                    
-                # new saddle had 2 connections to old min, therefore also 2 conn to new min
-                elif nb_sad == 2:
-                    # add to connection twice
-                    for k in range(nb_sad):
-                        MorseComplex.CritVertices[new_min].connected_saddles.append(new_sad)
-            else:
-                print("Saddle should only be able to connect to two minima or one minimum twice!")
-                raise RuntimeError
+    # find separatrix to be cancelled
+    cancel_separatrix = None
+    for sepa in saddle.paths:
+        if sepa.destination == minimum.index:
+            cancel_separatrix = sepa
     
-    # needs to be put out if the new saddles loop, otherwise repeated for each sadddle
-    for new_min, nb_min in new_minima_counts.items():
-        for j in range(nb_min):
-            MorseComplex.CritVertices[new_min].connected_saddles.remove(saddle.index)
-                
+    # add separatrix to MorseComplex with separatrix persistence
+    # store reverse path with removed crit cells (otherwise duplicated)
+    if cancel_separatrix != None:
+        inverted_cropped_path = cancel_separatrix.path[1:-1][::-1]
+        MorseComplex.add_separatrix_and_calculate_persistence(cancel_separatrix, vert_dict, edge_dict, face_dict)
+    else:
+        raise ValueError('Did not find the separatrix to be cancelled! Shouldnt happen.')
+    
+    # path to be added: inverted path from old_min to old_sad + path from old_sad to new min
+    path_old_sad_new_min = MorseComplex.get_single_path_from_edge_to_vert(saddle.index, new_minimum)
+    path_to_be_added = inverted_cropped_path + path_old_sad_new_min
+    
+    # reconnect from new sads to new min and add to connections
+    MorseComplex.extend_new_sads_to_new_min(minimum.index, new_saddles, new_minimum, path_to_be_added)
+    
+    # remove old sad and old min from connections of new sads and new mins
+    MorseComplex.remove_edge_from_vert_connections(saddle.index)
+    MorseComplex.remove_vert_from_edge_connections(minimum.index)
+    
     # now pop old saddle and old min from complex, as they have been cancelled and reconnected:
-    MorseComplex.CritEdges.pop(saddle.index)
-    MorseComplex.CritVertices.pop(minimum.index)
+    MorseComplex.pop_edge(saddle.index)
+    MorseComplex.pop_vert(minimum.index)
     
     return MorseComplex
 
 
-def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, edge_dict, face_dict):
+def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, vert_dict, edge_dict, face_dict):
     """
     Cancels a saddle and maximum pair of the MorseComplex
         saddle: a CritEdge object
         maximum: a CritFace object
         MorseComplex: a MorseComplex object, that will be changed accordingly
     """
-    #list of the minimal function values connected to saddle that is about to be cancelled
-    #we require the maximum of this list for separatrix persistence later
-    #minimal_values_list = []
-    # cut paths between old saddle and its connected minima, as we cancel the saddle
-    # saddle can be twice in the connection list
-    for conn_min in saddle.connected_minima:
-        #minimal_values_list.append(MorseComplex.CritVertices[conn_min].fun_val)
-        MorseComplex.CritVertices[conn_min].connected_saddles.remove(saddle.index)
+    # remove saddle from connected vertices 
+    # (dont have to remove sepa from sad to vert, as this sad will be cancelled anyways)
+    MorseComplex.remove_edge_from_vert_connections(saddle.index)
         
     # find new saddles and maxima:
-    new_saddles = []
-    for conn_sad in maximum.connected_saddles:
-        if conn_sad != saddle.index:
-            new_saddles.append(conn_sad)
-    new_maxima = []
+    # store separatrices to new saddles and set of indices for new maxmima
+    new_saddles_sepa_set = set()
+    for sepa in maximum.paths:
+        if sepa.destination != saddle.index:
+            new_saddles_sepa_set.add(sepa)
+    new_maxima = set()
     for conn_max in saddle.connected_maxima:
         if conn_max != maximum.index:
-            new_maxima.append(conn_max)
+            new_maxima.add(conn_max)
             
-    # save original path for separatrix persistence for later:
-    original_path = maximum.paths[saddle.index]
-    maximal_line_persistence = compute_max_sad_persistence(original_path, edge_dict, face_dict)
+    # find separatrix to be cancelled
+    cancel_separatrix = None
+    for sepa in maximum.paths:
+        if sepa.destination == saddle.index:
+            cancel_separatrix = sepa
     
-    maximal_line = Separatrix(maximum.index, saddle.index, 2, original_path, maximal_line_persistence)
-    MorseComplex.Separatrices.append(tuple((maximal_line_persistence, maximal_line)))
-    
-    # save the inverted path between sadle and maximum:
-    # reverse path and remove first and last elt (max and saddle otherwise duplicated)
-    inverted_cropped_path = maximum.paths[saddle.index][1:-1][::-1]
-    
-    new_saddles_counts = Counter(new_saddles)
-    new_maxima_counts = Counter(new_maxima)
-    for new_max, nb_max in new_maxima_counts.items():
-        # save paths from new maximum to saddle 
-        # (want to pop the saddle from the new max paths afterwards)
-        new_max_paths = MorseComplex.CritFaces[new_max].get_separatrices_to_sad(saddle.index)
-        
-        # remove all instances of saddle from new max connections and paths
-        for i in range(nb_max):
-            MorseComplex.CritFaces[new_max].connected_saddles.remove(saddle.index)
-            MorseComplex.CritFaces[new_max].paths.pop(saddle.index, None)
+    # add separatrix to MorseComplex with separatrix persistence
+    # store reverse path with removed crit cells (otherwise duplicated)
+    if cancel_separatrix != None:
+        inverted_cropped_path = cancel_separatrix.path[1:-1][::-1]
+        MorseComplex.add_separatrix_and_calculate_persistence(cancel_separatrix, vert_dict, edge_dict, face_dict)
+    else:
+        raise ValueError('Did not find the separatrix to be cancelled! Shouldnt happen.')
             
-        # now loop over new saddles to connect new paths and remove maximum from new saddle connections
-        for new_sad, nb_sad in new_saddles_counts.items():
-            # need cases:
-            # 1. one path new_max-old_sad and one path old_max-new_sad
-            # 2. two paths new_max-old_sad and one path old_max-new_sad
-            # 3. one path new_max-old_sad and two paths old_max-new_sad
-            # 4. two paths new_max-old_sad and two paths old_max-new_sad
-            if nb_sad == 1 and nb_max == 1:
-                MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
-                MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
-                if new_sad not in MorseComplex.CritFaces[new_max].paths.keys():
-                    MorseComplex.CritFaces[new_max].paths[new_sad] = new_max_paths + inverted_cropped_path + maximum.paths[new_sad]
-                else:
-                    MorseComplex.CritFaces[new_max].paths[new_sad] = [MorseComplex.CritFaces[new_max].paths[new_sad], new_max_paths + inverted_cropped_path + maximum.paths[new_sad]]
-                
-            elif nb_sad == 1 and nb_max == 2:
-                for p in range(2):
-                    MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
-                    MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
-                # add two paths: first part from new_max to saddle is different
-                MorseComplex.CritFaces[new_max].paths[new_sad] = [new_max_paths[0] + inverted_cropped_path + maximum.paths[new_sad], new_max_paths[1] + inverted_cropped_path + maximum.paths[new_sad]]
-                
-            elif nb_sad == 2 and nb_max == 1:
-                for p in range(2):
-                    MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
-                    MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
-                # add two paths: last part from max to new_sad is different
-                MorseComplex.CritFaces[new_max].paths[new_sad] = [new_max_paths + inverted_cropped_path + maximum.paths[new_sad][0], new_max_paths + inverted_cropped_path + maximum.paths[new_sad][1]]
-                
-            elif nb_sad == 2 and nb_max == 2:
-                '''
-                ! We reduce this case!
-                instead of the 4 possibilities, we only take two (should topologically be equal, due to mod 2 or so ? 
-                Problem for all 4 would be the paths, as we store them such that we expect max 2 paths between two critical simplices
-                '''
-                for p in range(2):
-                    MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
-                    MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
-                # add two paths: last part from max to new_sad and first part from new_max to sad are different,
-                # we take one of each to reduce the cases from 4 to 2
-                MorseComplex.CritFaces[new_max].paths[new_sad] = [new_max_paths[0] + inverted_cropped_path + maximum.paths[new_sad][0], new_max_paths[1] + inverted_cropped_path + maximum.paths[new_sad][1]]
-                
-            else:
-                print("More than 2 paths between new_max and saddle or max and new_saddle, shouldnt be possible!")
-                #raise RuntimeError
-                
-    # needs to be put out of new_max loop, otherwise repeated to often
-    for new_sad, nb_sad in new_saddles_counts.items():
-        for j in range(nb_sad):
-            MorseComplex.CritEdges[new_sad].connected_maxima.remove(maximum.index)
-                
+    # reconnect from new maxs to new sads and add to connections
+    MorseComplex.extend_new_maxs_to_new_sads(saddle.index, new_maxima, new_saddles_sepa_set, inverted_cropped_path)
+            
+    # remove old max and old sad from connections of new maxs and new sads
+    MorseComplex.remove_face_from_edge_connections(maximum.index)
+    MorseComplex.remove_edge_from_face_connections_and_delete_sepas(saddle.index)    
+    
     # now pop old saddle and old min from complex, as they have been cancelled and reconnected:
-    MorseComplex.CritEdges.pop(saddle.index)
-    MorseComplex.CritFaces.pop(maximum.index)
+    MorseComplex.pop_edge(saddle.index)
+    MorseComplex.pop_face(maximum.index)
     
     return MorseComplex
             
@@ -268,9 +174,9 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
             closest, dim, dist = check
             if dist <= CancelPairs.check_distance():
                 if dim == 0:
-                    redMorseComplex = cancel_one_critical_pair_min(saddle, redMorseComplex.CritVertices[closest], redMorseComplex, vert_dict, edge_dict)
+                    redMorseComplex = cancel_one_critical_pair_min(saddle, redMorseComplex.CritVertices[closest], redMorseComplex, vert_dict, edge_dict, face_dict)
                 elif dim == 2:
-                    redMorseComplex = cancel_one_critical_pair_max(saddle, redMorseComplex.CritFaces[closest], redMorseComplex, edge_dict, face_dict)
+                    redMorseComplex = cancel_one_critical_pair_max(saddle, redMorseComplex.CritFaces[closest], redMorseComplex, vert_dict, edge_dict, face_dict)
             else:
                 CancelPairs.insert(tuple((dist, obj_id, saddle)))
     

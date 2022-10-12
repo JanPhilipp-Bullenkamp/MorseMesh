@@ -17,6 +17,9 @@
 # - Separatrix
 # - MorseComplex
 
+#Imports
+from copy import deepcopy
+
 
 class Vertex:
     """! @brief Vertex class used for normal vertices and their properties.
@@ -250,7 +253,7 @@ class CritEdge:
         
     def get_separatrices_to_min(self, minimum):
         sepa_to_min = []
-        for sep in self.paths():
+        for sep in self.paths:
             if sep.destination == minimum:
                 sepa_to_min.append(sep)
         if len(sepa_to_min) == 0:
@@ -307,7 +310,7 @@ class CritFace:
         
     def get_separatrices_to_sad(self, saddle):
         sepa_to_sad = []
-        for sep in self.paths():
+        for sep in self.paths:
             if sep.destination == saddle:
                 sepa_to_sad.append(sep)
         if len(sepa_to_min) == 0:
@@ -315,14 +318,53 @@ class CritFace:
         else:
             return sepa_to_sad
         
+    def get_single_separatrix_path_to_sad(self, saddle):
+        sepa_to_sad = []
+        for sep in self.paths:
+            if sep.destination == saddle:
+                sepa_to_sad.append(sep)
+        if len(sepa_to_sad) != 1:
+            raise AssertionError("Unexpected length of list. Should be exactly one separatrix to this saddle here, but got:", len(sepa_to_min))
+        else:
+            return sepa_to_sad[0].path
+    
+    def get_all_separatrices_except_sad_to_cancel(self, saddle):
+        sepa_to_new_sad = []
+        check_cancel = False
+        for sep in self.paths:
+            if sep.destination != saddle:
+                sepa_to_new_sad.append(sep)
+            elif sep.destination == saddle:
+                check_cancel = True
+        if not check_cancel:
+            raise AssertionError("The saddle to be cancelled with this max, is not found in the separatrices!")
+        else:
+            return sepa_to_new_sad
+        
     def remove_connected_saddles(self, saddle):
         self.connected_saddles = [elt for elt in self.connected_saddles if elt != saddle]
         
-    def remove_separatrices_and_connected_saddle_to_saddle(self, saddle):
+    def remove_separatrices_and_connected_saddle(self, saddle):
         for sep in self.paths:
             if sep.destination == saddle:
                 self.paths.remove(sep)
-        self.connected_saddles = [elt for elt in self.connected_saddles if elt != saddle]
+        self.remove_connected_saddles(saddle)
+        
+    def update_paths_from_old_to_new_saddles(self, old_saddle, new_saddles_sepa_list, flipped_cancellation_path):
+        for sepa in self.paths:
+            if sepa.destination == old_saddle:
+                for new_sad_sep in new_saddles_sepa_list:
+                    sep = deepcopy(sepa)
+                    
+                    new_destination = new_sad_sep.destination
+                    path_to_be_added = flipped_cancellation_path + new_sad_sep.path
+                    
+                    sep.extend_to_new_destination(new_destination, path_to_be_added)
+                    self.paths.append(sep)
+                    self.connected_saddles.append(new_destination)
+                self.paths.remove(sepa)
+                #self.connected_saddles.remove(old_saddle)
+        self.connected_saddles = [elt for elt in self.connected_saddles if elt != old_saddle]
         
     def __str__(self):
         """! Retrieves the index of the critical face.
@@ -383,6 +425,27 @@ class Separatrix:
         @param separatrix_persistence A float that gives a measure of importance for this separatrix.
         """
         self.separatrix_persistence = separatrix_persistence
+        
+    def calculate_separatrix_persistence(self, vert_dict, edge_dict, face_dict):
+        distances = []
+        
+        if self.dimension == 1:
+            for i, elt in enumerate(self.path):
+                if i%2 == 0:
+                    distances.append(edge_dict[elt].fun_val[0])
+                elif i%2 == 1:
+                    distances.append(vert_dict[elt].fun_val)
+        elif self.dimension == 2:
+            for i, elt in enumerate(self.path):
+                if i%2 == 0:
+                    distances.append(face_dict[elt].fun_val[0])
+                elif i%2 == 1:
+                    distances.append(edge_dict[elt].fun_val[0])
+        else:
+            raise ValueError('Dimension must be 1 (minimal line) or 2 (maximal line)!')
+            
+        self.separatrix_persistence = sum(distances)/len(distances)
+        return sum(distances)/len(distances)
         
     def from_to(self):
         """! @brief Gives origin and destination of the separatrix.
@@ -457,6 +520,73 @@ class MorseComplex:
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
         
+    def remove_edge_from_vert_connections(self, edge):
+        for vert in self.CritEdges[edge].connected_minima:
+            self.CritVertices[vert].connected_saddles.remove(edge)
+            
+    def remove_vert_from_edge_connections(self, vert):
+        for edge in self.CritVertices[vert].connected_saddles:
+            self.CritEdges[edge].connected_minima.remove(vert)
+            
+    def remove_face_from_edge_connections(self, face):
+        for edge in self.CritFaces[face].connected_saddles:
+            self.CritEdges[edge].connected_maxima.remove(face)
+            
+    def remove_edge_from_face_connections_and_delete_sepas(self, edge):
+        for face in self.CritEdges[edge].connected_maxima:
+            self.CritFaces[face].connected_saddles.remove(edge)
+            for sep in self.CritFaces[face].paths:
+                if sep.destination == edge:
+                    self.CritFaces[face].paths.remove(sep)
+            
+    def remove_separatrix_from_face_to_edge(self, face, edge):
+        for sepa in self.CritFaces[face].paths:
+            if sepa.destination == edge:
+                self.CritFaces[face].paths.remove(sepa)
+        
+    def remove_separatrix_from_edge_to_vert(self, edge, vert):
+        for sepa in self.CritEdges[edge].paths:
+            if sepa.destination == vert:
+                self.CritEdges[edge].paths.remove(sepa)
+        
+    def pop_vert(self, vert):
+        self.CritVertices.pop(vert)
+        
+    def pop_edge(self, edge):
+        self.CritEdges.pop(edge)
+        
+    def pop_face(self, face):
+        self.CritFaces.pop(face)
+        
+    def add_separatrix_and_calculate_persistence(self, separatrix, vert_dict, edge_dict, face_dict):
+        sepa_pers = separatrix.calculate_separatrix_persistence(vert_dict, edge_dict, face_dict)
+        self.Separatrices.append(tuple((sepa_pers, separatrix)))
+        
+    def get_single_path_from_edge_to_vert(self, edge, vert):
+        for sep in self.CritEdges[edge].paths:
+            if sep.destination == vert:
+                return sep.path
+            
+    def extend_new_sads_to_new_min(self, old_min, new_saddles_set, new_min, path_to_be_added):
+        for sad in new_saddles_set:
+            for sepa in self.CritEdges[sad].paths:
+                if sepa.destination == old_min:
+                    sepa.extend_to_new_destination(new_min, path_to_be_added)
+                    self.CritEdges[sad].connected_minima.append(new_min)
+                    self.CritVertices[new_min].connected_saddles.append(sad)
+                
+    def extend_new_maxs_to_new_sads(self, old_sad, new_maxs_set, new_saddles_sepa_set, inverted_cancelled_path):
+        for new_max in new_maxs_set:
+            for sepa in self.CritFaces[new_max].paths:
+                if sepa.destination == old_sad:
+                    for last_part_sepa in new_saddles_sepa_set:
+                        new_sepa = deepcopy(sepa)
+                        path_to_be_added = inverted_cancelled_path + last_part_sepa.path
+                        new_sepa.extend_to_new_destination(last_part_sepa.destination, path_to_be_added)
+                        self.CritFaces[new_max].paths.append(new_sepa)
+                        self.CritEdges[last_part_sepa.destination].connected_maxima.append(new_max)
+                        self.CritFaces[new_max].connected_saddles.append(last_part_sepa.destination)
+                    self.CritFaces[new_max].paths.remove(sepa)
         
     def info(self):
         """! @brief Prints out an info block about this Morse Complex."""
