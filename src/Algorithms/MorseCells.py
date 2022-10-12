@@ -3,6 +3,7 @@ import timeit
 from .plot_bdpts import write_overlay_bd
 
 from .weight_metrics import compute_weight_saledge, compute_weight_normals, compute_weight_normalvariance
+from .LoadData.Datastructure import Cell
 '''
 first part: get MorseCells
 second part: get connectivity graph
@@ -18,7 +19,10 @@ def get_boundary(MorseComplex, edge_dict, face_dict):
             for count, elt in enumerate(minimal_sepa.path):
                 # only need to add edge indices, cause the vertices in between are alread considered then
                 if count%2 == 0:
-                    bd_points.update(edge_dict[elt].indices)
+                    #bd_points.update(edge_dict[elt].indices)
+                    for vert in edge_dict[elt].indices:
+                        bd_points.add(vert)
+                        vert.boundary = True
                         
     # only add faces of the path, as edges should be contained that way already
     '''new: only one of the faces added as bd'''
@@ -27,7 +31,8 @@ def get_boundary(MorseComplex, edge_dict, face_dict):
             for count, elt in enumerate(maximal_sepa.path):
                 if count%2 == 0: # add all faces
                     ''' old: bd_points.update(face_dict[elt].indices)'''
-                    bd_points.add(next(iter(face_dict[elt].indices)))
+                    bd_points.add(face_dict[elt].get_max_fun_val_index())
+                    face_dict[elt].get_max_fun_val_index().boundary = True
     return bd_points                
 
 def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborhood=True):
@@ -35,20 +40,25 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
     # boundary_points stored in a set. contains all vert that are either boundary themselves
     # or contained in a boundary edge or face
     boundary_points = get_boundary(MorseComplex, edge_dict, face_dict)
+    #write_overlay_bd(boundary_points, vert_dict, "bd_pts_morsecomplex_thinner")
     
     visited = set()
     visited_bd = set()
-    MorseCells = {}
     # start with label number 1, cause 0 is used for unlabeld points in gigamesh
-    cell_counter = 1
+    label = 1
     for vert_ind, vert in vert_dict.items():
-        if vert_ind in boundary_points or vert_ind in visited:
+        # .boundary is bool, .label is -1 by default and all labels than start at 1
+        # dont want boundary or already labelled component as start
+        if vert.boundary or vert.label != -1:
+        #if vert_ind in boundary_points or vert_ind in visited:
             continue
         else:
-            MorseCells[cell_counter] = {}
-            MorseCells[cell_counter]["neighbors"] = {}  # only required later
-            MorseCells[cell_counter]["boundary"] = set()
-            MorseCells[cell_counter]["set"] = set()
+            MorseComplex.MorseCells[label] = Cell(label)
+            
+            MorseComplex.MorseCells[label] = {}
+            MorseComplex.MorseCells[label]["neighbors"] = {}  # only required later
+            MorseComplex.MorseCells[label]["boundary"] = set()
+            MorseComplex.MorseCells[label]["set"] = set()
             
             queue = set()
             queue.add(vert)
@@ -56,11 +66,20 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
             while len(queue) != 0:
                 # pop one elt from queue
                 queue_elt = queue.pop()
+                queue_elt.label = label
+                queue_elt.boundary = False
                 
                 # add elts to queue if they are not boundary
                 for ind in queue_elt.neighbors:
-                    if ind not in boundary_points and ind not in visited:
+                    if vert_dict[ind].boundary == False and vert_dict[ind].label != -1:
                         queue.add(vert_dict[ind])
+                    elif vert_dict[ind].boundary:
+                        MorseComplex.MorseCells[label]["set"].add(ind)
+                        neighb_labels = vert_dict[ind].has_neighbor_label(vert_dict)
+                        if len(neighb_labels) > 0:
+                            MorseComplex.MorseCells[label]["boundary"].add(ind)
+                            for nei_label in neighb_labels:
+                                MorseComplex.MorseCells[label]["neighbors"][nei_label]
                     elif ind in boundary_points and ind not in visited:
                         MorseCells[cell_counter]["set"].add(ind)
                         MorseCells[cell_counter]["boundary"].add(ind)
@@ -101,9 +120,9 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
             
         for elt in rem_bd:
             boundary_points.remove(elt)
-      '''      
+    '''      
     print("Bd pts",len(boundary_points))
-    write_overlay_bd(visited_bd, vert_dict, "../../Data/test_bd_pts")
+    write_overlay_bd(visited_bd, vert_dict, "test_bd_pts_raw")
     end_time = timeit.default_timer() -start_time
     print("Time get MorseCells for ", MorseComplex.persistence,"persistence: ", end_time)
     
