@@ -121,8 +121,6 @@ class Mesh:
         
         self.maximalReducedComplex = None
         
-        self.MorseCells = {}
-        
         self.Segmentation = {}
         
         self.SegmentationDual = {}

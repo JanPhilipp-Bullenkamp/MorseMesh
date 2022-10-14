@@ -28,9 +28,9 @@ def write_labels_txt_file(label_dict, target_file):
     write_header(f)
     
     # write labels
-    for label, indices in enumerate(label_dict.values()):
+    for label, cell in enumerate(label_dict.values()):
         #if label != "boundary":
-        for index in indices["set"]:
+        for index in cell.vertices:
             f.write(str(index) + " " + str(label+1) + "\n")
             
     f.close()

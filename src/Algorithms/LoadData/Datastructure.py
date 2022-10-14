@@ -93,7 +93,7 @@ class Vertex:
         neighbor_labels = []
         for elt in self.neighbors:
             if vert_dict[elt].label != -1 and vert_dict[elt].label != self.label:
-                neighbor_labels.append(vert_dict[elt].label)
+                neighbor_labels.append([elt, vert_dict[elt].label])
         return neighbor_labels
         
     def __str__(self):
@@ -550,6 +550,24 @@ class MorseComplex:
         """
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
+        
+    def update_cell_vertex_isboundary(self, vert_ind, neighb_label, neighb_vert):
+        # also need to add to Morse Cell:
+        cell_label = self.CritVertices[vert_ind].label
+        self.MorseCells[cell_label].add_neighbor_vertex(vert_ind, neighb_vert, neighb_label)
+        
+    def add_neighboring_cell_labels(self, label1, v1, label2, v2):
+        # create neighbor keys if necessary
+        if label2 not in self.MorseCells[label1].neighbors.keys():
+            self.MorseCells[label1].neighbors[label2] = set()
+        if label1 not in self.MorseCells[label2].neighbors.keys():
+            self.MorseCells[label2].neighbors[label1] = set()
+        # mark the indices as boundary in their cell
+        self.MorseCells[label2].boundary.add(v2)
+        self.MorseCells[label1].boundary.add(v1)
+        # add the indices to the correct neighbor boundary
+        self.MorseCells[label2].neighbors[label1].add(v1)
+        self.MorseCells[label1].neighbors[label2].add(v2)
         
     def remove_edge_from_vert_connections(self, edge):
         for vert in self.CritEdges[edge].connected_minima:
