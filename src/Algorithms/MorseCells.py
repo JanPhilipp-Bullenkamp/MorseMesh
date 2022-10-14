@@ -157,6 +157,12 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
     
     MorseComplex._flag_MorseCells = True
     
+    
+    # need to reset boundary and labels as they are only part of the original mesh class
+    for vertex in vert_dict.values():
+        vertex.boundary = False
+        vertex.label = -1
+    
     end_time = timeit.default_timer() -start_time
     print("Time get MorseCells for ", MorseComplex.persistence,"persistence: ", end_time)
     

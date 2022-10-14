@@ -172,8 +172,7 @@ class Morse(Mesh):
             print("Need to reduce Morse complex to this persistence first...")
             self.ReduceMorseComplex(persistence)
         if not self.reducedMorseComplexes[persistence]._flag_MorseCells:
-            get_MorseCells(self.reducedMorseComplexes[persistence], 
-                                                          self.Vertices, self.Edges, self.Faces)
+            get_MorseCells(self.reducedMorseComplexes[persistence], self.Vertices, self.Edges, self.Faces)
             return self.reducedMorseComplexes[persistence].MorseCells
         else:
             print("MorseCells for the MorseComplex with this persistence have already been calculated!")
