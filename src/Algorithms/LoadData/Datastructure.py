@@ -551,10 +551,12 @@ class MorseComplex:
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
         
-    def update_cell_vertex_isboundary(self, vert_ind, neighb_label, neighb_vert):
-        # also need to add to Morse Cell:
-        cell_label = self.CritVertices[vert_ind].label
-        self.MorseCells[cell_label].add_neighbor_vertex(vert_ind, neighb_vert, neighb_label)
+    def find_active_boundaries(self, boundary_indices, vert_dict):
+        active_boundary = set()
+        for ind in boundary_indices:
+            if vert_dict[ind].boundary:
+                active_boundary.add(ind)
+        return active_boundary
         
     def add_neighboring_cell_labels(self, label1, v1, label2, v2):
         # create neighbor keys if necessary

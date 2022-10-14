@@ -35,7 +35,7 @@ def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
                     vert_dict[face_dict[elt].get_max_fun_val_index()].boundary = True
     return bd_points                
 
-def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborhood=True):
+def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
     start_time = timeit.default_timer()
     if MorseComplex._flag_MorseCells == True:
         print("Morse cells have been computed for this persistence already, but will be overwritten now")
@@ -86,8 +86,9 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
                         
                     # Case 4: label boundary as current label and check surrounding of boundary vert
                     # for other labels (and add the cell connections accordingly)
-                    elif vert_dict[ind].boundary and vert_dict[ind].label != -1:
+                    elif vert_dict[ind].boundary and vert_dict[ind].label == -1:
                         vert_dict[ind].label = label
+                        vert_dict[ind].boundary = False
                         MorseComplex.MorseCells[label].vertices.add(ind)
                         
                         # check surounding for other labels and connect
@@ -100,8 +101,36 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
                 MorseComplex.MorseCells[label].vertices.add(queue_elt.index)
                 
             label += 1
-    
             
+    
+    boundary_points = MorseComplex.find_active_boundaries(boundary_points, vert_dict)
+            
+    for i in range(3):
+        #boundary_points = MorseComplex.find_active_boundaries(boundary_points, vert_dict)
+        for unlabelled_ind in boundary_points:
+            if vert_dict[unlabelled_ind].label != -1:
+                raise ValueError('Should not be possible to have a labelled vertex in the unlabelled bd_pts...')
+            # check neighborhood 1-ring
+            neighb_labels = vert_dict[unlabelled_ind].has_neighbor_label(vert_dict)
+
+            if len(neighb_labels) > 0:
+                # just take the first label (shouldnt matter to much)
+                ind, label = neighb_labels[0]
+
+                MorseComplex.MorseCells[label].vertices.add(unlabelled_ind)
+                vert_dict[unlabelled_ind].boundary = False
+
+                # need to check wether there are other labels as well and add to cell connection if necessary
+                if len(neighb_labels) > 1:
+                    for nei_vert_ind, nei_label in neighb_labels:
+                        if nei_label != -1 and nei_label != label:
+                            MorseComplex.add_neighboring_cell_labels(label, unlabelled_ind, nei_label, nei_vert_ind)
+
+        boundary_points = MorseComplex.find_active_boundaries(boundary_points, vert_dict)
+    
+    if len(boundary_points) > 0:
+        print("Have ",len(boundary_points), " unlabelled boundary points left!")
+           
     '''
     while len(boundary_points) != 0:
         rem_bd = set()
