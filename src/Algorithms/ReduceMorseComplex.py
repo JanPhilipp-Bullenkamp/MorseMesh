@@ -14,30 +14,45 @@ def get_closest_extremum(crit_edge, vert_dict, face_dict):
     for face_ind, nb in face_counter.items():
         # cannot cancel loops, so only if there is a single path we can add the extremum
         if nb==1:
-            # check for valuebale edge-min connections:
-            min_dist = []
-            for elt in crit_edge.connected_minima:
-                min_dist.append(vert_dict[elt].fun_val)
+            # check for valuebale edge-min connections: (currently not needed)
+            ##min_dist = []
+            ##for elt in crit_edge.connected_minima:
+            ##    min_dist.append(vert_dict[elt].fun_val)
+            
             # take absolute value btw the two highest vertices of edge and face respectively
             distances.append(tuple((face_ind, 2, abs(face_dict[face_ind].fun_val[0]-crit_edge.fun_val[0])))) 
+        elif nb > 2:
+            print("face", face_ind, " has ", nb, " conns to ", crit_edge)
                                
     # now add distances to all minima
     vert_counter = Counter(crit_edge.connected_minima)
     for vert_ind, nb in vert_counter.items():
         # cannot cancel loops, so only if there is a single path we can add the extremum
         if nb==1:
-            #check for valuable max-edge connections:
-            max_dist = []
-            for elt in crit_edge.connected_maxima:
-                max_dist.append(face_dict[elt].fun_val[0])
+            #check for valuable max-edge connections: (currently not needed)
+            ##max_dist = []
+            ##for elt in crit_edge.connected_maxima:
+            ##    max_dist.append(face_dict[elt].fun_val[0])
                 
             # take absolute value btw the highest vertex of edge and the value of the vertex
-            distances.append(tuple((vert_ind, 0, abs(crit_edge.fun_val[0]-vert_dict[vert_ind].fun_val)))) 
+            distances.append(tuple((vert_ind, 0, abs(crit_edge.fun_val[0]-vert_dict[vert_ind].fun_val))))
+        elif nb > 2:
+            print("vert", vert_ind, " has ", nb, " conns to ", crit_edge)
             
     if sorted(distances, key=lambda item: item[2]):
         closest, dim, distance = sorted(distances, key=lambda item: item[2])[0] 
+        #print("edge ", crit_edge, " has ", len(sorted(distances, key=lambda item: item[2])), " connections")
+        #for extr, dim2, dist2 in sorted(distances, key=lambda item: item[2]):
+        #    if dim2 == 2:
+        #        if Counter(crit_edge.connected_maxima)[extr] != 1:
+        #            print("extr ", extr, " has ", Counter(crit_edge.connected_maxima)[extr], " conn max")
+        #    if dim2 == 1:
+        #        if Counter(crit_edge.connected_minima)[extr] != 1:
+        #            print("extr ", extr, " has ", Counter(crit_edge.connected_minima)[extr], " conn min")
+        
         return closest, dim, distance
     else: 
+        print("edge ", crit_edge, " had no possible cancellations")
         return None
             
 # saddle and minimum given as CritEdge and CritVertex objects
@@ -140,7 +155,12 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, vert_dict, edge_
         raise ValueError('Did not find the separatrix to be cancelled! Shouldnt happen.')
             
     # reconnect from new maxs to new sads and add to connections
+    start3 = timeit.default_timer()
+    
     MorseComplex.extend_new_maxs_to_new_sads(saddle.index, new_maxima, new_saddles_sepa_set, inverted_cropped_path)
+    time3= timeit.default_timer() - start3
+    if time3 > 1:
+        print("extend new max to sads took: ", time3)
             
     # remove old max and old sad from connections of new maxs and new sads
     MorseComplex.remove_face_from_edge_connections(maximum.index)
@@ -159,7 +179,7 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     
-    # reset Morse cells and Betti numbers 
+    # reset Morse cells and Betti numbers if necessary
     if redMorseComplex._flag_MorseCells:
         redMorseComplex.MorseCells = {}
         redMorseComplex._flag_MorseCells = False
@@ -182,10 +202,14 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
         if check != None:
             closest, dim, dist = check
             if dist <= CancelPairs.check_distance():
+                start2 = timeit.default_timer()
                 if dim == 0:
                     redMorseComplex = cancel_one_critical_pair_min(saddle, redMorseComplex.CritVertices[closest], redMorseComplex, vert_dict, edge_dict, face_dict)
                 elif dim == 2:
                     redMorseComplex = cancel_one_critical_pair_max(saddle, redMorseComplex.CritFaces[closest], redMorseComplex, vert_dict, edge_dict, face_dict)
+                time2= timeit.default_timer() - start2
+                if time2 > 1:
+                    print("Cancel saddle ",saddle, " with ", closest, " took: ", time2)
             else:
                 CancelPairs.insert(tuple((dist, obj_id, saddle)))
     

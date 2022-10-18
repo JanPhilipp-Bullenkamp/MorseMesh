@@ -19,6 +19,7 @@
 
 #Imports
 from copy import deepcopy
+import  timeit
 
 
 class Vertex:
@@ -627,11 +628,16 @@ class MorseComplex:
                     self.CritVertices[new_min].connected_saddles.append(sad)
                 
     def extend_new_maxs_to_new_sads(self, old_sad, new_maxs_set, new_saddles_sepa_set, inverted_cancelled_path):
+        if len(new_maxs_set) != 1:
+            raise AssertionError("The cancelled edge has only two possibilties to be reached from triangles if "
+                                 "the mesh is cleaned. Since one path goes up to the cancelled max, there is only "
+                                 "one other way to go up. Here there were ",len(new_maxs_set), " ways!")
         for new_max in new_maxs_set:
             for sepa in self.CritFaces[new_max].paths:
                 if sepa.destination == old_sad:
                     for last_part_sepa in new_saddles_sepa_set:
-                        new_sepa = deepcopy(sepa)
+                        new_sepa = Separatrix(sepa.origin, sepa.destination, 
+                                               sepa.dimension, sepa.path)
                         path_to_be_added = inverted_cancelled_path + last_part_sepa.path
                         new_sepa.extend_to_new_destination(last_part_sepa.destination, path_to_be_added)
                         self.CritFaces[new_max].paths.append(new_sepa)

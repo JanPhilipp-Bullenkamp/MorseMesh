@@ -31,8 +31,11 @@ def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
             for count, elt in enumerate(maximal_sepa.path):
                 if count%2 == 0: # add all faces
                     ''' old: bd_points.update(face_dict[elt].indices)'''
-                    bd_points.add(face_dict[elt].get_max_fun_val_index())
-                    vert_dict[face_dict[elt].get_max_fun_val_index()].boundary = True
+                    #bd_points.add(face_dict[elt].get_max_fun_val_index())
+                    #vert_dict[face_dict[elt].get_max_fun_val_index()].boundary = True
+                    bd_points.update(face_dict[elt].indices)
+                    for index in face_dict[elt].indices:
+                        vert_dict[index].boundary = True
     return bd_points                
 
 def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
