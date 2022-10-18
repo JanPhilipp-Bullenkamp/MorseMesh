@@ -36,7 +36,7 @@ from src.Algorithms.ReduceMorseComplex import CancelCriticalPairs
 from src.Algorithms.BettiNumbers import BettiViaPairCells
 
 from src.Algorithms.MorseCells import get_MorseCells, create_SalientEdgeCellConnectivityGraph
-from src.Algorithms.SalientEdgeIndices import get_salient_edge_indices, get_salient_edge_indices_dual_thr
+from src.Algorithms.EdgeDetection import get_salient_edge_indices, dual_thresh_edge_detection
 
 from src.Algorithms.PersistenceDiagram import PersistenceDiagram
 
@@ -322,7 +322,9 @@ class Morse(Mesh):
         return self.Segmentation[persistence][thresh][edge_percent]
     
     def SalientEdgeSegmentation_DualThresh(self, persistence, thresh_high, thresh_low,  edge_percent):
-        if persistence not in self.MorseCells.keys():
+        if persistence not in self.reducedMorseComplexes.keys():
+            raise ValueError('No MorseComplex reduced to this persistence!')
+        if not self.reducedMorseComplexes[persistence]._flag_MorseCells:
             raise ValueError('No MorseCell calculated for this persistence!')
         elif not self._flag_SalientEdge:
             print("Need maximally reduced complex for salient edges!")
@@ -448,44 +450,13 @@ class Morse(Mesh):
             write_labels_params_txt_file(self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Cells"], 
                                          filename+"_"+str(persistence)+"P_"+str(thresh_high)+"-"+str(thresh_low)+"T_"+str(edge_percent)+"EP_smallRem",
                                         persistence, thresh_high, thresh_low, edge_percent)
-            
-    def _get_neighbors(self, vert):
-        neighbors_ind = set()
-        for star_edge in vert.star["E"]:
-            neighbors_ind.update(self.Edges[star_edge].indices)
 
-        neighbors_ind.remove(vert.index)
-        return neighbors_ind
-            
     def dual_thresh_edges(self, thresh_high, thresh_low):
-        #self.ReduceMorseComplex(self.range)
-        strong_edge, weak_edge = get_salient_edge_indices_dual_thr(self.maximalReducedComplex, 
-                                                                thresh_high, thresh_low, 
-                                                                self.Vertices, self.Edges, self.Faces)
         
-        queue = []
-        for ind in strong_edge:
-            neighbors = self._get_neighbors(self.Vertices[ind])
-            for nei in neighbors:
-                if nei in weak_edge:
-                    queue.append(nei)
-                    weak_edge.remove(nei)
-                    
-        added = len(queue)
-        for elt in queue:
-            strong_edge.add(elt)
-        
-        while len(queue) != 0:
-            ind = queue.pop(0)
-            neighbors = self._get_neighbors(self.Vertices[ind])
-            for nei in neighbors:
-                if nei in weak_edge:
-                    queue.append(nei)
-                    strong_edge.add(nei)
-                    weak_edge.remove(nei)
-                    added+=1
-        #write_overlay_bd(strong_edge, self.Vertices, "test_"+str(thresh_low)+"-"+str(thresh_high))            
-        #print("Added", added, "points by weak threshold in", thresh_low, thresh_high)
+        strong_edge = dual_thresh_edge_detection(self.maximalReducedComplex, 
+                                                 thresh_high, thresh_low, 
+                                                 self.Vertices, self.Edges, self.Faces)
+        #write_overlay_bd(strong_edge, self.Vertices, "test_"+str(thresh_low)+"-"+str(thresh_high))   
         return strong_edge
     
     def Pipeline(self, infilename, outfilename, quality_index, inverted, 

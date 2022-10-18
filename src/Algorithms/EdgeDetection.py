@@ -1,5 +1,29 @@
 import timeit
 
+def dual_thresh_edge_detection(max_red_MSComplex, thresh_high, thresh_low, vert_dict, edge_dict, face_dict):
+    strong_edge, weak_edge = get_salient_edge_indices_dual_thr(max_red_MSComplex, 
+                                                               thresh_high, thresh_low, 
+                                                               vert_dict, edge_dict, face_dict)
+
+    queue = []
+    for ind in strong_edge:
+        for nei in vert_dict[ind].neighbors and nei != ind:
+            if nei in weak_edge:
+                queue.append(nei)
+                weak_edge.remove(nei)
+
+    for elt in queue:
+        strong_edge.add(elt)
+
+    while len(queue) != 0:
+        ind = queue.pop(0)
+        for nei in vert_dict[ind].neighbors and nei != ind:
+            if nei in weak_edge:
+                queue.append(nei)
+                strong_edge.add(nei)
+                weak_edge.remove(nei)
+    return strong_edge
+    
 def get_salient_edge_indices(MorseComplex, thresh, 
                              vert_dict, edge_dict, face_dict):
     start_timer = timeit.default_timer()

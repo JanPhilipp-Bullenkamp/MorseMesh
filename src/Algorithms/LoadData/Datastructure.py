@@ -637,7 +637,7 @@ class MorseComplex:
                 if sepa.destination == old_sad:
                     for last_part_sepa in new_saddles_sepa_set:
                         new_sepa = Separatrix(sepa.origin, sepa.destination, 
-                                               sepa.dimension, sepa.path)
+                                              sepa.dimension, sepa.path)
                         path_to_be_added = inverted_cancelled_path + last_part_sepa.path
                         new_sepa.extend_to_new_destination(last_part_sepa.destination, path_to_be_added)
                         self.CritFaces[new_max].paths.append(new_sepa)
