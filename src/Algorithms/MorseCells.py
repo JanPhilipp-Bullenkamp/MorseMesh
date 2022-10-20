@@ -183,8 +183,10 @@ def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dic
         
     var = []
     for label, cell in MorseCells.items():
-        for neighbor_label, points in cell.neighbors.items():
-            weight = compute_weight_saledge(points, salient_points)
+        for neighbor_label, points_here in cell.neighbors.items():
+            # need points on both sides of the bopundary
+            points_there = MorseCells[neighbor_label].neighbors[label]
+            weight = compute_weight_saledge(points_here.union(points_there), salient_points)
             ConnGraph.add_weightedEdge(label, neighbor_label, weight)
         
     end_time = timeit.default_timer() -start_time
