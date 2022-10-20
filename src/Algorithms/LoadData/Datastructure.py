@@ -414,9 +414,9 @@ class Separatrix:
         @return A string telling wether its a minimal or maximal line, origin, destination and the length of the path.
         """
         if self.dimension == 1:
-            return "Minimal line from saddle" + str(self.origin) + " to minimum" + str(self.destination) + " in " + str(len(path)) + " pathpoints"
+            return "Minimal line from saddle" + str(self.origin) + " to minimum" + str(self.destination) + " in " + str(len(self.path)) + " pathpoints"
         elif self.dimension == 2:
-            return "Maximal line from maximum" + str(self.origin) + " to saddle" + str(self.destination) + " in " + str(len(path)) + " pathpoints"
+            return "Maximal line from maximum" + str(self.origin) + " to saddle" + str(self.destination) + " in " + str(len(self.path)) + " pathpoints"
         
     
 class MorseComplex:
