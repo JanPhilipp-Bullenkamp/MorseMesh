@@ -280,25 +280,6 @@ class CritEdge:
         
         self.paths = []
         
-    def get_separatrices_to_min(self, minimum):
-        sepa_to_min = []
-        for sep in self.paths:
-            if sep.destination == minimum:
-                sepa_to_min.append(sep)
-        if len(sepa_to_min) == 0:
-            raise AssertionError("Unexpected length of list. Should be at least one separatrix to this minimum here, but got None.")
-        else:
-            return sepa_to_min
-    
-    def remove_connected_minima(self, minimum):
-        self.connected_minima = [elt for elt in self.connected_minima if elt != minimum]
-    
-    def update_paths_from_old_to_new_minimum(self, old_minimum, new_minimum, path_to_be_added):
-        for sep in self.paths:
-            if sep.destination == old_minimum:
-                sep.extend_to_new_destination(new_minimum, path_to_be_added)
-                self.connected_minima.append(new_minimum)
-        
     def __str__(self):
         """! Retrieves the index of the critical edge.
         @return A string of the index of the critical edge.
@@ -336,64 +317,6 @@ class CritFace:
         self.connected_saddles = []
         
         self.paths = []
-        
-    def get_separatrices_to_sad(self, saddle):
-        sepa_to_sad = []
-        for sep in self.paths:
-            if sep.destination == saddle:
-                sepa_to_sad.append(sep)
-        if len(sepa_to_min) == 0:
-            raise AssertionError("Unexpected length of list. Should be at least one separatrix to this saddle here, but got None.")
-        else:
-            return sepa_to_sad
-        
-    def get_single_separatrix_path_to_sad(self, saddle):
-        sepa_to_sad = []
-        for sep in self.paths:
-            if sep.destination == saddle:
-                sepa_to_sad.append(sep)
-        if len(sepa_to_sad) != 1:
-            raise AssertionError("Unexpected length of list. Should be exactly one separatrix to this saddle here, but got:", len(sepa_to_min))
-        else:
-            return sepa_to_sad[0].path
-    
-    def get_all_separatrices_except_sad_to_cancel(self, saddle):
-        sepa_to_new_sad = []
-        check_cancel = False
-        for sep in self.paths:
-            if sep.destination != saddle:
-                sepa_to_new_sad.append(sep)
-            elif sep.destination == saddle:
-                check_cancel = True
-        if not check_cancel:
-            raise AssertionError("The saddle to be cancelled with this max, is not found in the separatrices!")
-        else:
-            return sepa_to_new_sad
-        
-    def remove_connected_saddles(self, saddle):
-        self.connected_saddles = [elt for elt in self.connected_saddles if elt != saddle]
-        
-    def remove_separatrices_and_connected_saddle(self, saddle):
-        for sep in self.paths:
-            if sep.destination == saddle:
-                self.paths.remove(sep)
-        self.remove_connected_saddles(saddle)
-        
-    def update_paths_from_old_to_new_saddles(self, old_saddle, new_saddles_sepa_list, flipped_cancellation_path):
-        for sepa in self.paths:
-            if sepa.destination == old_saddle:
-                for new_sad_sep in new_saddles_sepa_list:
-                    sep = deepcopy(sepa)
-                    
-                    new_destination = new_sad_sep.destination
-                    path_to_be_added = flipped_cancellation_path + new_sad_sep.path
-                    
-                    sep.extend_to_new_destination(new_destination, path_to_be_added)
-                    self.paths.append(sep)
-                    self.connected_saddles.append(new_destination)
-                self.paths.remove(sepa)
-                #self.connected_saddles.remove(old_saddle)
-        self.connected_saddles = [elt for elt in self.connected_saddles if elt != old_saddle]
         
     def __str__(self):
         """! Retrieves the index of the critical face.
@@ -563,8 +486,10 @@ class MorseComplex:
         # create neighbor keys if necessary
         if label2 not in self.MorseCells[label1].neighbors.keys():
             self.MorseCells[label1].neighbors[label2] = set()
+            self.MorseCells[label1].neighborlist.append(label2)
         if label1 not in self.MorseCells[label2].neighbors.keys():
             self.MorseCells[label2].neighbors[label1] = set()
+            self.MorseCells[label2].neighborlist.append(label1)
         # mark the indices as boundary in their cell
         self.MorseCells[label2].boundary.add(v2)
         self.MorseCells[label1].boundary.add(v1)
@@ -632,9 +557,13 @@ class MorseComplex:
             raise AssertionError("The cancelled edge has only two possibilties to be reached from triangles if "
                                  "the mesh is cleaned. Since one path goes up to the cancelled max, there is only "
                                  "one other way to go up. Here there were ",len(new_maxs_set), " ways!")
+        a = 0
         for new_max in new_maxs_set:
+            a+=1
+            counter = 0
             for sepa in self.CritFaces[new_max].paths:
                 if sepa.destination == old_sad:
+                    counter +=1
                     for last_part_sepa in new_saddles_sepa_set:
                         new_sepa = Separatrix(sepa.origin, sepa.destination, 
                                               sepa.dimension, sepa.path)
@@ -644,6 +573,9 @@ class MorseComplex:
                         self.CritEdges[last_part_sepa.destination].connected_maxima.append(new_max)
                         self.CritFaces[new_max].connected_saddles.append(last_part_sepa.destination)
                     self.CritFaces[new_max].paths.remove(sepa)
+            print("Count is ", counter)
+        print("a is ", a)
+                
         
     def info(self):
         """! @brief Prints out an info block about this Morse Complex."""
@@ -674,4 +606,6 @@ class Cell:
         self.boundary = set()
         
         self.neighbors = {}
+        
+        self.neighborlist = []
         

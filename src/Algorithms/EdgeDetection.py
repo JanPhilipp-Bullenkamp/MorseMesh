@@ -7,8 +7,8 @@ def dual_thresh_edge_detection(max_red_MSComplex, thresh_high, thresh_low, vert_
 
     queue = []
     for ind in strong_edge:
-        for nei in vert_dict[ind].neighbors and nei != ind:
-            if nei in weak_edge:
+        for nei in vert_dict[ind].neighbors:
+            if nei in weak_edge and nei != ind:
                 queue.append(nei)
                 weak_edge.remove(nei)
 
@@ -17,8 +17,8 @@ def dual_thresh_edge_detection(max_red_MSComplex, thresh_high, thresh_low, vert_
 
     while len(queue) != 0:
         ind = queue.pop(0)
-        for nei in vert_dict[ind].neighbors and nei != ind:
-            if nei in weak_edge:
+        for nei in vert_dict[ind].neighbors:
+            if nei in weak_edge and nei != ind:
                 queue.append(nei)
                 strong_edge.add(nei)
                 weak_edge.remove(nei)

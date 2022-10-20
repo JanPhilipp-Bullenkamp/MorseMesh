@@ -345,7 +345,7 @@ class Morse(Mesh):
         else:
             salient_edge_points = self.dual_thresh_edges(thresh_high, thresh_low)
             
-            Cells = deepcopy(self.MorseCells[persistence])
+            Cells = deepcopy(self.reducedMorseComplexes[persistence].MorseCells)
             
             self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent] = {}
             self.SegmentationDual[persistence][thresh_high][thresh_low][edge_percent]["Graph"] = create_SalientEdgeCellConnectivityGraph(Cells, 

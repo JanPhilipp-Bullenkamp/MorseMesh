@@ -168,79 +168,22 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
     
     end_time = timeit.default_timer() -start_time
     print("Time get MorseCells for ", MorseComplex.persistence,"persistence: ", end_time)
-    
-    #if fill_neighborhood:
-    #    start_time2 = timeit.default_timer()
-
-    #    MorseCells = fill_cell_neighbors(MorseCells, vert_dict, edge_dict)
-
-    #    end_time2 = timeit.default_timer() -start_time2
-    #    print("Time fill neighbors for MorseCells: ", end_time2)
     return MorseComplex.MorseCells
 
 
-from .ConnectivityGraph import ConnComp, Graph
-
-def find_label(vert, MorseCells):
-    for label, cell in MorseCells.items():
-        if vert in cell["set"]:
-            return label
-    # if not contained in any MorseCell error
-    #raise ValueError('Vertex', vert, 'was not found in any MorseCell set! Shouldnt happen')
-    #print('Vertex', vert, 'was not found in any MorseCell set! Shouldnt happen')
-    return -1
-    
-def fill_cell_neighbors(MorseCells, vert_dict, edge_dict):
-    ct=0
-    pts = set()
-    for label, cell in MorseCells.items():
-        # check all boundary points 
-        for bd_point in cell["boundary"]:
-            # for all neighbors of bd points, check which label they have and add new labels to neighbors, 
-            # also storing the boundary points from both sides (for connectivity calculation later)
-            for ind in vert_dict[bd_point].neighbors:
-                if ind not in cell["set"]:
-                    ind_label = find_label(ind, MorseCells)
-                    if ind_label != -1:
-                        if ind_label not in cell["neighbors"].keys():
-                            cell["neighbors"][ind_label] = set()
-                            cell["neighbors"][ind_label].add(bd_point)
-                            cell["neighbors"][ind_label].add(ind)
-                            pts.add(bd_point)
-                            pts.add(ind)
-                        else:
-                            cell["neighbors"][ind_label].add(bd_point)
-                            cell["neighbors"][ind_label].add(ind)
-                            pts.add(bd_point)
-                            pts.add(ind)
-                            '''
-                            TODO maybe also add the other way around, just in case
-                            but should be equal both ways in theory
-                            '''
-                            
-                    else:
-                        ct +=1
-    #write_overlay_bd(pts, vert_dict, "test_fill_cell_neighbors")
-    #print("Nb of not found labels: ", ct)
-    return MorseCells
+from .ConnectivityGraph import Graph
  
 def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dict, edge_dict):
     start_time = timeit.default_timer()
     
-    ''' MOVED to get_Morse cells, as that is only called once for each persistence, 
-        sal edge creation is called multiple times usually. 
-        Was very computation heavy i think (badly implemented probably)'''
-    #MorseCells = fill_cell_neighbors(MorseCells, vert_dict, edge_dict) 
-    
     # create graph with all labels
     ConnGraph = Graph()
-    for label in MorseCells.keys():
-        cc = ConnComp(label)
-        ConnGraph.add_ConnComp(cc)
+    for cell in MorseCells.values():
+        ConnGraph.add_ConnComp(cell)
         
     var = []
     for label, cell in MorseCells.items():
-        for neighbor_label, points in cell["neighbors"].items():
+        for neighbor_label, points in cell.neighbors.items():
             weight = compute_weight_saledge(points, salient_points)
             ConnGraph.add_weightedEdge(label, neighbor_label, weight)
         

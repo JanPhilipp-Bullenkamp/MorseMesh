@@ -1,5 +1,6 @@
 from .weight_metrics import compute_weight_saledge, compute_weight_normals
 
+'''
 class ConnComp():
     def __init__(self, label):
         self.label = label
@@ -9,6 +10,7 @@ class ConnComp():
         if neighbor.label not in self.neighbors:
             self.neighbors.append(neighbor.label)
             neighbor.neighbors.append(self.label)
+'''
 
 class Graph():
     def __init__(self):
@@ -16,7 +18,7 @@ class Graph():
         
     def add_ConnComp(self, conncomp):
         self.conncomps[conncomp.label] = {}
-        for neighb in conncomp.neighbors:
+        for neighb in conncomp.neighborlist:
             self.conncomps[conncomp.label][neighb] = 0
 
     def add_Edge(self, label1, label2):
@@ -38,12 +40,12 @@ class Graph():
         for key, val in self.conncomps.items():
             if [neighb for neighb, v in sorted(val.items(), key=lambda item: abs(item[1]))]:
                 lowest_weight_label = [neighb for neighb, v in sorted(val.items(), key=lambda item: abs(item[1]))][0]
-                if len(MorseCell[key]["set"]) < size_thresh:
+                if len(MorseCell[key].vertices) < size_thresh:
                     for nei in self.conncomps[key].keys():
                         self.conncomps[nei].pop(key)
                         rem_comp.add(key)
-                    MorseCell[lowest_weight_label]["set"].update(MorseCell[key]["set"])
-                    MorseCell[lowest_weight_label]["boundary"].update(MorseCell[key]["boundary"])
+                    MorseCell[lowest_weight_label].vertices.update(MorseCell[key].vertices)
+                    MorseCell[lowest_weight_label].boundary.update(MorseCell[key].boundary)
                     MorseCell.pop(key)
         for comp in rem_comp:
             self.conncomps.pop(comp)
@@ -55,10 +57,10 @@ class Graph():
             if len(self.conncomps[enclosed].keys()) == 1:
                 surrounding = next(iter(self.conncomps[enclosed]))
                 
-                if len(MorseCell[enclosed]["set"])/len(MorseCell[surrounding]["set"]) < relative_size_thresh:
+                if len(MorseCell[enclosed].vertices)/len(MorseCell[surrounding].vertices) < relative_size_thresh:
                     self.conncomps[surrounding].pop(enclosed)
                     rem_comp.add(enclosed)
-                    MorseCell[surrounding]["set"].update(MorseCell[enclosed]["set"])
+                    MorseCell[surrounding].vertices.update(MorseCell[enclosed].vertices)
                     MorseCell.pop(enclosed)
         for comp in rem_comp:
             self.conncomps.pop(comp)
@@ -74,8 +76,8 @@ class Graph():
                     for nei in self.conncomps[key].keys():
                         self.conncomps[nei].pop(key)
                         rem_comp.add(key)
-                    MorseCell[neighb]["set"].update(MorseCell[key]["set"])
-                    MorseCell[neighb]["boundary"].update(MorseCell[key]["boundary"])
+                    MorseCell[neighb].vertices.update(MorseCell[key].vertices)
+                    MorseCell[neighb].boundary.update(MorseCell[key].boundary)
                     MorseCell.pop(key)
         for comp in rem_comp:
             self.conncomps.pop(comp)
@@ -86,21 +88,17 @@ class Graph():
         # update weights of the new combined label1
         # update the MorseCell dict accordingly
         #print("Merge", label1, "and", label2, "with weight", self.conncomps[label1][label2], "should be equal to",self.conncomps[label2][label1])
-        MorseCell[label1]["set"].update(MorseCell[label2]["set"])
-        MorseCell[label1]["boundary"].update(MorseCell[label2]["boundary"])
-        MorseCell[label1]["neighbors"].pop(label2)
-        MorseCell[label2]["neighbors"].pop(label1)
+        MorseCell[label1].vertices.update(MorseCell[label2].vertices)
+        MorseCell[label1].boundary.update(MorseCell[label2].boundary)
+        MorseCell[label1].neighbors.pop(label2)
+        MorseCell[label2].neighbors.pop(label1)
         # go over old neighbors of label2 and either combine with label1 or add new neighbor
-        for neighb, elts in MorseCell[label2]["neighbors"].items():
-            if neighb in MorseCell[label1]["neighbors"].keys():
-                MorseCell[label1]["neighbors"][neighb].update(elts)
-                MorseCell[neighb]["neighbors"][label1].update(elts)
+        for neighb, elts in MorseCell[label2].neighbors.items():
+            if neighb in MorseCell[label1].neighbors.keys():
+                MorseCell[label1].neighbors[neighb].update(elts)
+                MorseCell[neighb].neighbors[label1].update(elts)
                 # need to recompute weights
-                weight_saledge = compute_weight_saledge(MorseCell[label1]["neighbors"][neighb], saledge_points)
-                ''' Normals weight commented out, needs further work'''
-                #weight_normals = compute_weight_normals(MorseCell[label1]["set"], MorseCell[neighb]["set"], vert_dict)
-                #self.conncomps[label1][neighb] = (weight_saledge+weight_normals)/2
-                #self.conncomps[neighb][label1] = (weight_saledge+weight_normals)/2
+                weight_saledge = compute_weight_saledge(MorseCell[label1].neighbors[neighb], saledge_points)
                 self.conncomps[label1][neighb] = weight_saledge
                 self.conncomps[neighb][label1] = weight_saledge
                 
@@ -108,13 +106,13 @@ class Graph():
                 compute weights new every time due to changed mean normal
                    TODO'''
             else:
-                MorseCell[label1]["neighbors"][neighb] = elts
-                MorseCell[neighb]["neighbors"][label1] = elts
+                MorseCell[label1].neighbors[neighb] = elts
+                MorseCell[neighb].neighbors[label1] = elts
                 self.conncomps[label1][neighb] = self.conncomps[label2][neighb] #copy weight from label2
                 self.conncomps[neighb][label1] = self.conncomps[label2][neighb] #copy weight from label2
                 
             # delete label 2 from all neighbors
-            MorseCell[neighb]["neighbors"].pop(label2)
+            MorseCell[neighb].neighbors.pop(label2)
             self.conncomps[neighb].pop(label2)
             
         # now remove label2 objects
