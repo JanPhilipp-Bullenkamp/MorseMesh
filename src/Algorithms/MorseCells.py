@@ -29,7 +29,7 @@ def get_boundary(MorseComplex, edge_dict, face_dict):
                             bd_points.update(edge_dict[elt].indices)
                         
     # only add faces of the path, as edges should be contained that way already
-    '''new: only one of the faces added as bd'''
+    '''new: only one of the faces added as bd '''
     for face in MorseComplex.CritFaces.values():
         saddles = Counter(face.connected_saddles)
         for sad, nb in saddles.items():
