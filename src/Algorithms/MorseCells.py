@@ -25,7 +25,7 @@ def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
                         vert_dict[vert].boundary = True
                         
     # only add faces of the path, as edges should be contained that way already
-    '''new: only one of the faces added as bd'''
+    '''new: only one of the faces vertices added as bd'''
     for face in MorseComplex.CritFaces.values():
         for maximal_sepa in face.paths:
             for count, elt in enumerate(maximal_sepa.path):
@@ -47,7 +47,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict):
     # boundary_points stored in a set. contains all vert that are either boundary themselves
     # or contained in a boundary edge or face
     boundary_points = get_boundary(MorseComplex, vert_dict, edge_dict, face_dict)
-    #write_overlay_bd(boundary_points, vert_dict, "bd_pts_morsecomplex_thinner")
+    write_overlay_bd(boundary_points, vert_dict, "../../Data/bd_pts_finer_morsecomplex_"+str(MorseComplex.persistence))
     
     # start with label number 1, cause 0 is used for unlabeld points in gigamesh
     label = 1
