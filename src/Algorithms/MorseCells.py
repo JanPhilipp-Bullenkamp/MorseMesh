@@ -37,13 +37,15 @@ def get_boundary(MorseComplex, edge_dict, face_dict):
                 for count, elt in enumerate(face.paths[sad]):
                     if count%2 == 0: # add all faces
                         ''' old: bd_points.update(face_dict[elt].indices)'''
-                        bd_points.add(next(iter(face_dict[elt].indices)))
+                        #bd_points.add(next(iter(face_dict[elt].indices)))
+                        bd_points.update(face_dict[elt].indices)
             if nb==2:
                 for i in range(2):
                     for count, elt in enumerate(face.paths[sad][i]):
                         if count%2 == 0: # add all faces
                             ''' old: bd_points.update(face_dict[elt].indices)'''
-                            bd_points.add(next(iter(face_dict[elt].indices)))
+                            #bd_points.add(next(iter(face_dict[elt].indices)))
+                            bd_points.update(face_dict[elt].indices)
                         
     return bd_points                
 
