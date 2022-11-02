@@ -263,9 +263,20 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, edge_dict, face_
 def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict):
     start_eff = timeit.default_timer()
 
-    CancelPairs = CancellationQueue()
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
+    
+    # reset Morse cells and Betti numbers if necessary
+    if redMorseComplex._flag_MorseCells:
+        redMorseComplex.MorseCells = {}
+        redMorseComplex._flag_MorseCells = False
+    if redMorseComplex._flag_BettiNumbers:
+        redMorseComplex.BettiNumbers = None
+        redMorseComplex._flag_BettiNumbers = False
+    
+    
+    CancelPairs = CancellationQueue()
+    
     # fill queue
     for crit_edge in redMorseComplex.CritEdges.values():
         closest_extremum = get_closest_extremum(crit_edge, redMorseComplex.CritVertices, redMorseComplex.CritFaces)

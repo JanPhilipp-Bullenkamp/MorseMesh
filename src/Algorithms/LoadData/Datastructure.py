@@ -82,6 +82,17 @@ class Vertex:
         self.star["E"] = [] #list
         self.neighbors = set() #set
         
+        # needed for Morse Cells
+        self.label = -1 #int
+        self.boundary = False #bool
+        
+    def has_neighbor_label(self, vert_dict):
+        neighbor_labels = []
+        for elt in self.neighbors:
+            if vert_dict[elt].label != -1 and vert_dict[elt].label != self.label:
+                neighbor_labels.append([elt, vert_dict[elt].label])
+        return neighbor_labels
+        
     def __str__(self):
         """! Retrieves the index of the vertex.
         @return A string of the index of the vertex.
@@ -392,6 +403,9 @@ class MorseComplex:
         
         self.Separatrices = []
         
+        self._flag_MorseCells = False
+        self.MorseCells = {}
+        
         self._flag_BettiNumbers = False
         self.BettiNumbers = None
         
@@ -425,4 +439,17 @@ class MorseComplex:
         if self._flag_BettiNumbers:
             print("| Betti numbers: ", self.BettiNumbers)
         print("+-------------------------------------------------------")
+        
+        
+class Cell:
+    
+    def __init__(self, label):
+        self.label = label
+        
+        self.vertices = set()
+        self.boundary = set()
+        
+        self.neighbors = {}
+        
+        self.neighborlist = []
         

@@ -30,7 +30,7 @@ def write_labels_txt_file(label_dict, target_file):
     # write labels
     for label, indices in enumerate(label_dict.values()):
         #if label != "boundary":
-        for index in indices["set"]:
+        for index in indices.vertices:
             f.write(str(index) + " " + str(label+1) + "\n")
             
     f.close()
@@ -47,7 +47,7 @@ def write_labels_params_txt_file(label_dict, target_file, pers, thr_high, thr_lo
     # write labels
     for label, indices in enumerate(label_dict.values()):
         #if label != "boundary":
-        for index in indices["set"]:
+        for index in indices.vertices:
             f.write(str(index) + " " + str(label+1) + "\n")
             
     f.close()

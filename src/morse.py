@@ -168,14 +168,14 @@ class Morse(Mesh):
         
         
     def ExtractMorseCells(self, persistence):
-        if persistence not in self.MorseCells.keys():
-            self.MorseCells[persistence] = get_MorseCells(self.reducedMorseComplexes[persistence], 
-                                                          self.Vertices, self.Edges, self.Faces)
-            return self.MorseCells[persistence]
+        if persistence not in self.reducedMorseComplexes.keys():
+            print("Need to reduce Morse complex to this persistence first...")
+            self.ReduceMorseComplex(persistence)
+        if not self.reducedMorseComplexes[persistence]._flag_MorseCells:
+            get_MorseCells(self.reducedMorseComplexes[persistence], self.Vertices, self.Edges, self.Faces)
+            return self.reducedMorseComplexes[persistence].MorseCells
         else:
             print("MorseCells for the MorseComplex with this persistence have already been calculated!")
-            print("You can access the MorseCells dictionary via: .MorseCells[persistence]")
-            print("where the persistence can be retrieved from MorseComplex.persistence") 
             
     def GetConnectivityGraph(self, persistence):
         if persistence not in self.MorseCells.keys():
@@ -184,16 +184,20 @@ class Morse(Mesh):
             return create_CellConnectivityGraph(self.MorseCells[persistence], self.Vertices, self.Edges)
             
     def plot_MorseCells(self, persistence, filename):
-        if persistence not in self.MorseCells.keys():
-            raise ValueError('No MorseCell calculated for this persistence!')
+        if persistence not in self.reducedMorseComplexes.keys():
+            raise ValueError('No reduced Morse Complex calculated for this persistence!')
+        elif self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
+            raise ValueError('No Morse cells computed for the Morse complex with this persistence!')
         else:
-            write_cells_overlay_ply_file(self.MorseCells[persistence], self.Vertices, filename)
+            write_cells_overlay_ply_file(self.reducedMorseComplexes[persistence].MorseCells, self.Vertices, filename)
             
     def write_MorseCellLabels(self, persistence, filename):
-        if persistence not in self.MorseCells.keys():
-            raise ValueError('Morse Cells for this persistence have not been calculated!')
+        if persistence not in self.reducedMorseComplexes.keys():
+            raise ValueError('No reduced Morse Complex calculated for this persistence!')
+        elif self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
+            raise ValueError('No Morse cells computed for the Morse complex with this persistence!')
         else:
-            write_labels_txt_file(self.MorseCells[persistence], filename)
+            write_labels_txt_file(self.reducedMorseComplexes[persistence].MorseCells, filename)
             
     def plot_salient_edge_histogram(self, nb_bins = 15, log=False, filename = None):
         if not self._flag_SalientEdge:
