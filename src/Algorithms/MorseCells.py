@@ -98,12 +98,82 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
                 
             # worked down the whole queue -> continue with next cell
             label +=1
+            
+    second_it = set()
+    # now treat boundary points:
+    for bd_ind in boundary_points:
+        if vert_dict[bd_ind].label != -1:
+            raise ValueError('Should not be possible to have a labelled vertex in the unlabelled bd_pts...')
+        # check surrounding for other labels
+        # neighb_labels is set of neighboring labels
+        # neighb_ind is list of [elt, label] tuples of the neighboring labels
+        neighb_labels, neighb_ind = vert_dict[bd_ind].has_neighbor_label(vert_dict)
+        # Cases:
+        # 1. no labelled neighbors -> surrounded by other bd pts -> add for second iteration and continue for now
+        # 2. one neighbor label -> this point can be added to that label and marked as no bd
+        # 3. more than one label -> add as neighbors and boundary of the cells
+        if len(neighb_labels) == 0:
+            second_it.add(bd_ind)
+            continue
+        elif len(neighb_labels) == 1:
+            vert_dict[bd_ind].boundary = False
+            vert_dict[bd_ind].label = neighb_ind[0][1]
+            MorseComplex.MorseCells[neighb_ind[0][1]].vertices.add(bd_ind)
+        else:
+            counts = Counter([t[1] for t in neighb_ind])
+            most_common_label = counts.most_common(1)[0][0]
+            
+            vert_dict[bd_ind].label = most_common_label
+            MorseComplex.MorseCells[most_common_label].vertices.add(bd_ind)
+            MorseComplex.MorseCells[most_common_label].boundary.add(bd_ind)
+            
+            for elt_ind, elt_label in neighb_ind:
+                if elt_label != most_common_label:
+                    MorseComplex.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
+    
+    count_no_label_after_2it = 0
+    # now treat boundary points in second iteration that had no labelled neighbors before:
+    for bd_ind in second_it:
+        if vert_dict[bd_ind].label != -1:
+            raise ValueError('Should not be possible to have a labelled vertex in the unlabelled bd_pts...')
+        # check surrounding for other labels
+        # neighb_labels is set of neighboring labels
+        # neighb_ind is list of [elt, label] tuples of the neighboring labels
+        neighb_labels, neighb_ind = vert_dict[bd_ind].has_neighbor_label(vert_dict)
+        # Cases:
+        # 1. no labelled neighbors -> surrounded by other bd pts -> continue for now
+        # 2. one neighbor label -> this point can be added to that label and marked as no bd
+        # 3. more than one label -> add as neighbors and boundary of the cells
+        if len(neighb_labels) == 0:
+            count_no_label_after_2it += 1
+            continue
+        elif len(neighb_labels) == 1:
+            vert_dict[bd_ind].boundary = False
+            vert_dict[bd_ind].label = neighb_ind[0][1]
+            MorseComplex.MorseCells[neighb_ind[0][1]].vertices.add(bd_ind)
+        else:
+            counts = Counter([t[1] for t in neighb_ind])
+            most_common_label = counts.most_common(1)[0][0]
+            
+            vert_dict[bd_ind].label = most_common_label
+            MorseComplex.MorseCells[most_common_label].vertices.add(bd_ind)
+            MorseComplex.MorseCells[most_common_label].boundary.add(bd_ind)
+            
+            for elt_ind, elt_label in neighb_ind:
+                if elt_label != most_common_label:
+                    MorseComplex.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
+    
+    if count_no_label_after_2it > 0:
+        print("Have ", count_no_label_after_2it, " boundary points that could not be labelled in 2 iterations...")
+    
+    '''
     c=0        
     for vert_ind, vert in vert_dict.items():
         if vert.label == -1:
             c+=1
     print(c, "vert no label")
     print(len(boundary_points),"bd pts")
+    '''
     
     # cleanup: 
     # mark that we have Morse cells for this complex and
@@ -113,83 +183,9 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
         vertex.boundary = False
         vertex.label = -1
         
-    
-    '''
-    visited = set()
-    visited_bd = set()
-    # start with label number 1, cause 0 is used for unlabeld points in gigamesh
-    label = 1
-    for vert_ind, vert in vert_dict.items():
-        if vert_ind in boundary_points or vert_ind in visited:
-            continue
-        else:
-            MorseComplex.MorseCells[label] = Cell(label)
-            
-            queue = set()
-            queue.add(vert)
-            
-            while len(queue) != 0:
-                # pop one elt from queue
-                queue_elt = queue.pop()
-                
-                # add elts to queue if they are not boundary
-                for ind in queue_elt.neighbors:
-                    if ind not in boundary_points and ind not in visited:
-                        queue.add(vert_dict[ind])
-                    elif ind in boundary_points and ind not in visited:
-                        MorseComplex.MorseCells[label].vertices.add(ind)
-                        MorseComplex.MorseCells[label].boundary.add(ind)
-                        visited_bd.add(ind)
-                        visited.add(ind)
-                        boundary_points.remove(ind)
-                    elif ind not in boundary_points and ind in visited:
-                        # if it is in set, all good
-                        # if it is not in set: must be visited in another cell already, 
-                        # therefore the queue elt popped was a boundary
-                        if ind not in MorseComplex.MorseCells[label].vertices:
-                            MorseComplex.MorseCells[label].boundary.add(queue_elt.index)
-                            visited_bd.add(queue_elt.index)
-                
-                # add the popped element to the current Morse cell
-                MorseComplex.MorseCells[label].vertices.add(queue_elt.index)
-                visited.add(queue_elt.index)
-                
-            label += 1
-            
-    
-    while len(boundary_points) != 0:
-        rem_bd = set()
-        for left in boundary_points:
-            labels = []
-            for ind in vert_dict[left].neighbors:
-                if ind not in boundary_points:
-                    for label_v, val in MorseComplex.MorseCells.items():
-                        if ind in val.vertices:
-                            labels.append(label_v)
-            if len(labels) > 0:
-                counts = Counter(labels)
-                max_label = [label_v for label_v, nb in sorted(counts.items(), key=lambda item: item[1])][-1]
-                MorseComplex.MorseCells[max_label].vertices.add(left)
-                MorseComplex.MorseCells[max_label].boundary.add(left)
-                visited_bd.add(left)
-                rem_bd.add(left)
-            
-        for elt in rem_bd:
-            boundary_points.remove(elt)
-            
-    #print("Bd pts",len(boundary_points))
-    #write_overlay_bd(visited_bd, vert_dict, "test_bd_pts")
     end_time = timeit.default_timer() -start_time
     print("Time get MorseCells for ", MorseComplex.persistence,"persistence: ", end_time)
     
-    if fill_neighborhood:
-        start_time2 = timeit.default_timer()
-
-        MorseComplex.MorseCells = fill_cell_neighbors(MorseComplex.MorseCells, vert_dict, edge_dict)
-
-        end_time2 = timeit.default_timer() -start_time2
-        print("Time fill neighbors for MorseCells: ", end_time2)
-    '''
     return MorseComplex.MorseCells
 
 

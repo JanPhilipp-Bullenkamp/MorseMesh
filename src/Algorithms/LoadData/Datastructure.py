@@ -87,11 +87,13 @@ class Vertex:
         self.boundary = False #bool
         
     def has_neighbor_label(self, vert_dict):
-        neighbor_labels = []
+        neighbor_labels = set()
+        neighbor_indices = []
         for elt in self.neighbors:
             if vert_dict[elt].label != -1 and vert_dict[elt].label != self.label:
-                neighbor_labels.append([elt, vert_dict[elt].label])
-        return neighbor_labels
+                neighbor_indices.append([elt, vert_dict[elt].label])
+                neighbor_labels.add(vert_dict[elt].label)
+        return neighbor_labels, neighbor_indices
         
     def __str__(self):
         """! Retrieves the index of the vertex.
@@ -419,6 +421,21 @@ class MorseComplex:
         """
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
+        
+    def add_neighboring_cell_labels(self, label1, v1, label2, v2):
+        # create neighbor keys if necessary
+        if label2 not in self.MorseCells[label1].neighbors.keys():
+            self.MorseCells[label1].neighbors[label2] = set()
+            self.MorseCells[label1].neighborlist.append(label2)
+        if label1 not in self.MorseCells[label2].neighbors.keys():
+            self.MorseCells[label2].neighbors[label1] = set()
+            self.MorseCells[label2].neighborlist.append(label1)
+        # mark the indices as boundary in their cell
+        self.MorseCells[label2].boundary.add(v2)
+        self.MorseCells[label1].boundary.add(v1)
+        # add the indices to the correct neighbor boundary
+        self.MorseCells[label2].neighbors[label1].add(v1)
+        self.MorseCells[label1].neighbors[label2].add(v2)
         
         
     def info(self):

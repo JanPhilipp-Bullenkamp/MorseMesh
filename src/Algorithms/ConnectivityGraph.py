@@ -18,13 +18,6 @@ class Graph():
         self.conncomps[conncomp.label] = {}
         for neighb in conncomp.neighbors:
             self.conncomps[conncomp.label][neighb] = 0
-
-    def add_Edge(self, label1, label2):
-        if label1 in self.conncomps.keys() and label2 in self.conncomps.keys():
-            if label2 not in self.conncomps[label1].keys():
-                self.conncomps[label1][label2] = 0
-            if label1 not in self.conncomps[label2].keys():
-                self.conncomps[label2][label1] = 0
                 
     def add_weightedEdge(self, label1, label2, weight):
         if label1 in self.conncomps.keys() and label2 in self.conncomps.keys():
@@ -33,7 +26,14 @@ class Graph():
             if label1 not in self.conncomps[label2].keys():
                 self.conncomps[label2][label1] = weight
                 
-    def remove_small_components(self, MorseCell, size_thresh):
+    def remove_small_components(self, MorseCells, size_thresh):
+        remove_components = set()
+        for label, cc in self.conncomps.items():
+            if len(MorseCell[label].vertices) < size_thresh and len(MorseCell[label].neighbor_list) != 0:
+                lowest_weight_label = [neighb for neighb, weight in sorted(cc.items(), key=lambda item: abs(item[1]))][0]
+                
+                
+        
         rem_comp = set()
         for key, val in self.conncomps.items():
             if [neighb for neighb, v in sorted(val.items(), key=lambda item: abs(item[1]))]:
