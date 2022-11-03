@@ -406,7 +406,7 @@ class MorseComplex:
         self.Separatrices = []
         
         self._flag_MorseCells = False
-        self.MorseCells = {}
+        self.MorseCells = MorseCells()
         
         self._flag_BettiNumbers = False
         self.BettiNumbers = None
@@ -421,22 +421,6 @@ class MorseComplex:
         """
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
-        
-    def add_neighboring_cell_labels(self, label1, v1, label2, v2):
-        # create neighbor keys if necessary
-        if label2 not in self.MorseCells[label1].neighbors.keys():
-            self.MorseCells[label1].neighbors[label2] = set()
-            self.MorseCells[label1].neighborlist.append(label2)
-        if label1 not in self.MorseCells[label2].neighbors.keys():
-            self.MorseCells[label2].neighbors[label1] = set()
-            self.MorseCells[label2].neighborlist.append(label1)
-        # mark the indices as boundary in their cell
-        self.MorseCells[label2].boundary.add(v2)
-        self.MorseCells[label1].boundary.add(v1)
-        # add the indices to the correct neighbor boundary
-        self.MorseCells[label2].neighbors[label1].add(v1)
-        self.MorseCells[label1].neighbors[label2].add(v2)
-        
         
     def info(self):
         """! @brief Prints out an info block about this Morse Complex."""
@@ -467,6 +451,49 @@ class Cell:
         self.boundary = set()
         
         self.neighbors = {}
+        self.neighbors_weights = {}
         
         self.neighborlist = []
         
+        
+class MorseCells:
+    def __init__(self):
+        self.Cells = {}
+        
+    def add_cell(self, cell):
+        self.cells[cell.label] = cell
+        
+    def add_vertex_to_label(self, label, index):
+        if label not in self.Cells.keys():
+            raise ValueError("This label is not part of the Morse cells: ", label)
+            
+        self.Cells[label].vertices.add(index)
+        
+    def add_boundary_to_label(self, label, index):
+        if label not in self.Cells.keys():
+            raise ValueError("This label is not part of the Morse cells: ", label)
+            
+        self.Cells[label].boundary.add(index)
+        
+    def add_neighboring_cell_labels(self, label1, v1, label2, v2):
+        if label1 not in self.Cells.keys():
+            raise ValueError("This label is not part of the Morse cells: ", label1)
+        if label2 not in self.Cells.keys():
+            raise ValueError("This label is not part of the Morse cells: ", label2)
+            
+        # create neighbor keys if necessary
+        if label2 not in self.Cells[label1].neighbors.keys():
+            self.Cells[label1].neighbors[label2] = set()
+            self.Cells[label1].neighborlist.append(label2)
+            self.Cells[label1].neighbors_weights[label2] = 0
+        if label1 not in self.Cells[label2].neighbors.keys():
+            self.Cells[label2].neighbors[label1] = set()
+            self.Cells[label2].neighborlist.append(label1)
+            self.Cells[label2].neighbors_weights[label1] = 0
+            
+        # mark the indices as boundary in their cell
+        self.Cells[label2].boundary.add(v2)
+        self.Cells[label1].boundary.add(v1)
+        # add the indices to the correct neighbor boundary
+        self.Cells[label2].neighbors[label1].add(v1)
+        self.Cells[label1].neighbors[label2].add(v2)

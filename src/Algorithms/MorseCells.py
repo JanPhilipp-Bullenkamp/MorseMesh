@@ -3,7 +3,7 @@ import timeit
 from .plot_bdpts import write_overlay_bd
 
 from .weight_metrics import compute_weight_saledge, compute_weight_normals, compute_weight_normalvariance
-from .LoadData.Datastructure import Cell
+from .LoadData.Datastructure import Cell, MorseCells
 '''
 first part: get MorseCells
 second part: get connectivity graph
@@ -62,7 +62,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
     start_time = timeit.default_timer()
     if MorseComplex._flag_MorseCells == True:
         print("Morse cells have been computed for this persistence already, but will be overwritten now")
-        MorseComplex.MorseCells = {}
+        MorseComplex.MorseCells = MorseCells()
         
     # boundary_points stored in a set. contains all vert that are either boundary themselves
     # or contained in a boundary edge or face
@@ -74,7 +74,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
         if vert.boundary or vert.label != -1:
             continue
         else:
-            MorseComplex.MorseCells[label] = Cell(label)
+            MorseComplex.MorseCells.add_cell(Cell(label))
             
             queue = set()
             queue.add(vert)
@@ -94,7 +94,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
                         elif vert_dict[ind].label != label:
                             raise ValueError("Trying to find Morse cells, but seem to have an open cell... (dont know what went wrong)")
                 # add popped elt to current Morse cell
-                MorseComplex.MorseCells[label].vertices.add(queue_elt.index)
+                MorseComplex.MorseCells.add_vertex_to_label(label, queue_elt.index)
                 
             # worked down the whole queue -> continue with next cell
             label +=1
@@ -118,18 +118,20 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
         elif len(neighb_labels) == 1:
             vert_dict[bd_ind].boundary = False
             vert_dict[bd_ind].label = neighb_ind[0][1]
-            MorseComplex.MorseCells[neighb_ind[0][1]].vertices.add(bd_ind)
+            MorseComplex.MorseCells.add_vertex_to_label(neighb_ind[0][1], bd_ind)
         else:
             counts = Counter([t[1] for t in neighb_ind])
             most_common_label = counts.most_common(1)[0][0]
             
             vert_dict[bd_ind].label = most_common_label
-            MorseComplex.MorseCells[most_common_label].vertices.add(bd_ind)
-            MorseComplex.MorseCells[most_common_label].boundary.add(bd_ind)
+            MorseComplex.MorseCells.add_vertex_to_label(most_common_label, bd_ind)
+            #MorseComplex.MorseCells[most_common_label].vertices.add(bd_ind)
+            MorseComplex.MorseCells.add_boundary_to_label(most_common_label, bd_ind)
+            #MorseComplex.MorseCells[most_common_label].boundary.add(bd_ind)
             
             for elt_ind, elt_label in neighb_ind:
                 if elt_label != most_common_label:
-                    MorseComplex.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
+                    MorseCells.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
     
     count_no_label_after_2it = 0
     # now treat boundary points in second iteration that had no labelled neighbors before:
@@ -150,18 +152,21 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
         elif len(neighb_labels) == 1:
             vert_dict[bd_ind].boundary = False
             vert_dict[bd_ind].label = neighb_ind[0][1]
-            MorseComplex.MorseCells[neighb_ind[0][1]].vertices.add(bd_ind)
+            MorseComplex.MorseCells.add_vertex_to_label(neighb_ind[0][1], bd_ind)
+            #MorseComplex.MorseCells[neighb_ind[0][1]].vertices.add(bd_ind)
         else:
             counts = Counter([t[1] for t in neighb_ind])
             most_common_label = counts.most_common(1)[0][0]
             
             vert_dict[bd_ind].label = most_common_label
-            MorseComplex.MorseCells[most_common_label].vertices.add(bd_ind)
-            MorseComplex.MorseCells[most_common_label].boundary.add(bd_ind)
+            MorseComplex.MorseCells.add_vertex_to_label(most_common_label, bd_ind)
+            #MorseComplex.MorseCells[most_common_label].vertices.add(bd_ind)
+            MorseComplex.MorseCells.add_boundary_to_label(most_common_label, bd_ind)
+            #MorseComplex.MorseCells[most_common_label].boundary.add(bd_ind)
             
             for elt_ind, elt_label in neighb_ind:
                 if elt_label != most_common_label:
-                    MorseComplex.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
+                    MorseCells.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
     
     if count_no_label_after_2it > 0:
         print("Have ", count_no_label_after_2it, " boundary points that could not be labelled in 2 iterations...")
@@ -189,51 +194,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
     return MorseComplex.MorseCells
 
 
-from .ConnectivityGraph import ConnComp, Graph
-
-def find_label(vert, MorseCells):
-    for label, cell in MorseCells.items():
-        if vert in cell.vertices:
-            return label
-    # if not contained in any MorseCell error
-    #raise ValueError('Vertex', vert, 'was not found in any MorseCell set! Shouldnt happen')
-    #print('Vertex', vert, 'was not found in any MorseCell set! Shouldnt happen')
-    return -1
-    
-def fill_cell_neighbors(MorseCells, vert_dict, edge_dict):
-    ct=0
-    pts = set()
-    for label, cell in MorseCells.items():
-        # check all boundary points 
-        for bd_point in cell.boundary:
-            # for all neighbors of bd points, check which label they have and add new labels to neighbors, 
-            # also storing the boundary points from both sides (for connectivity calculation later)
-            for ind in vert_dict[bd_point].neighbors:
-                if ind not in cell.vertices:
-                    ind_label = find_label(ind, MorseCells)
-                    if ind_label != -1:
-                        if ind_label not in cell.neighbors.keys():
-                            cell.neighbors[ind_label] = set()
-                            cell.neighbors[ind_label].add(bd_point)
-                            cell.neighbors[ind_label].add(ind)
-                            cell.neighborlist.append(ind_label)
-                            pts.add(bd_point)
-                            pts.add(ind)
-                        else:
-                            cell.neighbors[ind_label].add(bd_point)
-                            cell.neighbors[ind_label].add(ind)
-                            pts.add(bd_point)
-                            pts.add(ind)
-                            '''
-                            TODO maybe also add the other way around, just in case
-                            but should be equal both ways in theory
-                            '''
-                            
-                    else:
-                        ct +=1
-    #write_overlay_bd(pts, vert_dict, "test_fill_cell_neighbors")
-    #print("Nb of not found labels: ", ct)
-    return MorseCells
+from .ConnectivityGraph import Graph
  
 def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dict, edge_dict):
     start_time = timeit.default_timer()
@@ -246,8 +207,11 @@ def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dic
         
     var = []
     for label, cell in MorseCells.items():
-        for neighbor_label, points in cell.neighbors.items():
-            weight = compute_weight_saledge(points, salient_points)
+        for neighbor_label, points_here in cell.neighbors.items():
+            # need points on both sides of the bopundary
+            points_there = MorseCells[neighbor_label].neighbors[label]
+            
+            weight = compute_weight_saledge(points_here.union(points_there), salient_points)
             ConnGraph.add_weightedEdge(label, neighbor_label, weight)
         
     end_time = timeit.default_timer() -start_time
