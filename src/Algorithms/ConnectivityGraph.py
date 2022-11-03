@@ -29,10 +29,20 @@ class Graph():
     def remove_small_components(self, MorseCells, size_thresh):
         remove_components = set()
         for label, cc in self.conncomps.items():
-            if len(MorseCell[label].vertices) < size_thresh and len(MorseCell[label].neighbor_list) != 0:
+            if len(MorseCells[label].vertices) < size_thresh and len(MorseCells[label].neighbor_list) != 0:
                 lowest_weight_label = [neighb for neighb, weight in sorted(cc.items(), key=lambda item: abs(item[1]))][0]
                 
+                # merge label conn comp cell into the lowest weight label cell
+                MorseCells[lowest_weight_label].vertices.update(MorseCells[label].vertices)
+                # also merge their boundaries
+                MorseCells[lowest_weight_label].boundary.update(MorseCells[label].boundary)
+                # remove boundary of the two cells from overall boundary
+                MorseCells[lowest_weight_label].boundary = MorseCells[lowest_weight_label].boundary - MorseCells[lowest_weight_label].neighbors[label]
+                MorseCells[lowest_weight_label].boundary = MorseCells[lowest_weight_label].boundary - MorseCells[label].neighbors[lowest_weight_label]
                 
+                # remove each other from neighborlists
+                MorseCells[lowest_weight_label].neighborlist = [n for n in MorseCells[lowest_weight_label].neighborlist if n != label]
+                MorseCells[label].neighborlist = [n for n in MorseCells[label].neighborlist if n != lowest_weight_label]
         
         rem_comp = set()
         for key, val in self.conncomps.items():

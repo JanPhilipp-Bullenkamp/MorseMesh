@@ -17,6 +17,9 @@
 # - Separatrix
 # - MorseComplex
 
+# imports
+from .weight_metrics import compute_weight_saledge
+
 
 class Vertex:
     """! @brief Vertex class used for normal vertices and their properties.
@@ -497,3 +500,18 @@ class MorseCells:
         # add the indices to the correct neighbor boundary
         self.Cells[label2].neighbors[label1].add(v1)
         self.Cells[label1].neighbors[label2].add(v2)
+        
+    def calculate_weights(self, salient_edge_points):
+        for label, cell in self.Cells.items():
+            for nei_label, points_here in cell.neighbors.items():
+                # need points on both sides of the bopundary
+                points_there = self.Cells[nei_label].neighbors[label]
+                
+                weight = compute_weight_saledge(points_here.union(points_there), salient_edge_points)
+                # add weight to both cells
+                cell.neighbors_weights[nei_label] = weight
+                self.Cells[nei_label].neighbors_weights[label] = weight
+                
+    def merge_cells(self, label1, label2):
+        
+        
