@@ -18,7 +18,10 @@
 # - MorseComplex
 
 # imports
+from copy import deepcopy
+
 from .weight_metrics import compute_weight_saledge
+from ..CancellationQueue import CancellationQueue
 
 
 class Vertex:
@@ -411,6 +414,8 @@ class MorseComplex:
         self._flag_MorseCells = False
         self.MorseCells = MorseCells()
         
+        self.Segmentations = {}
+        
         self._flag_BettiNumbers = False
         self.BettiNumbers = None
         
@@ -424,6 +429,22 @@ class MorseComplex:
         """
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
+        
+    def create_segmentation(self, salient_edge_points, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+        if self._flag_MorseCells == False:
+            raise AssertionError("No Morse Cells calculated yet...")
+        SegmentationCells = deepcopy(self.MorseCells)
+        
+        SegmentationCells.add_salient_edge_points(salient_edge_points, (thresh_large, thresh_small))
+        
+        SegmentationCells.segment(merge_threshold, minimum_labels=minimum_labels)
+        
+        if (thresh_large, thresh_small) not in self.Segmentations.keys():
+            self.Segmentations[(thresh_large, thresh_small)] = {}
+        if merge_threshold in self.Segmentations[(thresh_large, thresh_small)].keys():
+            raise AssertionError("This parameter combination has already been calculated...")
+        else:
+            self.Segmentations[(thresh_large, thresh_small)][merge_threshold] = SegmentationCells
         
     def info(self):
         """! @brief Prints out an info block about this Morse Complex."""
@@ -456,15 +477,30 @@ class Cell:
         self.neighbors = {}
         self.neighbors_weights = {}
         
-        self.neighborlist = []
+        #self.neighborlist = []
         
         
 class MorseCells:
     def __init__(self):
         self.Cells = {}
         
+        # only for segmentation cells:
+        self.salient_edge_points = None # will be set of indices
+        self.threshold = None # will be tuple of (large_thr, small_thr)
+        
+        self.merge_threshold = None # stores the merge threshold, is a float
+        
+        
+    def add_salient_edge_points(self, salient_edge_points, threshold):
+        if self.salient_edge_points != None:
+            raise AssertionError("This MorseCell object already contains salient edge points ...")
+        if self.threshold != None:
+            raise AssertionError("This MorseCell object already stores a threshold (but probably no salient edge points) shouldnt be possible...")
+        self.salient_edge_points = salient_edge_points
+        self.threshold = threshold
+        
     def add_cell(self, cell):
-        self.cells[cell.label] = cell
+        self.Cells[cell.label] = cell
         
     def add_vertex_to_label(self, label, index):
         if label not in self.Cells.keys():
@@ -487,31 +523,185 @@ class MorseCells:
         # create neighbor keys if necessary
         if label2 not in self.Cells[label1].neighbors.keys():
             self.Cells[label1].neighbors[label2] = set()
-            self.Cells[label1].neighborlist.append(label2)
+            #self.Cells[label1].neighborlist.append(label2)
             self.Cells[label1].neighbors_weights[label2] = 0
         if label1 not in self.Cells[label2].neighbors.keys():
             self.Cells[label2].neighbors[label1] = set()
-            self.Cells[label2].neighborlist.append(label1)
+            #self.Cells[label2].neighborlist.append(label1)
             self.Cells[label2].neighbors_weights[label1] = 0
             
         # mark the indices as boundary in their cell
         self.Cells[label2].boundary.add(v2)
         self.Cells[label1].boundary.add(v1)
+        # (also need to be added to vertices of the cell
+        self.Cells[label2].vertices.add(v2)
+        self.Cells[label1].vertices.add(v1)
         # add the indices to the correct neighbor boundary
         self.Cells[label2].neighbors[label1].add(v1)
         self.Cells[label1].neighbors[label2].add(v2)
         
-    def calculate_weights(self, salient_edge_points):
+    def calculate_all_weights(self):
         for label, cell in self.Cells.items():
             for nei_label, points_here in cell.neighbors.items():
                 # need points on both sides of the bopundary
                 points_there = self.Cells[nei_label].neighbors[label]
                 
-                weight = compute_weight_saledge(points_here.union(points_there), salient_edge_points)
+                weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
                 # add weight to both cells
                 cell.neighbors_weights[nei_label] = weight
                 self.Cells[nei_label].neighbors_weights[label] = weight
                 
+    def calculate_weight_between_two_cells(self, label1, label2):
+        points1 = self.Cells[label1].neighbors[label2]
+        points2 = self.Cells[label2].neighbors[label1]
+        
+        weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
+        
+        self.Cells[label1].neighbors_weights[label2] = weight
+        self.Cells[label2].neighbors_weights[label1] = weight
+        
+        return weight
+                
     def merge_cells(self, label1, label2):
+        # 1. add vertices and boundary to label 1 cell
+        # 2. remove boundary btw 1 and 2 from new combined boundary
+        # 3. add neighbors from label 2 to label 1 (except label1)
+        # 4. remove label 2 from its neighbors and add label 1 as new neighbor
+        # 5. if both labels had a common neighbor: recompute weight 
+        
+        updated_weights = []
+        
+        # do 1. and 2.:
+        self.Cells[label1].vertices.update(self.Cells[label2].vertices)
+        self.Cells[label1].boundary.update(self.Cells[label2].boundary)
+        # remove boundary between the two
+        self.Cells[label1].boundary = self.Cells[label1].boundary - (self.Cells[label1].neighbors[label2].union(self.Cells[label2].neighbors[label1]))
+        
+        # iterate over neighbors of label2:
+        for neighbor, indices in self.Cells[label2].neighbors.items():
+            if neighbor == label1:
+                continue
+            # common neighbor -> adjust boundaries and recomupte weights
+            elif neighbor in self.Cells[label1].neighbors.keys():
+                # extend boundaries on both sides
+                self.Cells[label1].neighbors[neighbor].update(indices)
+                self.Cells[neighbor].neighbors[label1].update(self.Cells[neighbor].neighbors[label2])
+                
+                # remove label 2 from neighbor
+                self.Cells[neighbor].neighbors.pop(label2)
+                self.Cells[neighbor].neighbors_weights.pop(label2)
+                
+                # recompute weight:
+                new_weight = self.calculate_weight_between_two_cells(label1, neighbor)
+                
+                # fill updated_weights list for cancellation queue later
+                updated_weights.append(tuple((new_weight, label1, neighbor)))
+                
+            elif neighbor not in self.Cells[label1].neighbors.keys():
+                # add new neighbor to label 1 and copy weight from label 2
+                self.Cells[label1].neighbors[neighbor] = indices
+                self.Cells[label1].neighbors_weights[neighbor] = self.Cells[label2].neighbors_weights[neighbor]
+                
+                # add label 1 as new neighbor to neighbor and copy weight
+                self.Cells[neighbor].neighbors[label1] = self.Cells[neighbor].neighbors[label2]
+                self.Cells[neighbor].neighbors_weights[label1] = self.Cells[neighbor].neighbors_weights[label2]
+                
+                # remove label 2 from neighbor:
+                self.Cells[neighbor].neighbors.pop(label2)
+                self.Cells[neighbor].neighbors_weights.pop(label2)
+                
+            else:
+                raise AssertionError("Shouldnt happen. One of the above cases always should be fulfilled.")
+        
+        # remove label 2 from label 1:
+        self.Cells[label1].neighbors.pop(label2)
+        self.Cells[label1].neighbors_weights.pop(label2)
+        
+        # remove label 2 cell completely
+        self.Cells.pop(label2)
+        
+        return updated_weights
+        
+        
+    def remove_small_enclosures(self, size_threshold = 15):
+        remove = set()
+        for label, cell in self.Cells.items():
+            if len(cell.neighbors.keys()) == 1 and len(cell.vertices) < size_threshold:
+                # merge cell into surrounding cell
+                neighbor = next(iter(cell.neighbors))
+                # just have to add vertices, as boundary will vanish once merged (and boundary is contained in vertices)
+                self.Cells[neighbor].vertices.update(cell.vertices)
+                
+                # remove enclosure from neighborhood of surrounding
+                self.Cells[neighbor].neighbors.pop(label)
+                self.Cells[neighbor].neighbors_weights.pop(label)
+                
+                # remove enclosure completely (outside the dictionary loop, cause cant change dictionary size)
+                remove.add(label)
+                
+        for label in remove:
+            self.Cells.pop(label)
+            
+    def remove_small_patches(self, size_threshold = 15):
+        do = 0
+                
+    def segment(self, merge_threshold, minimum_labels):
+        if self.salient_edge_points == None or self.threshold == None:
+            raise AssertionError("Cannot segment if no salient edge points are loaded to these Morse cells!")
+        if self.merge_threshold != None:
+            raise AssertionError("Already has a merge threshold assigned... Shouldnt be so, probably messed up the order of functions somewhere.")
+            
+        # remove small enclosures
+        self.remove_small_enclosures(size_threshold=500)
+        
+        # 1. calculate weights between cells
+        self.calculate_all_weights()
+        
+        # 2. create and fill Cancellation Queue
+        queue = CancellationQueue()
+        
+        for label, cell in self.Cells.items():
+            for neighbor, weight in cell.neighbors_weights.items():
+                if weight < merge_threshold:
+                    queue.insert(tuple((weight,label, neighbor)))
+                    
+        
+        # pop from queue until no more elements are below the merge threshold or we reach the minimum number of labels
+        while len(self.Cells) > minimum_labels and queue.length() != 0:
+            weight, label1, label2 = queue.pop_front()
+            
+            # need to make sure the popped tuple is still available for merging and their weight is also the same.
+            if label1 in self.Cells.keys() and label2 in self.Cells.keys():
+                if label2 in self.Cells[label1].neighbors.keys():
+                    if weight == self.Cells[label1].neighbors_weights[label2]:
+                        # can merge cells
+                        updated_weights = self.merge_cells(label1, label2)
+                        self.remove_small_enclosures(size_threshold=500)
+                        # insert updated weights into queue if necessary
+                        if len(updated_weights) != 0:
+                            for new_tuple in updated_weights:
+                                if new_tuple[0] < merge_threshold:
+                                    queue.insert(new_tuple)
+                    else:
+                        # reinsert the tuple with updated weight
+                        if self.Cells[label1].neighbors_weights[label2] < merge_threshold:
+                            queue.insert(tuple((self.Cells[label1].neighbors_weights[label2], label1, label2)))
+                        #print("weight has changed but connection still there...")
+        
+        
+        
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         

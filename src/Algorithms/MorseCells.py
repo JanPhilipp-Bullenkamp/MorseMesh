@@ -2,7 +2,7 @@ from collections import Counter
 import timeit
 from .plot_bdpts import write_overlay_bd
 
-from .weight_metrics import compute_weight_saledge, compute_weight_normals, compute_weight_normalvariance
+from .LoadData.weight_metrics import compute_weight_saledge, compute_weight_normals, compute_weight_normalvariance
 from .LoadData.Datastructure import Cell, MorseCells
 '''
 first part: get MorseCells
@@ -131,7 +131,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
             
             for elt_ind, elt_label in neighb_ind:
                 if elt_label != most_common_label:
-                    MorseCells.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
+                    MorseComplex.MorseCells.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
     
     count_no_label_after_2it = 0
     # now treat boundary points in second iteration that had no labelled neighbors before:
@@ -166,7 +166,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
             
             for elt_ind, elt_label in neighb_ind:
                 if elt_label != most_common_label:
-                    MorseCells.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
+                    MorseComplex.MorseCells.add_neighboring_cell_labels(most_common_label, bd_ind, elt_label, elt_ind)
     
     if count_no_label_after_2it > 0:
         print("Have ", count_no_label_after_2it, " boundary points that could not be labelled in 2 iterations...")

@@ -121,11 +121,12 @@ class Mesh:
         
         self.maximalReducedComplex = None
         
-        self.MorseCells = {}
+        # rework them into the according MorseCOmplex Datastructure
+        #self.MorseCells = {}
         
-        self.Segmentation = {}
+        #self.Segmentation = {}
         
-        self.SegmentationDual = {}
+        #self.SegmentationDual = {}
         
     def info(self):
         """! @brief Prints out Mesh information.

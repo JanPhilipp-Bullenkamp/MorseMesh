@@ -1,4 +1,4 @@
-from .weight_metrics import compute_weight_saledge, compute_weight_normals
+from .LoadData.weight_metrics import compute_weight_saledge, compute_weight_normals
 
 class ConnComp():
     def __init__(self, label):

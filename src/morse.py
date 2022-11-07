@@ -278,6 +278,38 @@ class Morse(Mesh):
             raise ValueError('Can not calculate Persistence Diagram before Betti Numbers!')
             
             
+            
+    def NewSegmentation(self, persistence, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+        if persistence not in self.reducedMorseComplexes.keys():
+            print("Need to reduce Morse complex to this persistence first...")
+            self.ReduceMorseComplex(persistence)
+        if self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
+            print("No Morse Cells computed for this persistence, computing now...")
+            self.ExtractMorseCells(persistence)
+        if not self._flag_SalientEdge:
+            print("Need maximally reduced complex for salient edges!")
+            print("Computing maximally reduced complex ...")
+            self.ReduceMorseComplex(self.range)
+            
+        salient_edge_points = self.dual_thresh_edges(thresh_large, thresh_small)
+        
+        self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, thresh_large, thresh_small, merge_threshold, minimum_labels=3)
+        
+        return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
+    
+    def write_NewSegmentationLabels(self, persistence, thresh_large, thresh_small, merge_threshold, filename):
+        if persistence not in self.reducedMorseComplexes.keys():
+            raise ValueError('Segmentation for this persistence has not been calculated!')
+        if (thresh_large, thresh_small) not in self.reducedMorseComplexes[persistence].Segmentations.keys():
+            raise ValueError('Segmentation for this salient edge threshold pair has not been calculated!')
+        if merge_threshold not in self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)].keys():
+            raise ValueError('Segmentation for this merge percentage threshold has not been calculated!')
+        else:
+            write_labels_params_txt_file(self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells, 
+                                         filename+"_"+str(persistence)+"P_"+str(thresh_large)+"-"+str(thresh_small)+"T_"+str(merge_threshold),
+                                        persistence, thresh_large, thresh_small, merge_threshold)
+            
+            
     def SalientEdgeSegmentation(self, persistence, thresh,  edge_percent):
         if persistence not in self.MorseCells.keys():
             raise ValueError('No MorseCell calculated for this persistence!')
