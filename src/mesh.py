@@ -80,6 +80,8 @@ class Mesh:
         self.Vertices = {}
         self.Edges = {}
         self.Faces = {}
+
+        self.InitialLabels = {}
         
         self._flag_ProcessLowerStars = False
         self._flag_MorseComplex = False
