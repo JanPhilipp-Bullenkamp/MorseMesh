@@ -33,8 +33,10 @@
 
 # import stuff
 from src.Algorithms.LoadData.read_ply import read_ply
+from src.Algorithms.LoadData.read_labels import read_label_txt
 from src.Algorithms.LoadData.read_funvals import read_funvals
 from src.Algorithms.ProcessLowerStars import ProcessLowerStars
+from src.Algorithms.ConformingGradient import ConformingGradient
 from src.Algorithms.ExtractMorseComplex import ExtractMorseComplex
 from src.Algorithms.ReduceMorseComplex import CancelCriticalPairs
 from src.Algorithms.BettiNumbers import BettiViaPairCells
@@ -85,8 +87,11 @@ class Morse(Mesh):
         self.max = max_val
         self.range = max_val - min_val
         
+    def load_labels(self, filename):
+        self.InitialLabels = read_label_txt(filename)
+ 
     ''' MORSE THEORY'''
-    
+
     @timed
     def ProcessLowerStars(self):
         # reset if has been computed already
@@ -101,11 +106,25 @@ class Morse(Mesh):
             
         ProcessLowerStars(self.Vertices, self.Edges, self.Faces, self.C, self.V12, self.V23)
         self._flag_ProcessLowerStars = True
-        
+
+    def ConformingGradient(self):
+        # reset if has been computed already
+        if self._flag_ProcessLowerStars:
+            self.V12 = {}
+            self.V23 = {}
+
+            self.C = {}
+            self.C[0] = set()
+            self.C[1] = set()
+            self.C[2] = set()
+            
+        ConformingGradient(self.Vertices, self.Edges, self.Faces, self.InitialLabels, self.C, self.V12, self.V23)
+        self._flag_ProcessLowerStars = True
+    
     @timed
     def ExtractMorseComplex(self):
         if not self._flag_ProcessLowerStars:
-            print('Need to call ProcessLowerStars first...')
+            print('Need to call ProcessLowerStars or ConformingGradient first...')
             self.ProcessLowerStars()
         else:
             if self._flag_MorseComplex:
