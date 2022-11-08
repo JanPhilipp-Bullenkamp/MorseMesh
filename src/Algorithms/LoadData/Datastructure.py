@@ -579,7 +579,7 @@ class MorseCells:
         
         return weight
                 
-    def merge_cells(self, label1, label2):
+    def merge_cells(self, label1, label2, pop_label2=True):
         # 1. add vertices and boundary to label 1 cell
         # 2. remove boundary btw 1 and 2 from new combined boundary
         # 3. add neighbors from label 2 to label 1 (except label1)
@@ -634,8 +634,9 @@ class MorseCells:
         self.Cells[label1].neighbors.pop(label2)
         self.Cells[label1].neighbors_weights.pop(label2)
         
-        # remove label 2 cell completely
-        self.Cells.pop(label2)
+        # remove label 2 cell completely (optional due to dictionary size change) need to remove after looping sometimes
+        if pop_label2:
+            self.Cells.pop(label2)
         
         return updated_weights
         
@@ -660,7 +661,17 @@ class MorseCells:
             self.Cells.pop(label)
             
     def remove_small_patches(self, size_threshold = 15):
-        do = 0
+        remove = set()
+        for label, cell in self.Cells.items():
+            if len(cell.vertices) < size_threshold:
+                lowest_weight_neighbor = [nei_label for nei_label, weight in sorted(cell.neighbors_weights.items(), key=lambda item: abs(item[1]))][0]
+                
+                if lowest_weight_neighbor not in remove:
+                    self.merge_cells(lowest_weight_neighbor, label, pop_label2=False)
+                    remove.add(label)
+                
+        for label in remove:
+            self.Cells.pop(label)
                 
     def segment(self, merge_threshold, minimum_labels):
         if self.salient_edge_points == None or self.threshold == None:
@@ -704,6 +715,9 @@ class MorseCells:
                         if self.Cells[label1].neighbors_weights[label2] < merge_threshold:
                             queue.insert(tuple((self.Cells[label1].neighbors_weights[label2], label1, label2)))
                         #print("weight has changed but connection still there...")
+                        
+        # remove small patches
+        self.remove_small_patches(size_threshold=500)
         
         
         
