@@ -11,7 +11,6 @@
 # - Vertices
 # - Edges
 # - Faces
-# - Links
 #
 # @section morse_theoretic_structures Morse-Theoretic Structures
 # - _flag_ProcessLowerStars
@@ -45,11 +44,9 @@ class Mesh:
     ## @var Vertices
     # A dictionary to store the vertices. Stored as key-value with key: vertex index and value: Vertex class object
     ## @var Edges
-    # A dictionary to store the edges. Stored as key-value with key: edge index and value: Edge class object
+    # A dictionary to store the edges. Stored as key-value with key: edge index and value: Simplex class object
     ## @var Faces
-    # A dictionary to store the faces. Stored as key-value with key: face index and value: Face class object
-    ## @var Links
-    # A dictionary to store the links of each vertex. Stored as key-value with key: vertex index and value: ??? set of neighbor indices ????
+    # A dictionary to store the faces. Stored as key-value with key: face index and value: Simplex class object
     
     ## @var _flag_ProcessLowerStars
     # Boolean whether the discrete vector field V has been calculated.
@@ -76,14 +73,6 @@ class Mesh:
     # A dictionary of reduced Morse complexes. The keys are the persistences of the respective reduced Morse complex in value.
     ## @var maximalReducedComplex
     # The maximally reduced Morse complex
-    ## @var MorseCells
-    # A dictionary of Morse cells. The keys are the persistences of the respective reduced Morse complex 
-    # underlying the Morse cells in value.
-    
-    ## @var Segmentation
-    # A dictionary storing various segmentations.
-    ## @var SegmentationDual
-    # A dictionary storing various segmentations using a double threshold
     
     def __init__(self):
         """! @brief Constructor for the Mesh class. """
@@ -96,8 +85,6 @@ class Mesh:
         self.Vertices = {}
         self.Edges = {}
         self.Faces = {}
-        
-        self.Links = {}
         
         self._flag_ProcessLowerStars = False
         self._flag_MorseComplex = False
@@ -120,13 +107,6 @@ class Mesh:
         self.reducedMorseComplexes = {}
         
         self.maximalReducedComplex = None
-        
-        # rework them into the according MorseCOmplex Datastructure
-        #self.MorseCells = {}
-        
-        #self.Segmentation = {}
-        
-        #self.SegmentationDual = {}
         
     def info(self):
         """! @brief Prints out Mesh information.
