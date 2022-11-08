@@ -46,4 +46,14 @@ class PriorityQueue(object):
         @return A list of the index, simplex tuples of the elemets in the queue.
         """
         return self.queue
+    
+    def pop(self, data):
+        """! @brief Removes an element from the heapq that is not at the highest priority and heapifies it again.
+        
+        @param data The data to be removed.
+        """
+        i = self.queue.index(data)
+        self.queue[i] = self.queue[-1]
+        self.queue.pop()
+        heapq.heapify(self.queue)
             

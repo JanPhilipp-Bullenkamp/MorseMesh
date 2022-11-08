@@ -39,6 +39,8 @@ def num_unpaired_faces(face, PQzero):
 def pair(face, PQzero):
     for simplex, index in PQzero.items():
         if face.has_face(simplex):
+            # need to pop the element from the Priority queue
+            PQzero.pop(tuple((simplex,index)))
             return index, simplex
 
 def ProcessLowerStars(vertices_dict, edges_dict, faces_dict, C, V12, V23):
