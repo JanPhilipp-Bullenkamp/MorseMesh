@@ -9,3 +9,4 @@ PlotData/__pycache__/
 PlotData/.ipynb_checkpoints/
 
 *.ipynb
+*.ply
