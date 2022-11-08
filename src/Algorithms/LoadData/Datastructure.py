@@ -106,28 +106,67 @@ class Vertex:
         @return A string of the index of the vertex.
         """
         return str(self.index)
+    
+def compare_heights(small, big):
+    """! @brief Compares two tuples of sorted values.
+    
+    @details Compares two sorted tuples of possibly different length and returns True if the second
+    one is considered larger and False if the first one is considered larger. Tuples are higher
+    if their highest (first) value is larger than the highest value of the other tuple and shorter
+    tuples are higher than longer if all values are equal up to the length of the shorter tuple.
+    For example the following tuples are sorted from high to low:
+    
+    (4), (4,3), (3,2,2), (3,2,1), (2), (2,9), (2,7), (2,9,15)
+    
+    @param small First tuple to be compared.
+    @param big Second tuple to be compared.
+    
+    @return True if small is smaller than big according to the metric. False otherwise.
+    """
+    # return True if small is smaller than big, False otherwise
+    if len(small) == len(big):
+        for i in range(len(small)):
+            if small[i] < big[i]:
+                return True
+            elif small[i] > big[i]:
+                return False
+        return False
+    if len(small) < len(big):
+        for i in range(len(small)):
+            if small[i] < big[i]:
+                return True
+            elif small[i] > big[i]:
+                return False
+        return False
+    if len(small) > len(big):
+        for i in range(len(big)):
+            if small[i] < big[i]:
+                return True
+            elif small[i] > big[i]:
+                return False
+        return True
 
-class Edge:
-    """! @brief Edge class used for normal edges.
+class Simplex:
+    """! @brief Simplex class used for normal edges and faces.
     
-    @details Stores an edge as a set of two indices (representing two vertices). 
-    Each edge has an own index (edge-index). 
+    @details Stores an edge or face as a set of two/ three indices (representing two/ three vertices). 
+    Each simplex has an own index (edge-index or face-index). 
     
-    Can set the function value of the edge by taking the two function values of the 
+    Can set the function value of the simplex by taking the function values of the 
     vertices and storing them in a list, sorted such that the higher function value
     is at the first position.    
     """
     ## @var indices
-    # A set of two indices representing the edge
+    # A set of two/three indices representing the simplex
     ## @var fun_val
-    # A sorted list of two floats, where the first value is the highest
+    # A sorted list of two/three floats, where the first value is the highest
     ## @var index
-    # The index of this edge (edge-index)
+    # The index of this simplex (edge-index or face-index)
     
     def __init__(self, indices=None, index=None):
-        """! The Constructor of an Edge.
-        @param indices A set of two indices representing the two vertices of the edge. Default is None.
-        @param index The index of this edge. Default is None. 
+        """! The Constructor of a Simplex
+        @param indices A set of indices representing the vertices of the simplex. Default is None.
+        @param index The index of this simplex. Default is None. 
         """
         self.indices = indices #set
         self.fun_val = None #list
@@ -135,8 +174,8 @@ class Edge:
         self.index = index #int
         
     def set_fun_val(self, vertices_dict):
-        """! @brief Sets the function value of the edge.
-        @details Uses the two function values of the vertices and sorts them such 
+        """! @brief Sets the function value of the simplex.
+        @details Uses the function values of the vertices and sorts them such 
         that the first value is the larger function value.
         
         @param vertices_dict The dictionary, where the vertices are stored. Keys should be the 
@@ -147,59 +186,37 @@ class Edge:
             self.fun_val.append(vertices_dict[ind].fun_val)
         self.fun_val.sort(reverse=True)
         
+    def has_face(self, other_simplex):
+        """! @brief Checks if a given other simplex is a face of this simplex.
+        @details Another simplex is a face of this simplex, if its vertices are a real subset of this simplex
+        vertices and there is only one vertex not contained. (e.g. an edge with 2 indices can be the face of a
+        triangle with 3 indices.
+        
+        @param other_simplex Another Simplex object that we want to know of whether it is a face of this simplex.
+        
+        @return Bool. True if the other simplex is a face of this simplex, False otherwise.
+        """
+        if len(self.indices) - len(other_simplex.indices) == 1 and other_simplex.indices.issubset(self.indices):
+            return True
+        else:
+            return False
+        
+    def __lt__(self, other_simplex):
+        """! @brief Checks if another simplex has a smaller function value (according to the metric described in compare_heights)
+        
+        @param other_simplex The simplex we want to know of whether it has a higher function value than this simplex.
+        
+        @return Bool. Returns True if this simplex has a smaller function value than the other simplex. False otherwise.
+        """
+        # return true if own fun_val is smaller than the fun_val of other_simplex
+        return compare_heights(self.fun_val, other_simplex.fun_val)
+        
     def __str__(self):
-        """! Retrieves the index of the edge.
-        @return A string of the index of the edge.
+        """! Retrieves the index of the simplex.
+        @return A string of the index of the simplex.
         """
         return str(self.indices)
 
-class Face:
-    """! @brief Face class used for normal faces.
-    
-    @details Stores a face as a set of three indices (representing three vertices). 
-    Each face has an own index (face-index). 
-    
-    Can set the function value of the face by taking the three function values of the 
-    vertices and storing them in a list, sorted such that the highest function value
-    is at the first position.    
-    """
-    ## @var indices
-    # A set of three indices representing the face
-    ## @var fun_val
-    # A sorted list of three floats, where the first value is the highest
-    ## @var index
-    # The index of this face (face-index)
-    
-    def __init__(self, indices=None, index=None):
-        """! The Constructor of a Face.
-        @param indices A set of three indices representing the three vertices of the edge. Default is None.
-        @param index The index of this face. Default is None. 
-        """
-        self.indices = indices #set
-        self.fun_val = None #list
-
-        self.index = index #int
-        
-    def set_fun_val(self, vertices_dict):
-        """! @brief Sets the function value of the face.
-        @details Uses the three function values of the vertices and sorts them such 
-        that the first value is the largest function value.
-        
-        @param vertices_dict The dictionary, where the vertices are stored. Keys should be the 
-        indices of the vertices.
-        """
-        self.fun_val = []
-        for ind in self.indices:
-            self.fun_val.append(vertices_dict[ind].fun_val)
-        self.fun_val.sort(reverse=True)
-        
-        
-    def __str__(self):
-        """! Retrieves the index of the face.
-        @return A string of the index of the face.
-        """
-        return str(self.indices)
-    
 class CritVertex:
     """! @brief CritVertex class used for critical vertices.
     

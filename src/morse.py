@@ -27,7 +27,6 @@
 
 
 # import stuff
-from src.Algorithms.LoadData.Datastructure import Vertex, Edge, Face
 from src.Algorithms.LoadData.read_ply import read_ply
 from src.Algorithms.LoadData.read_funvals import read_funvals
 from src.Algorithms.ProcessLowerStars import ProcessLowerStars

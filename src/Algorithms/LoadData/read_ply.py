@@ -20,7 +20,7 @@ import numpy as np
 from collections import Counter
 import timeit
 
-from .Datastructure import Vertex, Edge, Face
+from .Datastructure import Vertex, Simplex
 
 def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inverted=False):
     """! @brief Reads a ply file and writes the simplicial complex into vertices, edges and faces dictionaries.
@@ -71,7 +71,7 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
     eindex = 0
     unique_edges = set()
     for findex, rawface in enumerate(rawdata['face']):
-        face = Face(indices=set(rawface[0]), index=findex)
+        face = Simplex(indices=set(rawface[0]), index=findex)
         face.set_fun_val(vertices_dict)
         
         faces_dict[findex] = face
@@ -85,7 +85,7 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
             vertices_dict[tmp_ind].neighbors.add(tmp[1])
             
             if set(tmp) not in unique_edges:
-                edge = Edge(indices=set(tmp), index=eindex)
+                edge = Simplex(indices=set(tmp), index=eindex)
                 edge.set_fun_val(vertices_dict)
                 
                 edges_dict[eindex] = edge
