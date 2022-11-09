@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['eliminate_5fboundaries_0',['eliminate_boundaries',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_betti_numbers.html#a480f600a5b944f3ef3cfcadacb0f9fcc',1,'MorseTheory::src::Algorithms::BettiNumbers']]],
-  ['extractmorsecells_1',['ExtractMorseCells',['../class_morse_theory_1_1src_1_1morse_1_1_morse.html#ae29a6da7404bd94240bad8de1d8f5726',1,'MorseTheory::src::morse::Morse']]],
-  ['extractmorsecomplex_2',['ExtractMorseComplex',['../class_morse_theory_1_1src_1_1morse_1_1_morse.html#ab4d9197b9a9175fca599f443aa068f94',1,'MorseTheory.src.morse.Morse.ExtractMorseComplex()'],['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_extract_morse_complex.html#aed88c3f6a2403da7e45e23b5a0fcd74a',1,'MorseTheory.src.Algorithms.ExtractMorseComplex.ExtractMorseComplex()']]]
+  ['get_5fboundary_359',['get_boundary',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1MorseCells.html#a01dcf713b79842851220c84c81a4b048',1,'MorseTheory::src::Algorithms::MorseCells']]],
+  ['get_5fclosest_5fextremum_360',['get_closest_extremum',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1ReduceMorseComplex.html#a069643be098d21abdbda9a1270ded35d',1,'MorseTheory::src::Algorithms::ReduceMorseComplex']]],
+  ['get_5fmorsecells_361',['get_MorseCells',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1MorseCells.html#a772fd0cacf8f078bf38113af2c44c9d6',1,'MorseTheory::src::Algorithms::MorseCells']]],
+  ['get_5fsalient_5fedge_5findices_362',['get_salient_edge_indices',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1EdgeDetection.html#a5ab3af1f957b6e461804a90fa73fa216',1,'MorseTheory::src::Algorithms::EdgeDetection']]],
+  ['get_5fsalient_5fedges_363',['get_salient_edges',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#aec2e6d923a3331b762e2e40024f74c5a',1,'MorseTheory::src::morse::Morse']]]
 ];

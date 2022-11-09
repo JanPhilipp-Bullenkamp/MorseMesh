@@ -25,6 +25,11 @@
 # @section notes_main Notes
 # - Currently worked on.
 
+##
+# @file morse.py
+#
+# @brief Stores the Morse dataclass used for all Morse Theory related computations.
+
 
 # import stuff
 from src.Algorithms.LoadData.read_ply import read_ply

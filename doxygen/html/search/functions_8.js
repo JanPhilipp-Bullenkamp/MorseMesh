@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['info_0',['info',['../class_morse_theory_1_1src_1_1_algorithms_1_1_load_data_1_1_datastructure_1_1_morse_complex.html#a4cbc8f16a0b6cd68f685de5561a0c618',1,'MorseTheory.src.Algorithms.LoadData.Datastructure.MorseComplex.info()'],['../class_morse_theory_1_1src_1_1mesh_1_1_mesh.html#a4cbc8f16a0b6cd68f685de5561a0c618',1,'MorseTheory.src.mesh.Mesh.info()']]],
-  ['insert_1',['insert',['../class_morse_theory_1_1src_1_1_algorithms_1_1_cancellation_queue_1_1_cancellation_queue.html#a46251bd1967d20304ed37fe0681218c1',1,'MorseTheory.src.Algorithms.CancellationQueue.CancellationQueue.insert()'],['../class_morse_theory_1_1src_1_1_algorithms_1_1_priority_queue_1_1_priority_queue.html#a46251bd1967d20304ed37fe0681218c1',1,'MorseTheory.src.Algorithms.PriorityQueue.PriorityQueue.insert()']]]
+  ['length_369',['length',['../classMorseTheory_1_1src_1_1Algorithms_1_1CancellationQueue_1_1CancellationQueue.html#a9ce4d38e7521431497617e1e793fda6d',1,'MorseTheory::src::Algorithms::CancellationQueue::CancellationQueue']]],
+  ['load_5fmesh_5fply_370',['load_mesh_ply',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#ad6d2ae6dddc277e5afd8c2ee5856ba42',1,'MorseTheory::src::morse::Morse']]],
+  ['load_5fnew_5ffunvals_371',['load_new_funvals',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a63fbae59baf56933b32f8c83ef385949',1,'MorseTheory::src::morse::Morse']]],
+  ['lower_5fstar_372',['lower_star',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1ProcessLowerStars.html#a812ad1b125dc4b17fddad750f76ee476',1,'MorseTheory::src::Algorithms::ProcessLowerStars']]]
 ];

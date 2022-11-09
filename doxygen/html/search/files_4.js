@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['extractmorsecomplex_2epy_0',['ExtractMorseComplex.py',['../_extract_morse_complex_8py.html',1,'']]]
+  ['edgedetection_2epy_304',['EdgeDetection.py',['../EdgeDetection_8py.html',1,'']]],
+  ['extractmorsecomplex_2epy_305',['ExtractMorseComplex.py',['../ExtractMorseComplex_8py.html',1,'']]]
 ];

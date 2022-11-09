@@ -1,11 +1,12 @@
 var searchData=
 [
-  ['add_0',['add',['../class_morse_theory_1_1src_1_1_algorithms_1_1_betti_numbers_1_1_dell.html#a98abc45da47d8a91d5ac6b854a4b7c20',1,'MorseTheory::src::Algorithms::BettiNumbers::Dell']]],
-  ['add_5fconncomp_1',['add_ConnComp',['../class_morse_theory_1_1src_1_1_algorithms_1_1_connectivity_graph_1_1_graph.html#a11c3e65e82a220f86d97b65ae703ac97',1,'MorseTheory::src::Algorithms::ConnectivityGraph::Graph']]],
-  ['add_5fedge_2',['add_Edge',['../class_morse_theory_1_1src_1_1_algorithms_1_1_connectivity_graph_1_1_graph.html#ac911fdc8083283f8e43c9469aa5f928f',1,'MorseTheory::src::Algorithms::ConnectivityGraph::Graph']]],
-  ['add_5fneighbor_3',['add_neighbor',['../class_morse_theory_1_1src_1_1_algorithms_1_1_connectivity_graph_1_1_conn_comp.html#a046de132808765098e0527ba1e6ceb7f',1,'MorseTheory::src::Algorithms::ConnectivityGraph::ConnComp']]],
-  ['add_5fvertex_4',['add_vertex',['../class_morse_theory_1_1src_1_1_algorithms_1_1_load_data_1_1_datastructure_1_1_morse_complex.html#a97242d38e616e7afaa35b65331978f1e',1,'MorseTheory::src::Algorithms::LoadData::Datastructure::MorseComplex']]],
-  ['add_5fweightededge_5',['add_weightedEdge',['../class_morse_theory_1_1src_1_1_algorithms_1_1_connectivity_graph_1_1_graph.html#a1e788e3399089a7abe2e1e8834e4169a',1,'MorseTheory::src::Algorithms::ConnectivityGraph::Graph']]],
-  ['addend_6',['addEnd',['../class_morse_theory_1_1src_1_1_algorithms_1_1_tree_1_1_tree.html#a238a2de855a63c3ec350ab538e9d844b',1,'MorseTheory::src::Algorithms::Tree::Tree']]],
-  ['addnode_7',['addNode',['../class_morse_theory_1_1src_1_1_algorithms_1_1_tree_1_1_tree.html#ae082175bbc75316048b69bc7dbd7da5e',1,'MorseTheory.src.Algorithms.Tree.Tree.addNode()'],['../class_morse_theory_1_1src_1_1_algorithms_1_1_tree_1_1_node.html#ae082175bbc75316048b69bc7dbd7da5e',1,'MorseTheory.src.Algorithms.Tree.Node.addNode()']]]
+  ['add_328',['add',['../classMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers_1_1Dell.html#a98abc45da47d8a91d5ac6b854a4b7c20',1,'MorseTheory::src::Algorithms::BettiNumbers::Dell']]],
+  ['add_5fboundary_5fto_5flabel_329',['add_boundary_to_label',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1MorseCells.html#a328da8955575fd8575d6fb01e5cf28be',1,'MorseTheory::src::Algorithms::LoadData::Datastructure::MorseCells']]],
+  ['add_5fcell_330',['add_cell',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1MorseCells.html#a012389113444c040372e4e6dabda354e',1,'MorseTheory::src::Algorithms::LoadData::Datastructure::MorseCells']]],
+  ['add_5fneighboring_5fcell_5flabels_331',['add_neighboring_cell_labels',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1MorseCells.html#a99d48a884698c416a13ec5e1eda097f6',1,'MorseTheory::src::Algorithms::LoadData::Datastructure::MorseCells']]],
+  ['add_5fsalient_5fedge_5fpoints_332',['add_salient_edge_points',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1MorseCells.html#aae4ca2d1aa23e0617de08e7c2f5a04c5',1,'MorseTheory::src::Algorithms::LoadData::Datastructure::MorseCells']]],
+  ['add_5fvertex_333',['add_vertex',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1MorseComplex.html#a97242d38e616e7afaa35b65331978f1e',1,'MorseTheory::src::Algorithms::LoadData::Datastructure::MorseComplex']]],
+  ['add_5fvertex_5fto_5flabel_334',['add_vertex_to_label',['../classMorseTheory_1_1src_1_1Algorithms_1_1LoadData_1_1Datastructure_1_1MorseCells.html#a8084b648251b8eb290e7a0e6c0e55c88',1,'MorseTheory::src::Algorithms::LoadData::Datastructure::MorseCells']]],
+  ['addend_335',['addEnd',['../classMorseTheory_1_1src_1_1Algorithms_1_1Tree_1_1Tree.html#a238a2de855a63c3ec350ab538e9d844b',1,'MorseTheory::src::Algorithms::Tree::Tree']]],
+  ['addnode_336',['addNode',['../classMorseTheory_1_1src_1_1Algorithms_1_1Tree_1_1Tree.html#ae082175bbc75316048b69bc7dbd7da5e',1,'MorseTheory.src.Algorithms.Tree.Tree.addNode()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1Tree_1_1Node.html#ae082175bbc75316048b69bc7dbd7da5e',1,'MorseTheory.src.Algorithms.Tree.Node.addNode()']]]
 ];

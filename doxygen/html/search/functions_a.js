@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['length_0',['length',['../class_morse_theory_1_1src_1_1_algorithms_1_1_cancellation_queue_1_1_cancellation_queue.html#a9ce4d38e7521431497617e1e793fda6d',1,'MorseTheory::src::Algorithms::CancellationQueue::CancellationQueue']]],
-  ['load_5fmesh_5fply_1',['load_mesh_ply',['../class_morse_theory_1_1src_1_1morse_1_1_morse.html#ad6d2ae6dddc277e5afd8c2ee5856ba42',1,'MorseTheory::src::morse::Morse']]],
-  ['load_5fnew_5ffunvals_2',['load_new_funvals',['../class_morse_theory_1_1src_1_1morse_1_1_morse.html#a63fbae59baf56933b32f8c83ef385949',1,'MorseTheory::src::morse::Morse']]],
-  ['lower_5fstar_3',['lower_star',['../namespace_morse_theory_1_1src_1_1_algorithms_1_1_process_lower_stars.html#ac20921359894999084709489c36a66b6',1,'MorseTheory::src::Algorithms::ProcessLowerStars']]]
+  ['nonzero_374',['nonzero',['../classMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers_1_1Dell.html#ad7e5aa42eeffeca6264ca609e311aa69',1,'MorseTheory::src::Algorithms::BettiNumbers::Dell']]],
+  ['notempty_375',['notEmpty',['../classMorseTheory_1_1src_1_1Algorithms_1_1CancellationQueue_1_1CancellationQueue.html#a54c82b62f8b5b2ec3e02cb64027e112f',1,'MorseTheory.src.Algorithms.CancellationQueue.CancellationQueue.notEmpty()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1PriorityQueue_1_1PriorityQueue.html#a54c82b62f8b5b2ec3e02cb64027e112f',1,'MorseTheory.src.Algorithms.PriorityQueue.PriorityQueue.notEmpty()']]],
+  ['num_5funpaired_5ffaces_376',['num_unpaired_faces',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1ProcessLowerStars.html#af6141792c84b5824e207cc424f38ab31',1,'MorseTheory::src::Algorithms::ProcessLowerStars']]]
 ];
