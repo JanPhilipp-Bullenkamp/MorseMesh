@@ -195,7 +195,7 @@ class Morse(Mesh):
         elif self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
             raise ValueError('No Morse cells computed for the Morse complex with this persistence!')
         else:
-            write_labels_txt_file(self.reducedMorseComplexes[persistence].MorseCells, filename)
+            write_labels_txt_file(self.reducedMorseComplexes[persistence].MorseCells.Cells, filename)
             
     def plot_salient_edge_histogram(self, nb_bins = 15, log=False, filename = None):
         if not self._flag_SalientEdge:
@@ -315,7 +315,7 @@ class Morse(Mesh):
             print("Need to maximally reduce MorseComplex first...")
             self.ReduceMorseComplex(self.range)
         edges = edge_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
-                               self.Vertices, self.Edges, self.Faces
+                               self.Vertices, self.Edges, self.Faces)
         return edges
     
     def Pipeline(self, infilename, outfilename, quality_index, inverted, 

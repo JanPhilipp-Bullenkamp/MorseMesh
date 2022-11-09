@@ -4,7 +4,7 @@ import timeit
 from copy import deepcopy
 
 from .CancellationQueue import CancellationQueue
-from .LoadData.Datastructure import Separatrix
+from .LoadData.Datastructure import Separatrix, MorseCells
 
 def get_closest_extremum(crit_edge, vert_dict, face_dict):
     distances = []
@@ -266,10 +266,11 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     
-    # reset Morse cells and Betti numbers if necessary
+    # reset Morse cells, Segmentation and Betti numbers if necessary
     if redMorseComplex._flag_MorseCells:
-        redMorseComplex.MorseCells = {}
+        redMorseComplex.MorseCells = MorseCells()
         redMorseComplex._flag_MorseCells = False
+        redMorseComplex.Segmentations = {}
     if redMorseComplex._flag_BettiNumbers:
         redMorseComplex.BettiNumbers = None
         redMorseComplex._flag_BettiNumbers = False
