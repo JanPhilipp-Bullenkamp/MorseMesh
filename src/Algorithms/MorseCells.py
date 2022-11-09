@@ -2,12 +2,7 @@ from collections import Counter
 import timeit
 from .plot_bdpts import write_overlay_bd
 
-from .LoadData.weight_metrics import compute_weight_saledge, compute_weight_normals, compute_weight_normalvariance
 from .LoadData.Datastructure import Cell, MorseCells
-'''
-first part: get MorseCells
-second part: get connectivity graph
-'''
 
 def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
     bd_points = set()
@@ -171,15 +166,6 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
     if count_no_label_after_2it > 0:
         print("Have ", count_no_label_after_2it, " boundary points that could not be labelled in 2 iterations...")
     
-    '''
-    c=0        
-    for vert_ind, vert in vert_dict.items():
-        if vert.label == -1:
-            c+=1
-    print(c, "vert no label")
-    print(len(boundary_points),"bd pts")
-    '''
-    
     # cleanup: 
     # mark that we have Morse cells for this complex and
     # need to reset boundary and labels as they are only part of the original mesh class
@@ -192,28 +178,3 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
     print("Time get MorseCells for ", MorseComplex.persistence,"persistence: ", end_time)
     
     return MorseComplex.MorseCells
-
-
-from .ConnectivityGraph import Graph
- 
-def create_SalientEdgeCellConnectivityGraph(MorseCells, salient_points, vert_dict, edge_dict):
-    start_time = timeit.default_timer()
-    
-    
-    # create graph with all labels
-    ConnGraph = Graph()
-    for cell in MorseCells.values():
-        ConnGraph.add_ConnComp(cell)
-        
-    var = []
-    for label, cell in MorseCells.items():
-        for neighbor_label, points_here in cell.neighbors.items():
-            # need points on both sides of the bopundary
-            points_there = MorseCells[neighbor_label].neighbors[label]
-            
-            weight = compute_weight_saledge(points_here.union(points_there), salient_points)
-            ConnGraph.add_weightedEdge(label, neighbor_label, weight)
-        
-    end_time = timeit.default_timer() -start_time
-    print("Time get weighted ConnectivityGraph: ", end_time)
-    return ConnGraph

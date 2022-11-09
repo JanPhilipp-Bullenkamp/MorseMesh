@@ -19,6 +19,7 @@
 
 # imports
 from copy import deepcopy
+import timeit
 
 from .weight_metrics import compute_weight_saledge
 from ..CancellationQueue import CancellationQueue
@@ -448,6 +449,8 @@ class MorseComplex:
         self.CritVertices[vert.index] = critvert
         
     def create_segmentation(self, salient_edge_points, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+        start_time = timeit.default_timer()
+        
         if self._flag_MorseCells == False:
             raise AssertionError("No Morse Cells calculated yet...")
         SegmentationCells = deepcopy(self.MorseCells)
@@ -462,6 +465,9 @@ class MorseComplex:
             raise AssertionError("This parameter combination has already been calculated...")
         else:
             self.Segmentations[(thresh_large, thresh_small)][merge_threshold] = SegmentationCells
+            
+        end_time = timeit.default_timer() - start_time
+        print("Time Segmentation: ", end_time)
         
     def info(self):
         """! @brief Prints out an info block about this Morse Complex."""
