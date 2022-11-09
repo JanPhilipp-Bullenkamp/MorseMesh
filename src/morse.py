@@ -35,7 +35,7 @@ from src.Algorithms.ReduceMorseComplex import CancelCriticalPairs
 from src.Algorithms.BettiNumbers import BettiViaPairCells
 
 from src.Algorithms.MorseCells import get_MorseCells
-from src.Algorithms.SalientEdgeIndices import get_salient_edge_indices
+from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
 
 from src.Algorithms.PersistenceDiagram import PersistenceDiagram
 
@@ -309,32 +309,9 @@ class Morse(Mesh):
         if not self._flag_SalientEdge:
             print("Need to maximally reduce MorseComplex first...")
             self.ReduceMorseComplex(self.range)
-        strong_edge, weak_edge = get_salient_edge_indices(self.maximalReducedComplex, thresh_high, thresh_low, 
-                                                          self.Vertices, self.Edges, self.Faces)
-        
-        if len(weak_edge) != 0:
-            queue = []
-            for ind in strong_edge:
-                for nei in self.Vertices[ind].neighbors:
-                    if nei in weak_edge:
-                        queue.append(nei)
-                        weak_edge.remove(nei)
-
-            added = len(queue)
-            for elt in queue:
-                strong_edge.add(elt)
-
-            while len(queue) != 0:
-                ind = queue.pop(0)
-                for nei in self.Vertices[ind].neighbors:
-                    if nei in weak_edge:
-                        queue.append(nei)
-                        strong_edge.add(nei)
-                        weak_edge.remove(nei)
-                        added+=1
-        #write_overlay_bd(strong_edge, self.Vertices, "test_"+str(thresh_low)+"-"+str(thresh_high))            
-        #print("Added", added, "points by weak threshold in", thresh_low, thresh_high)
-        return strong_edge
+        edges = edge_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
+                               self.Vertices, self.Edges, self.Faces
+        return edges
     
     def Pipeline(self, infilename, outfilename, quality_index, inverted, 
                  persistences, high_thresh, low_thresh, merge_thresh):

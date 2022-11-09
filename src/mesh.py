@@ -25,11 +25,6 @@
 # - MorseComplex
 # - reducedMorseComplexes
 # - maximalReducedComplex
-# - MorseCells
-#
-# @section segmentation_related_tructures Segmentation related Structures
-# - Segmentation
-# - SegmentationDual
 
 class Mesh:
     """! @brief Mesh class used to store mesh, Morse Theory and Segmentation related structures."""

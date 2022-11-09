@@ -2,7 +2,11 @@
 # @file PriorityQueue.py
 #
 # @brief Contains a PriorityQueue class
+#
+# @section libraries_PriorityQueue Libraries/Modules
+# - heapq standard library
 
+# imports
 import heapq
 
 class PriorityQueue(object):
