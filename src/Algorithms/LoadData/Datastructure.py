@@ -5,8 +5,7 @@
 #
 # @section normal_mesh_parts Normal Mesh Parts
 # - Vertex class
-# - Edge class
-# - Face class
+# - Simplex class
 #
 # @section critical_simplices Critical Simplices
 # - CritVertex class
@@ -14,8 +13,12 @@
 # - CritFace class
 #
 # @section morse_complex_related Morse Complex Related
-# - Separatrix
-# - MorseComplex
+# - Separatrix class
+# - MorseComplex class
+#
+# @section segmentation_related Segmentation Related
+# - Cell class
+# - MorseCells class
 
 # imports
 from copy import deepcopy
@@ -391,13 +394,17 @@ class Separatrix:
         
     
 class MorseComplex:
-    """! @brief A Morse Complex, that stores a reduced skeleton of the original mesh/simplicial complex and has the same topology.
+    """! @brief A Morse Complex, that stores a reduced skeleton of the original mesh/simplicial complex 
+    and has the same topology. Also stores MorseCells and various Segmentations for this persistence level.
     
     @details A Morse Complex consists of critical vertices, edges and faces, representing minima, saddles and maxima of the 
-    assigned scalar Morse function on the mesh. These critical simplices are connected via separatrices, that give information on 
-    how the gradient "flows" from the maxima to the saddles and from the saddles to the minima. This gives a topological skelton 
-    of the mesh which can be noise reduced using a parameter called persistence. The topologicallly relveant Betti numbers can be 
-    stored as well.
+    assigned scalar Morse function on the mesh. These critical simplices are connected via separatrices, that give 
+    information on how the gradient "flows" from the maxima to the saddles and from the saddles to the minima. 
+    This gives a topological skelton of the mesh which can be noise reduced using a parameter called persistence. 
+    The topologicallly relveant Betti numbers can be stored as well.
+    Since the skeleton provides us with enclosed areas on a mesh as well, each Morse Complex can also contain 
+    MorseCells, which give a segmentation in between the skeleton of the mathematical complex, as well as different 
+    segmentations that started from the MorseCells of the MorseComplex and got reduced based on defined ridges.
     """
     ## @var CritVertices
     # A dictionary storing the critical vertices. Key is the vertex index and value the CritVertex class object.
@@ -407,6 +414,13 @@ class MorseComplex:
     # A dictionary storing the critical faces. Key is the face index and value the CritFace class object.
     ## @var Separatrices
     # A list storing the Separatrix class objects.
+    ## @var _flag_MorseCells
+    # Boolean whether the Morse Cells for this Morse Complex have been calculated.
+    ## @var MorseCells
+    # A MorseCells class object storing the MorseCells for this MorseComplex persistence.
+    ## @var Segmentations
+    # A dictionary storing different Segmentations at this persistence level. 
+    # Can be accessed via .Segmentations[(large_thr, small_thr)][merge_thr] and contains Morse Cell objects.
     ## @var _flag_BettiNumbers
     # Boolean wether the Betti numbers have been calculated or not.
     ## @var BettiNumbers
@@ -449,6 +463,21 @@ class MorseComplex:
         self.CritVertices[vert.index] = critvert
         
     def create_segmentation(self, salient_edge_points, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+        """! @brief Creates a segmentation from this MorseComplex with the given double edge threshold 
+        and the merging threshold.
+        
+        @details Creates a copy of the Morse cells at this persistence level and than segments 
+        based on the given parameters. Segemntation stops when either no more cells can be
+        merged due to no more adjacent cells having a weight below the merge threshold, or 
+        reaching the optional minimum number of labels (which is defaulted to 3).
+        
+        @param salient_edge_points The salient edge points that have been calcualted from the double threshold
+        @param thresh_large The larger threshold of the double threshold that was used to get the edge points.
+        @param thresh_small The smaller threshold of the double threshold that was used to get the edge points.
+        @param merge_threshold The threshold that determines when to stop merging cells. Weights in the 
+        neighborhood graph of the Morse cells will be above this threshold.
+        @param minimum_labels The minimum number of labels we want to keep. Default is set to 3
+        """
         start_time = timeit.default_timer()
         
         if self._flag_MorseCells == False:
@@ -490,8 +519,25 @@ class MorseComplex:
         
         
 class Cell:
-    
+    """! @brief A single cell that will be used in the MorseCells. Stores one connected component and
+    the relations to adjacent cells.
+    """
+    ## @var label
+    # The label of this cell.
+    ## @var vertices
+    # A set of vertices making up this cell
+    ## @var boundary
+    # A set of the boundary vertices of this cell. (also contained in vertices)
+    ## @var neighbors
+    # A dictionary storing neighbor_label, boundary_to_neighbor pairs. boundary_to_neighbor is a set
+    # the vertices that border the cell with the neighbor_label.
+    ## @var neighbors_weights
+    # A dictionary storing neighbor_label, weight pairs, where the weight gives the weight for the 
+    # connection between these two cells.
     def __init__(self, label):
+        """! @brief The constructor of a Cell object.
+        @param label The label of this cell object.
+        """
         self.label = label
         
         self.vertices = set()
@@ -500,11 +546,24 @@ class Cell:
         self.neighbors = {}
         self.neighbors_weights = {}
         
-        #self.neighborlist = []
-        
         
 class MorseCells:
+    """! @brief An object storing Morse Cells that segment the given mesh. Also allows to use further 
+    segmentation than the original MorseComplex provides.
+    
+    @details ....
+    """
+    ## @var Cells
+    # A dictionary of Cell objects, with the labels as keys.
+    ## @var salient_edge_points
+    # Edge points that are used for further segmentation.
+    ## @var threshold
+    # Double threshold that was used to get these edge points. A tuple of (large_thr, small_thr).
+    ## @var merge_threshold
+    # The merge threhsold that was used in the segmentation.
     def __init__(self):
+        """! @brief The constructor of the MorseCells object.
+        """
         self.Cells = {}
         
         # only for segmentation cells:
@@ -515,6 +574,12 @@ class MorseCells:
         
         
     def add_salient_edge_points(self, salient_edge_points, threshold):
+        """! @brief Adds salient edge points for a given threshold to this MorseCells object.
+        
+        @param salient_edge_points The salient edge points we want to use for further segmentation.
+        @param threshold The double threshold that was used to get these edge points. 
+        A tuple of (large_thr, small_thr).
+        """
         if self.salient_edge_points != None:
             raise AssertionError("This MorseCell object already contains salient edge points ...")
         if self.threshold != None:
@@ -523,21 +588,44 @@ class MorseCells:
         self.threshold = threshold
         
     def add_cell(self, cell):
+        """! @brief Adds a cell to the MorseCells.
+        
+        @param cell A Cell object that is added the the MorseCells.
+        """
         self.Cells[cell.label] = cell
         
     def add_vertex_to_label(self, label, index):
+        """! @brief Adds a vertex to a cell with a given label.
+        
+        @param label The label of the cell that the vertex should be added to.
+        @param index The index of the vertex that should be added to the cell. 
+        """
         if label not in self.Cells.keys():
             raise ValueError("This label is not part of the Morse cells: ", label)
-            
         self.Cells[label].vertices.add(index)
         
     def add_boundary_to_label(self, label, index):
+        """! @brief Adds a boundary vertex to a cell with a given label.
+        
+        @param label The label of the cell that the vertex should be added to.
+        @param index The index of the vertex that should be added as boundary to the cell. 
+        """
         if label not in self.Cells.keys():
             raise ValueError("This label is not part of the Morse cells: ", label)
-            
+        self.Cells[label].vertices.add(index)
         self.Cells[label].boundary.add(index)
         
     def add_neighboring_cell_labels(self, label1, v1, label2, v2):
+        """! @brief Connects two cells if necessary and updates their boundray points.
+        
+        @details Connects label 1 and label 2 if necessary and stores the vertices v1 and v2 as
+        the according neighboring points.
+        
+        @param label1 One of the labels that should be connected.
+        @param v1 The vertex for label1 neighboring label2.
+        @param label2 One of the labels that should be connected.
+        @param v2 The vertex for label2 neighboring label1.
+        """
         if label1 not in self.Cells.keys():
             raise ValueError("This label is not part of the Morse cells: ", label1)
         if label2 not in self.Cells.keys():
@@ -564,6 +652,7 @@ class MorseCells:
         self.Cells[label1].neighbors[label2].add(v2)
         
     def calculate_all_weights(self):
+        """! @brief Calculate all weights between neighboring cells. """
         for label, cell in self.Cells.items():
             for nei_label, points_here in cell.neighbors.items():
                 # need points on both sides of the bopundary
@@ -575,6 +664,13 @@ class MorseCells:
                 self.Cells[nei_label].neighbors_weights[label] = weight
                 
     def calculate_weight_between_two_cells(self, label1, label2):
+        """! @brief Calculate weights between two adjacent labels.
+        
+        @param label1 One of the neigboring labels.
+        @param label2 One of the neigboring labels.
+        
+        @return weight The calculated weight between the two cells.
+        """
         points1 = self.Cells[label1].neighbors[label2]
         points2 = self.Cells[label2].neighbors[label1]
         
@@ -586,12 +682,24 @@ class MorseCells:
         return weight
                 
     def merge_cells(self, label1, label2, pop_label2=True):
-        # 1. add vertices and boundary to label 1 cell
-        # 2. remove boundary btw 1 and 2 from new combined boundary
-        # 3. add neighbors from label 2 to label 1 (except label1)
-        # 4. remove label 2 from its neighbors and add label 1 as new neighbor
-        # 5. if both labels had a common neighbor: recompute weight 
+        """! @brief Merges the label2 cell into the label1 cell and updates the weights and surrounding
+        adjacencies.
         
+        @details Merges the label2 cell into the label1 cell. The weights and surrounding
+        adjacencies are updated accordingly, such that all former connections of label2 are now 
+        connected to label1 and have their weights updated. Label2 is removed from all neighbor 
+        dictionaries and the label 2 cell is deleted after all its points were tramsferred to label 1.
+        
+        @param label1 The cell label that will remain and be merged into.
+        @param label2 The cell label that will be merged into the other cell and deleted.
+        @param pop_label2 Boolean. Default is True. If False, all adjacencies are updated, but the
+        label 2 cell is not popped yet. This allows to loop over the Cells dictionary and removing the 
+        labels later
+        
+        @return updated_weights A list containing triples (new_weight, label1, neighbor) that give the 
+        updated weights. (Weights are updated, if the two merging cells have a common neighbor, as the 
+        new boundary than contains unknown parts of both labels) 
+        """
         updated_weights = []
         
         # do 1. and 2.:
@@ -648,6 +756,11 @@ class MorseCells:
         
         
     def remove_small_enclosures(self, size_threshold = 15):
+        """! @brief Removes small cells, that are fully enclosed by a single other label.
+        
+        @param size_threshold (Optional) Default is set to 15. If cells have fewer than this parameter
+        vertices, they are merged into their surrounding cell.
+        """
         remove = set()
         for label, cell in self.Cells.items():
             if len(cell.neighbors.keys()) == 1 and len(cell.vertices) < size_threshold:
@@ -667,6 +780,11 @@ class MorseCells:
             self.Cells.pop(label)
             
     def remove_small_patches(self, size_threshold = 15):
+        """! @brief Removes small cells, that have fewer than a threshold vertices.
+        
+        @param size_threshold (Optional) Default is set to 15. If cells have fewer than this parameter
+        vertices, they are merged into their their lowest weight neighboring cell.
+        """
         remove = set()
         for label, cell in self.Cells.items():
             if len(cell.vertices) < size_threshold:
@@ -680,6 +798,19 @@ class MorseCells:
             self.Cells.pop(label)
                 
     def segment(self, merge_threshold, minimum_labels):
+        """! @brief Makes this MorseCells object a Segmentation, based on the salient edge points stored 
+        in this MorseCells object and a given merge_threshold and minim_labels number.
+        
+        @details Requires this MorseCells object to contain salient edge points. Based on those, the 
+        weights between neighboring cells are calculated and then cells are merged using a Priority 
+        Queue to make sure to merge cells first if they have a low weight. Merging stops if either 
+        no more cell adjacencies have a weight below the threshold or the minimum number of labels 
+        is reached. This MorseCell object then becomes the segmentation.
+        
+        @param merge_threshold The threshold for weights between adjacent cells to stop merging.
+        @param minimum_labels A minimum number of labels that will stop the merging process if it is reached.
+        (Otherwise the merge threshold is the stopping criterium)
+        """
         if self.salient_edge_points == None or self.threshold == None:
             raise AssertionError("Cannot segment if no salient edge points are loaded to these Morse cells!")
         if self.merge_threshold != None:
@@ -723,22 +854,4 @@ class MorseCells:
                         #print("weight has changed but connection still there...")
                         
         # remove small patches
-        self.remove_small_patches(size_threshold=500)
-        
-        
-        
-                
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        self.remove_small_patches(size_threshold=500)         
