@@ -15,26 +15,26 @@ def construct_labels(lower_star, edges_dict, faces_dict, labels_dict):
 
     for key in lower_star['faces'].keys():
         labels['faces'][key] = set()
-        for i in edges_dict[key].indices:
+        for i in faces_dict[key].indices:
             labels['faces'][key].add(labels_dict[i])
 
     return labels
 
-def num_unpaired_conforming_faces(face, PQzero, edges_dict, faces_dict, star_labels):
+def num_unpaired_conforming_faces(Findex, face, PQzero, star_labels):
     # checks number of faces in PQzero ( should be equal to number of unpaired faces in lower star, 
     # since all edges from lower star go to PQzero or are paired/ added to C and removed from PQzero)
     number = 0
-    for key in PQzero.keys():
-        if len(edges_dict[key].indices) == 2:
-            if (edges_dict[key].indices).issubset(faces_dict[face].indices):
-                number+=1
+    for simplex, index in PQzero.items():
+        if face.has_face(simplex) and star_labels['faces'][Findex] == star_labels['edges'][index]:
+            number+=1
     return number
 
-def pair(face, PQzero, edges_dict, faces_dict, star_labels):
-    for key in PQzero.keys():
-        if len(edges_dict[key].indices) ==2:
-            if (edges_dict[key].indices).issubset(faces_dict[face].indices):
-                return key, PQzero.pop_key(key)
+def conforming_pair(Findex, face, PQzero, star_labels):
+    for simplex, index in PQzero.items():
+        if face.has_face(simplex) and star_labels['faces'][Findex] == star_labels['edges'][index]:
+            # need to pop the element from the Priority queue
+            PQzero.pop(tuple((simplex,index)))
+            return index, simplex
 
 def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V12, V23):
     start_eff = timeit.default_timer()
@@ -49,51 +49,55 @@ def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V1
         
             label_set = {labels_dict[vertex.index]}
             
-            conformingEdges = {key for key in lower_star['edges'].keys() if star_labels['edges'][key] == label_set}
+            conformingEdges = [Eindex for Eindex in lowerStar['edges'].keys() if star_labels['edges'][Eindex] == label_set]
 
             if len(conformingEdges) == 0:
                 C[0].add(vertex.index)
             else:
-                key = conformingEdges.popitem()
-                delta_key, delta_value = lowerStar['edges'].pop(key)
-                V12[vertex.index] = delta_key
+                delta_Eindex = conformingEdges.pop()
+                delta_edge = lowerStar['edges'].pop(delta_Eindex)
+                V12[vertex.index] = delta_Eindex
 
             PQzero = PriorityQueue()
             PQone = PriorityQueue()
             
-            for key, value in lowerStar['edges'].items():
-                PQzero.insert(tuple((key, value)))
+            for Eindex, edge in lowerStar['edges'].items():
+                PQzero.insert(tuple((edge, Eindex)))
             
-            for key, value in lowerStar['faces'].items():
-                if (num_unpaired_conforming_faces(key, PQzero, edges_dict, faces_dict, star_labels) == 1 and value > delta_value):
-                    PQone.insert(tuple((key, value)))
+            for Findex, face in lowerStar['faces'].items():
+                if (num_unpaired_conforming_faces(Findex, face, PQzero, star_labels) == 1 and face.has_face(delta_edge)):
+                    PQone.insert(tuple((face, Findex)))
+                elif (num_unpaired_conforming_faces(Findex, face, PQzero, star_labels) == 0): #??? otherwise some faces might never be visited?
+                    PQzero.insert(tuple((face, Findex)))
 
             while (PQone.notEmpty() or PQzero.notEmpty()):
                 while PQone.notEmpty():
-                    alpha_key, alpha_value = PQone.pop_front()
+                    alpha_simplex, alpha_index = PQone.pop_front()
                     
-                    if num_unpaired_conforming_faces(alpha_key, PQzero, edges_dict, faces_dict) == 0:
-                        PQzero.insert(tuple((alpha_key, alpha_value)))
+                    if num_unpaired_conforming_faces(alpha_index, alpha_simplex, PQzero, star_labels) == 0:
+                        PQzero.insert(tuple((alpha_simplex, alpha_index)))
 
                     else:
-                        pair_key, pair_value = pair(alpha_key, PQzero, edges_dict, faces_dict)
-                        V23[pair_key] = alpha_key
+                        pair_index, pair_simplex = conforming_pair(alpha_index, alpha_simplex, PQzero, star_labels)
+                        V23[pair_index] = alpha_index
 
-                        for key, value in lowerStar['faces'].items():
-                            if (num_unpaired_conforming_faces(key,PQzero, edges_dict, faces_dict) == 1 and (value > alpha_value or value > pair_value)):
-                                PQone.insert(tuple((key, value)))
+                        ########
+
+                        for Findex, face in lowerStar['faces'].items():
+                            if (num_unpaired_conforming_faces(alpha_index, alpha_simplex, PQzero, star_labels) == 1 and (face.has_face(alpha_simplex) or face.has_face(pair_simplex))):
+                                PQone.insert(tuple((face, Findex)))
                 
                 if PQzero.notEmpty():
-                    gamma_key, gamma_value = PQzero.pop_front()
+                    gamma_simplex, gamma_index = PQzero.pop_front()
                     
-                    if len(gamma_value) == 2:
-                        C[1].add(gamma_key)
-                    if len(gamma_value) == 3:
-                        C[2].add(gamma_key)
+                    if len(gamma_simplex.indices) == 2:
+                        C[1].add(gamma_index)
+                    if len(gamma_simplex.indices) == 3:
+                        C[2].add(gamma_index)
                     
-                    for key, value in lowerStar['faces'].items():
-                        if (num_unpaired_conforming_faces(key,PQzero, edges_dict, faces_dict) == 1 and value > gamma_value):
-                            PQone.insert(tuple((key, value)))
+                    for Findex, face in lowerStar['faces'].items():
+                        if (num_unpaired_conforming_faces(alpha_index, alpha_simplex, PQzero, star_labels) == 1 and face.has_face(gamma_simplex)):
+                            PQone.insert(tuple((face, Findex)))
 
     time_eff = timeit.default_timer() -start_eff
     print('Time ProcessLowerStar:', time_eff)
