@@ -1,26 +1,6 @@
 var searchData=
 [
-  ['pair_377',['pair',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1ProcessLowerStars.html#aa174a0f2cae7ee8a7399692668b1a59b',1,'MorseTheory::src::Algorithms::ProcessLowerStars']]],
-  ['pair_5fcells_378',['pair_cells',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers.html#a7e07e67670fd5fa5126e3492754c23a2',1,'MorseTheory::src::Algorithms::BettiNumbers']]],
-  ['persistencediagram_379',['PersistenceDiagram',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1PersistenceDiagram.html#afada77192c5ad484c8b87f443b02133d',1,'MorseTheory::src::Algorithms::PersistenceDiagram']]],
-  ['pipeline_380',['Pipeline',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#ab78ecb1eb18dda2958d51e0b893ab557',1,'MorseTheory::src::morse::Morse']]],
-  ['pipeline_5fsemiauto_381',['Pipeline_semiAuto',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a204bef0e6b5516d34f97a24e0b637edc',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fdouble_5fthresh_5fsalient_5fedge_382',['plot_double_thresh_salient_edge',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a0fad14c65007009e2611aa3bed49d089',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5ffun_5fval_5fhistogramm_383',['plot_fun_val_histogramm',['../namespaceMorseTheory_1_1src_1_1PlotData_1_1plot__fun__val__statistics.html#a48182a5d951a4850fd37d6585f7549ba',1,'MorseTheory::src::PlotData::plot_fun_val_statistics']]],
-  ['plot_5ffunval_5fhistogram_384',['plot_funval_histogram',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a346174581d06bfb3479c1e390883d322',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fimproved_5fsalient_5fedge_385',['plot_improved_salient_edge',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a932df187b1e021973055867fe49e6423',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fmorsecells_386',['plot_MorseCells',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a6845538b3b8466ffa7adb40b553d65a8',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fmorsecomplex_387',['plot_MorseComplex',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a96d18f0ae6801f2649fc33032f4aba1c',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fmorsecomplex_5fpline_388',['plot_MorseComplex_pline',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a12351fe1c63122a5a5075cc447e95478',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fmorsecomplex_5fthresholded_389',['plot_MorseComplex_thresholded',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a3edf20853c0ac315f36dda92257b3a86',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fmorsecomplex_5fthresholded_5fpline_390',['plot_MorseComplex_thresholded_pline',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a92e6ad984acf7f0d314dc82462baf003',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fpersistencediagram_391',['plot_PersistenceDiagram',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a861d8c748246f19a69958e3bfce3d917',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fsalient_5fedge_392',['plot_salient_edge',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a33466defb9f8b6c4bb06d100f989c2ef',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fsalient_5fedge_5fhistogram_393',['plot_salient_edge_histogram',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#ad945f712ccf407bb181bae3cbf5fe011',1,'MorseTheory::src::morse::Morse']]],
-  ['plot_5fsalient_5fedge_5fhistogramm_394',['plot_salient_edge_histogramm',['../namespaceMorseTheory_1_1src_1_1PlotData_1_1write__salient__edge__overlay.html#a68f7ca365464fde7ec3eb50071cfb62e',1,'MorseTheory::src::PlotData::write_salient_edge_overlay']]],
-  ['plot_5fsalient_5fedge_5fpline_395',['plot_salient_edge_pline',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a2bdf9799b9f09887ab9ec9b56e9d49f0',1,'MorseTheory::src::morse::Morse']]],
-  ['pop_396',['pop',['../classMorseTheory_1_1src_1_1Algorithms_1_1PriorityQueue_1_1PriorityQueue.html#aae58f640c2c4b7b35bdfe6fdccb8bfdd',1,'MorseTheory::src::Algorithms::PriorityQueue::PriorityQueue']]],
-  ['pop_5ffront_397',['pop_front',['../classMorseTheory_1_1src_1_1Algorithms_1_1PriorityQueue_1_1PriorityQueue.html#adba7d6852d5d7a26ea7cacbcfbc8bd0f',1,'MorseTheory.src.Algorithms.PriorityQueue.PriorityQueue.pop_front()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1CancellationQueue_1_1CancellationQueue.html#adba7d6852d5d7a26ea7cacbcfbc8bd0f',1,'MorseTheory.src.Algorithms.CancellationQueue.CancellationQueue.pop_front()']]],
-  ['potential_5fcells_398',['potential_cells',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1ExtractMorseComplex.html#a19b6886e579019665ab8e3c41f634323',1,'MorseTheory::src::Algorithms::ExtractMorseComplex']]],
-  ['processlowerstars_399',['ProcessLowerStars',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#af87ccdd03beba4ad1f958d3215357bc6',1,'MorseTheory.src.morse.Morse.ProcessLowerStars()'],['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1ProcessLowerStars.html#a93682ab80619726a6f8fc0cdcf51e4ea',1,'MorseTheory.src.Algorithms.ProcessLowerStars.ProcessLowerStars()']]]
+  ['nonzero_332',['nonzero',['../classMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers_1_1Dell.html#ad7e5aa42eeffeca6264ca609e311aa69',1,'MorseTheory::src::Algorithms::BettiNumbers::Dell']]],
+  ['notempty_333',['notEmpty',['../classMorseTheory_1_1src_1_1Algorithms_1_1CancellationQueue_1_1CancellationQueue.html#a54c82b62f8b5b2ec3e02cb64027e112f',1,'MorseTheory.src.Algorithms.CancellationQueue.CancellationQueue.notEmpty()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1PriorityQueue_1_1PriorityQueue.html#a54c82b62f8b5b2ec3e02cb64027e112f',1,'MorseTheory.src.Algorithms.PriorityQueue.PriorityQueue.notEmpty()']]],
+  ['num_5funpaired_5ffaces_334',['num_unpaired_faces',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1ProcessLowerStars.html#af6141792c84b5824e207cc424f38ab31',1,'MorseTheory::src::Algorithms::ProcessLowerStars']]]
 ];

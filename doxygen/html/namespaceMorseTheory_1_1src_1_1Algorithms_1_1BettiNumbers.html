@@ -76,15 +76,19 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers_1_1Dell.html">Dell</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A class to contain and check boundaries.  <a href="classMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers_1_1Dell.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a925206ecbc0a884f3c76ab247051180d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers.html#a925206ecbc0a884f3c76ab247051180d">BettiViaPairCells</a> (MorseComplex)</td></tr>
+<tr class="memdesc:a925206ecbc0a884f3c76ab247051180d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The wrapper for the PairCells algorithm described by Zomorodian.  <a href="namespaceMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers.html#a925206ecbc0a884f3c76ab247051180d">More...</a><br /></td></tr>
 <tr class="separator:a925206ecbc0a884f3c76ab247051180d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab13678a0e54fd01d82a17c52647af798"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers.html#ab13678a0e54fd01d82a17c52647af798">eliminate_boundaries</a> (sigma, cascade, partner, partner_below, dell_cascade, MorseComplex, p)</td></tr>
+<tr class="memdesc:ab13678a0e54fd01d82a17c52647af798"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function described by Zomorodian to remove boundaries if possible.  <a href="namespaceMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers.html#ab13678a0e54fd01d82a17c52647af798">More...</a><br /></td></tr>
 <tr class="separator:ab13678a0e54fd01d82a17c52647af798"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e07e67670fd5fa5126e3492754c23a2"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers.html#a7e07e67670fd5fa5126e3492754c23a2">pair_cells</a> (MorseComplex)</td></tr>
+<tr class="memdesc:a7e07e67670fd5fa5126e3492754c23a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The PairCells algorithm described by Zomorodian.  <a href="namespaceMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers.html#a7e07e67670fd5fa5126e3492754c23a2">More...</a><br /></td></tr>
 <tr class="separator:a7e07e67670fd5fa5126e3492754c23a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
@@ -103,6 +107,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>The wrapper for the PairCells algorithm described by Zomorodian. </p>
+<p>Calculates Betti numbers by pairing up all critical simplices of the Morse Complex; leaving some unpaired. The unpaired cells give us the betti numbers while the paired cells can be used to obtain a persistence diagram.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">MorseComplex</td><td>A Morse Complex class object that we want to calculate the betti numbers from.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>betti, partner0, partner1, partner2 The betti numbers in a 3 long array, and the paired cells for each dimension in dictionaries. </dd></dl>
 
 </div>
 </div>
@@ -162,6 +176,56 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Function described by Zomorodian to remove boundaries if possible. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sigma</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Add description </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cascade</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Add description </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">partner</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Add description </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">partner_below</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Add description </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dell_cascade</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>Add description </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">MorseComplex</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Add description </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>The dimension of the simplex. (Should be 1 or 2 / edge or face) </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a7e07e67670fd5fa5126e3492754c23a2"></a>
@@ -179,6 +243,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>The PairCells algorithm described by Zomorodian. </p>
+<p>Calculates Betti numbers by pairing up all critical simplices of the Morse Complex; leaving some unpaired. The unpaired cells give us the betti numbers while the paired cells can be used to obtain a persistence diagram.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">MorseComplex</td><td>A Morse Complex class object that we want to calculate the betti numbers from.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>partner0, partner1, partner2 The paired cells for each dimension in dictionaries. Can get betti numbers by finding out which cells havent been paired. </dd></dl>
 
 </div>
 </div>

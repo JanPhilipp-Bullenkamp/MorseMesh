@@ -42,8 +42,7 @@ from src.Algorithms.BettiNumbers import BettiViaPairCells
 from src.Algorithms.MorseCells import get_MorseCells
 from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
 
-from src.Algorithms.PersistenceDiagram import PersistenceDiagram
-
+from src.PlotData.PersistenceDiagram import PersistenceDiagram
 from src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
 from src.PlotData.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file
 from src.PlotData.statistics import fun_val_statistics, critical_fun_val_statistics, salient_edge_statistics
@@ -64,7 +63,7 @@ class Morse(Mesh):
     def __init__(self):
         super().__init__()
     
-''' DATALOADING'''
+    ''' DATALOADING'''
     
     def load_mesh_ply(self, filename, quality_index, inverted=False):
         min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
@@ -80,7 +79,7 @@ class Morse(Mesh):
         self.max = max_val
         self.range = max_val - min_val
         
-''' MORSE THEORY'''
+    ''' MORSE THEORY'''
     
     def ProcessLowerStars(self):
         # reset if has been computed already
@@ -186,7 +185,7 @@ class Morse(Mesh):
         self._flag_BettiNumbers = True
         print("Betti Numbers: ", betti)
     
-''' SEGMENTATION'''
+    ''' SEGMENTATION'''
     
     def Segmentation(self, persistence, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
         if persistence not in self.reducedMorseComplexes.keys():
@@ -299,7 +298,7 @@ class Morse(Mesh):
                 f.write("\t\t"+str(high_thresh)+" "+str(low_thresh)+" "+str(merge)+": "+str(t10-t9)+"\n")
                 self.write_DualSegmentationLabels(pers, high_thresh, low_thresh, merge, outfilename)
     
-''' PLOTTING'''
+    ''' PLOTTING'''
        
     def write_funval_thresh_labels(self, thresh, filename):
         """! @brief Writes a txt label file (first col index, second col label) that can be read in by GigaMesh as labels.

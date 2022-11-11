@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tree_2epy_317',['Tree.py',['../Tree_8py.html',1,'']]]
+  ['statistics_2epy_274',['statistics.py',['../statistics_8py.html',1,'']]]
 ];
