@@ -20,7 +20,7 @@ def write_header_params(file, pers, thr_high, thr_low, merge_thr):
     file.write("# | Format: index label                                 |\n")
     file.write("# +-----------------------------------------------------+\n")
     
-def write_Cells_labels_txt_file(label_dict, target_file, params = None):
+def write_Cell_labels_txt_file(label_dict, target_file, params = None):
     start_timer = timeit.default_timer()
     
     with open(target_file + ".txt", "w") as f:

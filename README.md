@@ -7,6 +7,7 @@ Provides a discrete Morse theory framework for 3D mesh data. Work in progress...
 - [Segmentation Method](#segmentation-method)
 - [Dependencies](#dependencies)
 - [Usage](#usage)
+- [Visualization](#visualization)
 # Discrete Morse Theory Introduction
 
 Smooth Morse theory enables to perform topological calculations on a manifold, by just looking at a scalar function (Morse function) on it. Translating this to the discrete case, discrete Morse theory (DMT) aims to do the same on simplicial complexes. While this also works for volumes and higher dimensional data, we are interested in unregular triangular meshes and thereby restrict to 2D surfaces that are embedded in 3D. 
@@ -76,3 +77,13 @@ data.ReduceMorseComplex(persistence)
 then removes spurious critical points up to a *persistence*.
 
 ### 3. Morse Cell Computation
+
+# Visualization
+
+## Morse Cells / Segmentation Cells
+
+## Morse Complex
+
+## Edges
+
+## Histograms
