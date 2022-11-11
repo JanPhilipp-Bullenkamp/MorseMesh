@@ -44,12 +44,11 @@ from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detectio
 
 from src.Algorithms.PersistenceDiagram import PersistenceDiagram
 
-from src.PlotData.write_overlay_ply_file import write_overlay_ply_file, write_overlay_ply_file_thresholded
+from src.PlotData.write_MSComplex_overlay_ply_file import write_MSComplex_overlay_ply_file
 from src.PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
 from src.PlotData.write_salient_edge_overlay import write_salient_edge_file, write_dual_thresh_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
 from src.PlotData.write_salient_edge_pline import write_salient_edge_pline
 from src.PlotData.write_labels_txt import write_labels_txt_file, write_labels_params_txt_file, write_funval_thresh_labels_txt_file
-from src.PlotData.write_pline_file import write_pline_file, write_pline_file_thresholded
 from src.PlotData.plot_fun_val_statistics import plot_fun_val_histogramm, plot_critical_fun_val_histogramm
 
 from src.Algorithms.plot_bdpts import write_overlay_bd
@@ -297,24 +296,19 @@ class Morse(Mesh):
     def write_funval_thresh_labels(self, thresh, filename):
         write_funval_thresh_labels_txt_file(self.Vertices, thresh, filename)
  
-    def plot_MorseComplex(self, persistence, filename, path_color=[255,0,255]):
-        write_overlay_ply_file(self.reducedMorseComplexes[persistence], 
-                               self.Vertices, self.Edges, self.Faces, 
-                               filename, color_paths=path_color)
+    def plot_MorseComplex_ply(self, persistence, filename, path_color=[255,0,255]):
+        """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh. 
+        Visualizes the Morse Complex at the given persistence level with red = minima, green = saddles, 
+        blue = maxima, and separatrix = given color (default pink).
         
-    def plot_MorseComplex_thresholded(self, persistence, filename, threshold, path_color=[255,0,255]):
-        write_overlay_ply_file_thresholded(self.reducedMorseComplexes[persistence], 
-                                           self.Vertices, self.Edges, self.Faces, 
-                                           filename, threshold, color_paths=path_color)
-        
-    def plot_MorseComplex_pline(self, persistence, filename):
-        write_pline_file(self.reducedMorseComplexes[persistence], 
-                         self.Vertices, self.Edges, self.Faces, filename)
-        
-    def plot_MorseComplex_thresholded_pline(self, persistence, filename, minimum_length=3, thresh=0.1):
-        write_pline_file_thresholded(self.reducedMorseComplexes[persistence], 
-                                     minimum_length, thresh, 
-                                     self.Vertices, self.Edges, self.Faces, filename)
+        @param persistence The persistence of the Morse Complex to be plotted.
+        @param filename The name of the output file. "_(persistence)P_OverlayMorseComplex" will be added.
+        @param path_color (Optional) A 3-array (RGB) which gives the color of the separatrices. 
+        Default is pink (255,0,255)
+        """
+        write_MSComplex_overlay_ply_file(self.reducedMorseComplexes[persistence], 
+                                         self.Vertices, self.Edges, self.Faces, 
+                                         filename, color_paths=path_color)
         
     def plot_MorseCells(self, persistence, filename):
         if persistence not in self.reducedMorseComplexes.keys():

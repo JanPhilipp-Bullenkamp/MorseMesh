@@ -43,10 +43,10 @@ def write_face(file, face, vert_dict, color=[0,0,0]):
     file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
         
 
-def write_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_file, color_paths=[0,0,0]):
+def write_MSComplex_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_file, color_paths=[0,0,0]):
     start_timer = timeit.default_timer()
     
-    f = open(target_file + "_pers" + str(MorseCpx.persistence) + "_OverlayMorseComplex.ply", "w")
+    f = open(target_file + "_" + str(MorseCpx.persistence) + "P_OverlayMorseComplex.ply", "w")
     
     path_vert = set()
     path_edges = set()
@@ -124,102 +124,7 @@ def write_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_fil
         write_edge(f, edge_dict[ind], vert_dict, color=color_paths)
     for ind in path_faces:
         write_face(f, face_dict[ind], vert_dict, color=color_paths)
-     
-        
-                        
-            
+           
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
     print('Time writing overlay file for MorseComplex with ', MorseCpx.persistence,': ', time_writing_file)
-    
-    
-def write_overlay_ply_file_thresholded(MorseCpx, vert_dict, edge_dict, face_dict, target_file, abs_thresh, color_paths=[0,0,0]):
-    start_timer = timeit.default_timer()
-    
-    f = open(target_file + "_pers" + str(MorseCpx.persistence) + "_thresh" + str(abs_thresh) + "_OverlayThreshMorseComplex.ply", "w")
-    
-    path_vert = set()
-    path_edges = set()
-    path_faces = set()
-    for maximum in MorseCpx.CritFaces.keys():
-        saddles = Counter(MorseCpx.CritFaces[maximum].connected_saddles)
-        for sad, nb in saddles.items():
-            if nb == 1:
-                # remove first and last elt, as they are in Crit already
-                path = MorseCpx.CritFaces[maximum].paths[sad]
-                # first is face, second edge
-                count = 0
-                for elt in path:
-                    if count%2 == 1:
-                        if abs(edge_dict[elt].fun_val[0]) > abs_thresh:
-                            path_edges.add(elt)
-                    elif count%2 ==0:
-                        if abs(face_dict[elt].fun_val[0]) > abs_thresh:
-                            path_faces.add(elt)
-                    count+=1
-                
-            elif nb == 2:
-                for i in range(2):
-                    # remove first and last elt, as they are in Crit already
-                    path = MorseCpx.CritFaces[maximum].paths[sad][i]
-                    # first is face, second edge
-                    count = 0
-                    for elt in path:
-                        if count%2 == 1:
-                            if abs(edge_dict[elt].fun_val[0]) > abs_thresh:
-                                path_edges.add(elt)
-                        elif count%2 ==0:
-                            if abs(face_dict[elt].fun_val[0]) > abs_thresh:
-                                path_faces.add(elt)
-                        count+=1
-                        
-    for saddle in MorseCpx.CritEdges.keys():
-        minima = Counter(MorseCpx.CritEdges[saddle].connected_minima)
-        for mini, nb in minima.items():
-            if nb == 1:
-                # remove first and last elt, as they are in Crit already
-                path = MorseCpx.CritEdges[saddle].paths[mini]
-                # first is sad, second min
-                count = 0
-                for elt in path:
-                    if count%2 == 1:
-                        if abs(vert_dict[elt].fun_val) > abs_thresh:
-                            path_vert.add(elt)
-                    elif count%2 ==0:
-                        if abs(edge_dict[elt].fun_val[0]) > abs_thresh:
-                            path_edges.add(elt)
-                    count+=1
-                
-            elif nb == 2:
-                for i in range(2):
-                    # remove first and last elt, as they are in Crit already
-                    path = MorseCpx.CritEdges[saddle].paths[mini][i]
-                    # first is sad, second min
-                    count = 0
-                    for elt in path:
-                        if count%2 == 1:
-                            if abs(vert_dict[elt].fun_val) > abs_thresh:
-                                path_vert.add(elt)
-                        elif count%2 ==0:
-                            if abs(edge_dict[elt].fun_val[0]) > abs_thresh:
-                                path_edges.add(elt)
-                        count+=1
-    
-    nb_points = len(path_vert) + len(path_edges) + len(path_faces)
-    
-    write_header(f, nb_points)
-    
-    for ind in path_vert:
-        write_vertex(f, vert_dict[ind], vert_dict, color=color_paths)
-    for ind in path_edges:
-        write_edge(f, edge_dict[ind], vert_dict, color=color_paths)
-    for ind in path_faces:
-        write_face(f, face_dict[ind], vert_dict, color=color_paths)
-     
-        
-                        
-            
-    f.close()
-    time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing thresholded overlay file for MorseComplex with', MorseCpx.persistence,'and', abs_thresh, 'threshold:', time_writing_file)
-    
