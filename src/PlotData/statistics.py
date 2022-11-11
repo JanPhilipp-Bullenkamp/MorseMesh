@@ -1,5 +1,5 @@
 ##
-# @file plot_statistics.py
+# @file statistics.py
 #
 # @brief Contains functions to get statistics on function values of vertices, critical simplices and 
 # separatrix persistence as well as plotting their histograms.
@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 
-def plot_fun_val_histogramm(vert_dict, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
+def fun_val_statistics(vert_dict, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
     """! @brief Creates statistics of function values on all vertices and allows to optionally plot 
     and save a histogram as well.
     
@@ -35,10 +35,11 @@ def plot_fun_val_histogramm(vert_dict, nb_bins = 15, log=False, save = False, fi
     for vert in vert_dict.values():
         fun_vals.append(vert.fun_val)
         
-    plt.hist(fun_vals, bins=nb_bins, log=log)
-    plt.xlabel("Function Value")
-    plt.ylabel("Counts")
-    plt.title("Function Value Histogram")
+    if save or show:
+        plt.hist(fun_vals, bins=nb_bins, log=log)
+        plt.xlabel("Function Value")
+        plt.ylabel("Counts")
+        plt.title("Function Value Histogram")
     if save == True:
         plt.savefig(filepath, dpi=600)
     if show:
@@ -50,7 +51,7 @@ def plot_fun_val_histogramm(vert_dict, nb_bins = 15, log=False, save = False, fi
     stat['fun_vals'] = fun_vals
     return stat
 
-def plot_critical_fun_val_histogramm(MSComplex, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
+def critical_fun_val_statistics(MSComplex, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
     """! @brief Creates statistics of function values on all critical vertices, edges and faces separately and 
     allows to optionally plot and save the histograms as well.
     
@@ -81,30 +82,33 @@ def plot_critical_fun_val_histogramm(MSComplex, nb_bins = 15, log=False, save = 
             fun_vals_CritF.append(fun_val)
         
     # plot Crit Vertices histogram
-    plt.hist(fun_vals_CritV, bins=nb_bins, log=log)
-    plt.xlabel("Function Value")
-    plt.ylabel("Counts")
-    plt.title("Critical Vertices Function Value Histogram")
+    if save or show:
+        plt.hist(fun_vals_CritV, bins=nb_bins, log=log)
+        plt.xlabel("Function Value")
+        plt.ylabel("Counts")
+        plt.title("Critical Vertices Function Value Histogram")
     if save == True:
         plt.savefig(filepath + 'critV', dpi=600)
     if show:
         plt.show()
 
     # plot crit edges histogram
-    plt.hist(fun_vals_CritE, bins=nb_bins, log=log)
-    plt.xlabel("Function Value")
-    plt.ylabel("Counts")
-    plt.title("Critical Edges Function Value Histogram")
+    if save or show:
+        plt.hist(fun_vals_CritE, bins=nb_bins, log=log)
+        plt.xlabel("Function Value")
+        plt.ylabel("Counts")
+        plt.title("Critical Edges Function Value Histogram")
     if save == True:
         plt.savefig(filepath + 'critE', dpi=600)
     if show:
         plt.show()
     
     # plot crit faces histogram
-    plt.hist(fun_vals_CritF, bins=nb_bins, log=log)
-    plt.xlabel("Function Value")
-    plt.ylabel("Counts")
-    plt.title("Critical Faces Function Value Histogram")
+    if save or show:
+        plt.hist(fun_vals_CritF, bins=nb_bins, log=log)
+        plt.xlabel("Function Value")
+        plt.ylabel("Counts")
+        plt.title("Critical Faces Function Value Histogram")
     if save == True:
         plt.savefig(filepath + 'critF', dpi=600)
     if show:
@@ -129,7 +133,7 @@ def plot_critical_fun_val_histogramm(MSComplex, nb_bins = 15, log=False, save = 
     stat['F']['fun_vals'] = fun_vals_CritF
     return stat
 
-def plot_salient_edge_histogramm(Complex, nb_bins=15, log=False, save=False, filepath='histogram' show=True):
+def salient_edge_statistics(Complex, nb_bins=15, log=False, save=False, filepath='histogram', show=True):
     """! @brief Creates statistics of the separatrix persistences of the cancelled separatrices in the given 
     Morse Complex and allows to optionally plot and save a histogram as well.
     
@@ -140,15 +144,19 @@ def plot_salient_edge_histogramm(Complex, nb_bins=15, log=False, save=False, fil
     @param save (Optional) Bool. Whether to save the histogram as a file. Default is False.
     @param filepath (Optional) The filepath to use if the histogram should be saved. Default is 'histogram'.
     @param show (Optional) Bool. Whether to plot the histogram or not. Default is True.
+    
+    @return stat A dictionary containing the keys 'mean', 'std' and 'persistences' containing the mean, 
+    the standard deviation and a list of the separatrix persistences.
     """
     persistences = []
     for pers, sepa in Complex.Separatrices:
         persistences.append(pers)
         
-    plt.hist(persistences, bins=nb_bins, log=log)
-    plt.xlabel("Separatrix Persistence")
-    plt.ylabel("Counts")
-    plt.title("Separatrix Persistence Histogram")
+    if save or show:
+        plt.hist(persistences, bins=nb_bins, log=log)
+        plt.xlabel("Separatrix Persistence")
+        plt.ylabel("Counts")
+        plt.title("Separatrix Persistence Histogram")
     if save == True:
         plt.savefig(filepath, dpi=600)
     if show:

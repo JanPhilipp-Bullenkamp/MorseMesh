@@ -45,12 +45,10 @@ from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detectio
 from src.Algorithms.PersistenceDiagram import PersistenceDiagram
 
 from src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
-
 from src.PlotData.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file
+from src.PlotData.statistics import fun_val_statistics, critical_fun_val_statistics, salient_edge_statistics
 
-from src.PlotData.plot_statistics import plot_fun_val_histogramm, plot_critical_fun_val_histogramm, plot_salient_edge_histogramm
-
-from src.Algorithms.plot_bdpts import write_overlay_bd
+from src.PlotData.plot_points_for_debugging import write_overlay_points
 
 from src.mesh import Mesh
 
@@ -66,7 +64,7 @@ class Morse(Mesh):
     def __init__(self):
         super().__init__()
     
-    ''' DATALOADING'''
+''' DATALOADING'''
     
     def load_mesh_ply(self, filename, quality_index, inverted=False):
         min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
@@ -82,7 +80,7 @@ class Morse(Mesh):
         self.max = max_val
         self.range = max_val - min_val
         
-    ''' MORSE THEORY'''
+''' MORSE THEORY'''
     
     def ProcessLowerStars(self):
         # reset if has been computed already
@@ -100,7 +98,8 @@ class Morse(Mesh):
     
     def ExtractMorseComplex(self):
         if not self._flag_ProcessLowerStars:
-            raise ValueError('Need to call ProcessLowerStars first, cannot calculate MorseComplex otherwise!')
+            print('Need to call ProcessLowerStars first...')
+            self.ProcessLowerStars()
         else:
             if self._flag_MorseComplex:
                 self.MorseComplex = None
@@ -113,7 +112,8 @@ class Morse(Mesh):
         
     def ReduceMorseComplex(self, persistence):
         if not self._flag_MorseComplex:
-            raise ValueError('Need to call ExtractMorseComplex first, cannot reduce MorseComplex otherwise!')
+            print("Need to call ExtractMorseComplex first...")
+            self.ExtractMorseComplex()
         elif persistence in self.reducedMorseComplexes.keys():
             print("This persistence has already been calculated!")
             print("You can access it via .reducedMorseComplexes[persistence] ") 
@@ -136,7 +136,8 @@ class Morse(Mesh):
                 key_array = np.array([list(self.reducedMorseComplexes.keys())])
                 closest_smaller = key_array[key_array < persistence].max()
                 self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.reducedMorseComplexes[closest_smaller], 
-                                                                              persistence, self.Vertices, self.Edges, self.Faces)
+                                                                              persistence, self.Vertices, 
+                                                                              self.Edges, self.Faces)
                 
                 if persistence >= self.range and not self._flag_SalientEdge:
                     self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
@@ -156,21 +157,36 @@ class Morse(Mesh):
         else:
             print("MorseCells for the MorseComplex with this persistence have already been calculated!")
             
-    def calculate_BettiNumbers(self):
-        if not self._flag_BettiNumbers:
-            betti, partner0, partner1, partner2 = BettiViaPairCells(self.MorseComplex)
-            self.BettiNumbers = betti
+    def calculate_BettiNumbers(self, persistence = 0):
+        if persistence not in self.reducedMorseComplexes.keys():
+            print("Need to reduce to this persistence first...")
+            self.ReduceMorseComplex(persistence)
+            
+        betti, partner0, partner1, partner2 = BettiViaPairCells(self.reducedMorseComplexes[persistence])
+
+        self.reducedMorseComplexes[persistence].BettiNumbers = betti
+        self.reducedMorseComplexes[persistence]._flag_BettiNumbers = True
+        self.reducedMorseComplexes[persistence].partner = {}
+        self.reducedMorseComplexes[persistence].partner[0] = partner0
+        self.reducedMorseComplexes[persistence].partner[1] = partner1
+        self.reducedMorseComplexes[persistence].partner[2] = partner2
+        if persistence == 0:
             self.MorseComplex.BettiNumbers = betti
             self.MorseComplex._flag_BettiNumbers = True
-            
-            self.partner = {}
-            self.partner[0] = partner0
-            self.partner[1] = partner1
-            self.partner[2] = partner2
-            self._flag_BettiNumbers = True
+            self.MorseComplex.partner = {}
+            self.MorseComplex.partner[0] = partner0
+            self.MorseComplex.partner[1] = partner1
+            self.MorseComplex.partner[2] = partner2
+        
+        if self.BettiNumbers is not None:
+            if betti[0]!=self.BettiNumbers[0] or betti[1]!=self.BettiNumbers[1] or betti[2]!=self.BettiNumbers[2]:
+                raise AssertionError("Betti numbers have changed since last computation on this mesh... "
+                                     "Shouldnt be possible as we do not change the mesh geometry")
+        self.BettiNumbers = betti
+        self._flag_BettiNumbers = True
         print("Betti Numbers: ", betti)
     
-    ''' SEGMENTATION'''
+''' SEGMENTATION'''
     
     def Segmentation(self, persistence, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
         if persistence not in self.reducedMorseComplexes.keys():
@@ -185,7 +201,8 @@ class Morse(Mesh):
             
         salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
         
-        self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, thresh_large, thresh_small, merge_threshold, minimum_labels=minimum_labels)
+        self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, thresh_large, thresh_small, 
+                                                                    merge_threshold, minimum_labels=minimum_labels)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
@@ -282,9 +299,15 @@ class Morse(Mesh):
                 f.write("\t\t"+str(high_thresh)+" "+str(low_thresh)+" "+str(merge)+": "+str(t10-t9)+"\n")
                 self.write_DualSegmentationLabels(pers, high_thresh, low_thresh, merge, outfilename)
     
-    ''' PLOTTING'''
+''' PLOTTING'''
        
     def write_funval_thresh_labels(self, thresh, filename):
+        """! @brief Writes a txt label file (first col index, second col label) that can be read in by GigaMesh as labels.
+        Labels vertices with a lower function value than the threshold blue, vertices above in green. (Labels 1 and 2).
+        
+        @param thresh The threshold where to distinguish the labels.
+        @param filename The name of the output file. "_()thresh" will be added to the given filename
+        """
         write_funval_thresh_labels_txt_file(self.Vertices, thresh, filename)
  
     def plot_MorseComplex_ply(self, persistence, filename, path_color=[255,0,255]):
@@ -374,28 +397,84 @@ class Morse(Mesh):
                                             thresh_high, thresh_low, 
                                             filename, color_high=[255,0,0], color_low=[0,0,255])
       
-    def plot_PersistenceDiagram(self, pointsize = 4, save = False, filepath = None):
-        if self._flag_BettiNumbers:
-            PersistenceDiagram(self.MorseComplex, self.partner, self.max, self.min, pointsize = pointsize, save = save, filepath = filepath)
-        else:
-            raise ValueError('Can not calculate Persistence Diagram before Betti Numbers!')
+    def plot_PersistenceDiagram(self, persistence = 0, pointsize = 4, save = False, filepath = 'persistenceDiagram'):
+        """! @brief Plots the persistence diagram for the Morse Complex of the given persistence.
+        
+        @param persistence (Optional) The persistence of the Morse Complex we want to get the persistence diagram from.
+        Default is 0.
+        @apram pointsize (Optional) The pointsize in the diagram. Default is 4. 
+        @param save (Optional) Bool. Whether to save the diagram or not. Default is False.
+        @param filepath (Optional) The filename under which the diagram should be stored. Default is 'persistenceDiagram'.
+        """
+        if persistence not in self.reducedMorseComplexes.keys():
+            print("Need to reduce to this persistence first...")
+            self.ReduceMorseComplex(persistence)
+            print("Need to calculate Betti Numbers...")
+            self.calculate_BettiNumbers(persistence)
             
-    def plot_salient_edge_histogram(self, nb_bins = 15, log=False, filename = None):
+        PersistenceDiagram(self.reducedMorseComplexes[persistence], self.reducedMorseComplexes[persistence].partner, 
+                           self.max, self.min, pointsize = pointsize, save = save, filepath = filepath)
+            
+    def salient_edge_statistics(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
+        """! @brief Creates statistics of the separatrix persistences of the cancelled separatrices in the maximally
+        reduced Morse Complex and allows to optionally plot and save a histogram as well.
+
+        @param nb_bins (Optional) Integer. The number of bins for the histogram. Default is 15.
+        @param log (Optional) Bool. Use logarithmic scale for the counts /y-axis in the 
+        histogram. Default is False.
+        @param save (Optional) Bool. Whether to save the histogram as a file. Default is False.
+        @param filepath (Optional) The filepath to use if the histogram should be saved. Default is 'histogram'.
+        @param show (Optional) Bool. Whether to plot the histogram or not. Default is True.
+
+        @return stats A dictionary containing the keys 'mean', 'std' and 'persistences' containing the mean, 
+        the standard deviation and a list of the separatrix persistences.
+        """
         if not self._flag_SalientEdge:
             print("Need to maximally reduce MorseComplex first...")
             self.ReduceMorseComplex(self.range)
-        if filename == None:
-            plot_salient_edge_histogramm(self.maximalReducedComplex, nb_bins, log=log)
-        else:
-            plot_salient_edge_histogramm(self.maximalReducedComplex, nb_bins, 
-                                         log=log, save=True, filename=filename)
+        stats = salient_edge_statistics(self.maximalReducedComplex, nb_bins=nb_bins, 
+                                        log=log, save=save, filepath=filepath, show=show)
+        return stats
             
-    def plot_funval_histogram(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
-        stats = plot_fun_val_histogramm(self.Vertices, nb_bins=nb_bins, log=log, save=save, filepath=filepath, show=show)
+    def funval_statistics(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
+        """! @brief Creates statistics of function values on all vertices and allows to optionally plot 
+        and save a histogram as well.
+
+        @param nb_bins (Optional) Integer. The number of bins for the histogram. Default is 15.
+        @param log (Optional) Bool. Use logarithmic scale for the counts /y-axis in the 
+        histogram. Default is False.
+        @param save (Optional) Bool. Whether to save the histogram as a file. Default is False.
+        @param filepath (Optional) The filepath to use if the histogram should be saved. Default is 'histogram'.
+        @param show (Optional) Bool. Whether to plot the histogram or not. Default is True.
+
+        @return stat A dictionary containing the keys 'mean', 'std' and 'fun_vals' containing the mean, 
+        the standard deviation and a list of the function values.
+        """
+        stats = fun_val_statistics(self.Vertices, nb_bins=nb_bins, log=log, 
+                                   save=save, filepath=filepath, show=show)
         return stats
     
-    def plot_critical_funval_histogramm(self, persistence, nb_bins=15, log=False, save = False, filepath = None, show = True):
-        stats = plot_critical_fun_val_histogramm(self.reducedMorseComplexes[persistence], nb_bins=nb_bins, log=log, save=save, filepath=filepath, show=show)
+    def critical_funval_statistics(self, persistence, nb_bins=15, log=False, save = False, filepath = None, show = True):
+        """! @brief Creates statistics of function values on all critical vertices, edges and faces of the 
+        Morse Complex at a given persitence separately and allows to optionally plot and save the histograms as well.
+
+        @details The histograms will be plotted adding 'critV', 'critE' and 'critF' to the filepath.
+
+        @param persistence The persistence of the Morse Complex we want to have the function value 
+        statistics of (will use CritV, CritE and CritF).
+        @param nb_bins (Optional) Integer. The number of bins for the histogram. Default is 15.
+        @param log (Optional) Bool. Use logarithmic scale for the counts /y-axis in the 
+        histogram. Default is False.
+        @param save (Optional) Bool. Whether to save the histogram as a file. Default is False.
+        @param filepath (Optional) The filepath to use if the histogram should be saved. Default is 'histogram'.
+        @param show (Optional) Bool. Whether to plot the histogram or not. Default is True.
+
+        @return stat A dictionary containing the keys 'V', 'E' and 'F' each containing dictionaries with keys 'mean', 
+        'std' and 'fun_vals' containing the mean, the standard deviation and a list of the function values for the critical 
+        vertices, edges or faces respectively.
+        """
+        stats = critical_fun_val_statistics(self.reducedMorseComplexes[persistence], nb_bins=nb_bins, 
+                                            log=log, save=save, filepath=filepath, show=show)
         return stats
     
     

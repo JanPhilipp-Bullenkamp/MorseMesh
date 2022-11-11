@@ -273,6 +273,7 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
         redMorseComplex.Segmentations = {}
     if redMorseComplex._flag_BettiNumbers:
         redMorseComplex.BettiNumbers = None
+        redMorseComplex.partners = None
         redMorseComplex._flag_BettiNumbers = False
     
     

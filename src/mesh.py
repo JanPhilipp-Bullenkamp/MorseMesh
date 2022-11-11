@@ -86,7 +86,6 @@ class Mesh:
         self._flag_SalientEdge = False
         self._flag_BettiNumbers = False
         
-        self.partners = None  # filled by betti numbers calculation (for persistence diagram needed)
         self.BettiNumbers = None
 
         self.V12 = {}

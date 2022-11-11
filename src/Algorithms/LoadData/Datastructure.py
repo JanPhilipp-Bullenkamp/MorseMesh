@@ -450,6 +450,7 @@ class MorseComplex:
         
         self._flag_BettiNumbers = False
         self.BettiNumbers = None
+        self.partners = None # gives betti numbers and needed for persistence diagram
         
         self.maximalReduced = False
         self.persistence = persistence

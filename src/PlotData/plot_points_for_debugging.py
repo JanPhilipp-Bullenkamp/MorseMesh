@@ -18,17 +18,15 @@ def write_vertex(file, vert, vert_dict, color=[0,0,0]):
     file.write(str(vert_dict[vert].x) + " " + str(vert_dict[vert].y) + " " + str(vert_dict[vert].z) + " ") 
     file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
         
-def write_overlay_bd(bd_points, vert_dict, target_file):
+def write_overlay_points(points, vert_dict, target_file):
     start_timer = timeit.default_timer()
     
-    f = open(target_file +"_OverlayBD.ply", "w")
-    
-    nb_points = len(bd_points)
-    write_header(f, nb_points)
-    
-    for vert in bd_points:
-        write_vertex(f, vert, vert_dict, color=[255,0,0])
+    with open(target_file +"_OverlayPoints.ply", "w") as f:
+        nb_points = len(points)
+        write_header(f, nb_points)
+
+        for vert in points:
+            write_vertex(f, vert, vert_dict, color=[255,0,0])
         
-    f.close()
     time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing overlay file for bd: ', time_writing_file)
+    print('Time writing overlay file for points: ', time_writing_file)

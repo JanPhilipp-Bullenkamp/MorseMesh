@@ -1,6 +1,6 @@
 from collections import Counter
 import timeit
-from .plot_bdpts import write_overlay_bd
+#from ..PlotData.plot_points_for_debugging import write_overlay_points
 
 from .LoadData.Datastructure import Cell, MorseCells
 
