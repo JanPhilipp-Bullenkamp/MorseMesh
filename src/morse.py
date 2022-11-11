@@ -44,14 +44,11 @@ from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detectio
 
 from src.Algorithms.PersistenceDiagram import PersistenceDiagram
 
-from src.PlotData.write_MSComplex_overlay_ply_file import write_MSComplex_overlay_ply_file
-from src.PlotData.write_Cell_labels_overlay_ply_file import write_Cell_labels_overlay_ply_file
+from src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
 
-from src.PlotData.write_SalientEdge_overlay_ply import write_SalientEdge_overlay_ply_file, plot_salient_edge_histogramm
-from src.PlotData.write_salient_edge_pline import write_salient_edge_pline
+from src.PlotData.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file
 
-from src.PlotData.write_Cell_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file
-from src.PlotData.plot_fun_val_statistics import plot_fun_val_histogramm, plot_critical_fun_val_histogramm
+from src.PlotData.plot_statistics import plot_fun_val_histogramm, plot_critical_fun_val_histogramm, plot_salient_edge_histogramm
 
 from src.Algorithms.plot_bdpts import write_overlay_bd
 
@@ -286,15 +283,7 @@ class Morse(Mesh):
                 self.write_DualSegmentationLabels(pers, high_thresh, low_thresh, merge, outfilename)
     
     ''' PLOTTING'''
-        
-    def plot_funval_histogram(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
-        stats = plot_fun_val_histogramm(self.Vertices, nb_bins=nb_bins, log=log, save=save, filepath=filepath, show=show)
-        return stats
-    
-    def plot_critical_funval_histogramm(self, persistence, nb_bins=15, log=False, save = False, filepath = None, show = True):
-        stats = plot_critical_fun_val_histogramm(self.reducedMorseComplexes[persistence], nb_bins=nb_bins, log=log, save=save, filepath=filepath, show=show)
-        return stats
-    
+       
     def write_funval_thresh_labels(self, thresh, filename):
         write_funval_thresh_labels_txt_file(self.Vertices, thresh, filename)
  
@@ -400,5 +389,13 @@ class Morse(Mesh):
         else:
             plot_salient_edge_histogramm(self.maximalReducedComplex, nb_bins, 
                                          log=log, save=True, filename=filename)
+            
+    def plot_funval_histogram(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
+        stats = plot_fun_val_histogramm(self.Vertices, nb_bins=nb_bins, log=log, save=save, filepath=filepath, show=show)
+        return stats
+    
+    def plot_critical_funval_histogramm(self, persistence, nb_bins=15, log=False, save = False, filepath = None, show = True):
+        stats = plot_critical_fun_val_histogramm(self.reducedMorseComplexes[persistence], nb_bins=nb_bins, log=log, save=save, filepath=filepath, show=show)
+        return stats
     
     

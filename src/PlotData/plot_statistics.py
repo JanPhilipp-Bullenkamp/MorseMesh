@@ -1,9 +1,10 @@
 ##
-# @file plot_fun_val_statistics.py
+# @file plot_statistics.py
 #
-# @brief Contains functions to get statistics on function values of vertices and critical simplices.
+# @brief Contains functions to get statistics on function values of vertices, critical simplices and 
+# separatrix persistence as well as plotting their histograms.
 #
-# @section libraries_plot_fun_val_statistics Libraries/Modules
+# @section libraries_plot_statistics Libraries/Modules
 # - numpy standard library
 # - collections standard library
 #   - need Counter
@@ -126,4 +127,35 @@ def plot_critical_fun_val_histogramm(MSComplex, nb_bins = 15, log=False, save = 
     stat['F']['mean'] = sum(fun_vals_CritF)/len(fun_vals_CritF)
     stat['F']['std'] = np.sqrt( np.square(sum(fun_vals_CritF - stat['F']['mean'])) / len(fun_vals_CritF) )
     stat['F']['fun_vals'] = fun_vals_CritF
+    return stat
+
+def plot_salient_edge_histogramm(Complex, nb_bins=15, log=False, save=False, filepath='histogram' show=True):
+    """! @brief Creates statistics of the separatrix persistences of the cancelled separatrices in the given 
+    Morse Complex and allows to optionally plot and save a histogram as well.
+    
+    @param Complex The Morse Complex we want to have the separatrix persistence statistics of.
+    @param nb_bins (Optional) Integer. The number of bins for the histogram. Default is 15.
+    @param log (Optional) Bool. Use logarithmic scale for the counts /y-axis in the 
+    histogram. Default is False.
+    @param save (Optional) Bool. Whether to save the histogram as a file. Default is False.
+    @param filepath (Optional) The filepath to use if the histogram should be saved. Default is 'histogram'.
+    @param show (Optional) Bool. Whether to plot the histogram or not. Default is True.
+    """
+    persistences = []
+    for pers, sepa in Complex.Separatrices:
+        persistences.append(pers)
+        
+    plt.hist(persistences, bins=nb_bins, log=log)
+    plt.xlabel("Separatrix Persistence")
+    plt.ylabel("Counts")
+    plt.title("Separatrix Persistence Histogram")
+    if save == True:
+        plt.savefig(filepath, dpi=600)
+    if show:
+        plt.show()
+    
+    stat = {}
+    stat['mean'] = sum(persistences)/len(persistences)
+    stat['std'] = np.sqrt( np.square(sum(persistences - stat['mean'])) / len(persistences) )
+    stat['persistences'] = persistences
     return stat

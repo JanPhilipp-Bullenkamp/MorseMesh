@@ -2,6 +2,28 @@ import numpy as np
 import timeit
 from collections import Counter
 
+'''
+Contains:
+write_SalientEdge_overlay_ply_file
+write_MSComplex_overlay_ply_file
+write_Cell_labels_overlay_ply_file
+'''
+
+color_list = [[255,0,0],  #red
+              [0,255,0], #lime
+              [0,0,255], # blue
+              [255,255,0], # yellow
+              [0,255,255], #cyan
+              [255,0,255], #magenta
+              [192,192,192], #silver
+              [128,0,0], #maroon
+              [128,128,0], #olive
+              [0,128,0], # green
+              [128,0,128], #purple
+              [0,128,128], #teal
+              [0,0,128] #navy
+             ]
+
 def write_header(file, nb_points):
     file.write("ply \n")
     file.write("format ascii 1.0 \n")
@@ -41,7 +63,24 @@ def write_face(file, face, vert_dict, color=[0,0,0]):
     z = round(z/len(face.indices), 8)
     file.write(str(x) + " " + str(y) + " " + str(z) + " ") 
     file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
-        
+
+def write_Cell_labels_overlay_ply_file(MorseCells, vert_dict, target_file):
+    start_timer = timeit.default_timer()
+    
+    with open(target_file + "_OverlayCells.ply", "w") as f:
+        nb_points = 0
+        for cell in MorseCells.values():
+            nb_points += len(cell.vertices)
+
+        write_header(f, nb_points)
+
+        for label, cells in MorseCells.items():
+            cell_color = color_list[label%len(color_list)]
+            for ind in cells.vertices:
+                write_vertex(f, vert_dict[ind], vert_dict, color=cell_color)
+            
+    time_writing_file = timeit.default_timer() - start_timer
+    print('Time writing Cells overlay file:', time_writing_file)
 
 def write_MSComplex_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_file, color_paths=[0,0,0]):
     start_timer = timeit.default_timer()
@@ -126,3 +165,71 @@ def write_MSComplex_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, 
            
     time_writing_file = timeit.default_timer() - start_timer
     print('Time writing overlay file for MorseComplex with ', MorseCpx.persistence,': ', time_writing_file)
+    
+def write_SalientEdge_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, 
+                                       thresh_high, thresh_low, 
+                                       target_file, color_high=[0,0,0], color_low=[255,255,255]):
+    start_timer = timeit.default_timer()
+    
+    with open(target_file+"_"+str(thresh_low)+"Tlow_"+str(thresh_high)+"Thigh_OverlaySalientEdge.ply", "w") as f:
+        path_vert_high = set()
+        path_edges_high = set()
+        path_faces_high = set()
+        path_vert_low = set()
+        path_edges_low = set()
+        path_faces_low = set()
+
+        for pers, sepa in MorseCpx.Separatrices:
+            if pers > thresh_high:
+                if sepa.dimension == 1:
+                    for i, elt in enumerate(sepa.path):
+                        if i%2==0:
+                            path_edges_high.add(elt)
+                        elif i%2==1:
+                            path_vert_high.add(elt)
+
+                elif sepa.dimension == 2:
+                    for i, elt in enumerate(sepa.path):
+                        if i%2==0:
+                            path_faces_high.add(elt)
+                        elif i%2==1:
+                            path_edges_high.add(elt)
+
+            # add low edges
+            elif pers <= thresh_high and pers > thresh_low:
+                if sepa.dimension == 1:
+                    for i, elt in enumerate(sepa.path):
+                        if i%2==0:
+                            path_edges_low.add(elt)
+                        elif i%2==1:
+                            path_vert_low.add(elt)
+
+                elif sepa.dimension == 2:
+                    for i, elt in enumerate(sepa.path):
+                        if i%2==0:
+                            path_faces_low.add(elt)
+                        elif i%2==1:
+                            path_edges_low.add(elt)
+
+
+        nb_points = len(path_vert_high) + len(path_edges_high) + len(path_faces_high) + len(path_vert_low) + len(path_edges_low) + len(path_faces_low)
+
+        write_header(f, nb_points)
+
+        for ind in path_vert_high:
+            write_vertex(f, vert_dict[ind], vert_dict, color=color_high)
+        for ind in path_edges_high:
+            write_edge(f, edge_dict[ind], vert_dict, color=color_high)
+        for ind in path_faces_high:
+            write_face(f, face_dict[ind], vert_dict, color=color_high)
+
+
+        for ind in path_vert_low:
+            write_vertex(f, vert_dict[ind], vert_dict, color=color_low)
+        for ind in path_edges_low:
+            write_edge(f, edge_dict[ind], vert_dict, color=color_low)
+        for ind in path_faces_low:
+            write_face(f, face_dict[ind], vert_dict, color=color_low)
+          
+    time_writing_file = timeit.default_timer() - start_timer
+    print('Time writing salient edge overlay file for maximally reduced MC and threshold', thresh_low, thresh_high, ': ', time_writing_file)
