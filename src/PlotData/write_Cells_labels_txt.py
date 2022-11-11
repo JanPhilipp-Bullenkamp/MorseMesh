@@ -20,37 +20,23 @@ def write_header_params(file, pers, thr_high, thr_low, merge_thr):
     file.write("# | Format: index label                                 |\n")
     file.write("# +-----------------------------------------------------+\n")
     
-def write_labels_txt_file(label_dict, target_file):
+def write_Cells_labels_txt_file(label_dict, target_file, params = None):
     start_timer = timeit.default_timer()
     
-    f = open(target_file + ".txt", "w")
-      
-    write_header(f)
-    
-    # write labels
-    for label, indices in enumerate(label_dict.values()):
-        #if label != "boundary":
-        for index in indices.vertices:
-            f.write(str(index) + " " + str(label+1) + "\n")
+    with open(target_file + ".txt", "w") as f:
+        if params == None:
+            write_header(f)
+        elif len(params) == 4:
+            pers, thr_high, thr_low, merge_thr = params
+            write_header_params(f, pers, thr_high, thr_low, merge_thr)
+        else:
+            raise ValueError("The params variable needs the 4 parameters: pers, thr_high, thr_low, merge_thr!")
+
+        # write labels
+        for label, indices in enumerate(label_dict.values()):
+            for index in indices.vertices:
+                f.write(str(index) + " " + str(label+1) + "\n")
             
-    f.close()
-    time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing label txt file:', time_writing_file)
-    
-def write_labels_params_txt_file(label_dict, target_file, pers, thr_high, thr_low, merge_thr):
-    start_timer = timeit.default_timer()
-    
-    f = open(target_file + ".txt", "w")
-      
-    write_header_params(f, pers, thr_high, thr_low, merge_thr)
-    
-    # write labels
-    for label, indices in enumerate(label_dict.values()):
-        #if label != "boundary":
-        for index in indices.vertices:
-            f.write(str(index) + " " + str(label+1) + "\n")
-            
-    f.close()
     time_writing_file = timeit.default_timer() - start_timer
     print('Time writing label txt file:', time_writing_file)
     

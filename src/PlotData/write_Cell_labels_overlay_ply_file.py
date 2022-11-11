@@ -33,23 +33,20 @@ def write_vertex(file, vert, vert_dict, color=[0,0,0]):
     file.write(str(vert_dict[vert].x) + " " + str(vert_dict[vert].y) + " " + str(vert_dict[vert].z) + " ") 
     file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
         
-def write_cells_overlay_ply_file(MorseCells, vert_dict, target_file):
+def write_Cell_labels_overlay_ply_file(MorseCells, vert_dict, target_file):
     start_timer = timeit.default_timer()
     
-    f = open(target_file + "_Cells_overlay.ply", "w")
-    
-    nb_points = 0
-    for cell in MorseCells.values():
-        nb_points += len(cell["set"])
-        
-    write_header(f, nb_points)
-    
-    for label, cells in MorseCells.items():
-        # if label != "boundary":  # not necessary anymore?
-        cell_color = color_list[label%len(color_list)]
-        for ind in cells["set"]:
-            write_vertex(f, ind, vert_dict, color=cell_color)
+    with open(target_file + "_OverlayCells.ply", "w") as f:
+        nb_points = 0
+        for cell in MorseCells.values():
+            nb_points += len(cell.vertices)
+
+        write_header(f, nb_points)
+
+        for label, cells in MorseCells.items():
+            cell_color = color_list[label%len(color_list)]
+            for ind in cells.vertices:
+                write_vertex(f, ind, vert_dict, color=cell_color)
             
-    f.close()
     time_writing_file = timeit.default_timer() - start_timer
     print('Time writing Cells overlay file:', time_writing_file)

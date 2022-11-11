@@ -45,10 +45,12 @@ from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detectio
 from src.Algorithms.PersistenceDiagram import PersistenceDiagram
 
 from src.PlotData.write_MSComplex_overlay_ply_file import write_MSComplex_overlay_ply_file
-from src.PlotData.write_labeled_cells_overlay import write_cells_overlay_ply_file
+from src.PlotData.write_Cell_labels_overlay_ply_file import write_Cell_labels_overlay_ply_file
+
 from src.PlotData.write_salient_edge_overlay import write_salient_edge_file, write_dual_thresh_salient_edge_file, write_improved_salient_edge_file, plot_salient_edge_histogramm
 from src.PlotData.write_salient_edge_pline import write_salient_edge_pline
-from src.PlotData.write_labels_txt import write_labels_txt_file, write_labels_params_txt_file, write_funval_thresh_labels_txt_file
+
+from src.PlotData.write_Cells_labels_txt import write_Cells_labels_txt_file, write_funval_thresh_labels_txt_file
 from src.PlotData.plot_fun_val_statistics import plot_fun_val_histogramm, plot_critical_fun_val_histogramm
 
 from src.Algorithms.plot_bdpts import write_overlay_bd
@@ -310,21 +312,35 @@ class Morse(Mesh):
                                          self.Vertices, self.Edges, self.Faces, 
                                          filename, color_paths=path_color)
         
-    def plot_MorseCells(self, persistence, filename):
+    def plot_MorseCells_ply(self, persistence, filename):
+        """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh.
+        Visualizes the MorseCells for the MorseComplex of the given persistence in 13 different colors. (Cannot 
+        guarantee that neighboring labels have different colors!).
+        
+        @param persistence The persistence of the Morse Complex whose Cells should be plotted.
+        @param filename The name of the output file. "_(persistence)P_OverlayCells" will be added.
+        """
         if persistence not in self.reducedMorseComplexes.keys():
             raise ValueError('No reduced Morse Complex calculated for this persistence!')
         elif self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
             raise ValueError('No Morse cells computed for the Morse complex with this persistence!')
         else:
-            write_cells_overlay_ply_file(self.reducedMorseComplexes[persistence].MorseCells, self.Vertices, filename)
+            write_Cell_labels_overlay_ply_file(self.reducedMorseComplexes[persistence].MorseCells.Cells, 
+                                               self.Vertices, filename + "_"+str(persistence)+"P")
             
-    def write_MorseCellLabels(self, persistence, filename):
+    def plot_MorseCells_label_txt(self, persistence, filename):
+        """! @brief Writes a txt label file (first col index, second col label) that can be read in by GigaMesh as labels.
+        Each label is a Morse Cell from the Morse Complex of the given persistence.
+        
+        @param persistence The persistence of the Morse Complex whose Cells should be plotted.
+        @param filename The name of the output file.
+        """
         if persistence not in self.reducedMorseComplexes.keys():
             raise ValueError('No reduced Morse Complex calculated for this persistence!')
         elif self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
             raise ValueError('No Morse cells computed for the Morse complex with this persistence!')
         else:
-            write_labels_txt_file(self.reducedMorseComplexes[persistence].MorseCells.Cells, filename)
+            write_Cells_labels_txt_file(self.reducedMorseComplexes[persistence].MorseCells.Cells, filename)
             
     def plot_salient_edge_histogram(self, nb_bins = 15, log=False, filename = None):
         if not self._flag_SalientEdge:
