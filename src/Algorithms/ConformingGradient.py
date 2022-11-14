@@ -60,6 +60,7 @@ def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V1
 
             PQzero = PriorityQueue()
             PQone = PriorityQueue()
+            VisitedFaces = []
             
             for Eindex, edge in lowerStar['edges'].items():
                 PQzero.insert(tuple((edge, Eindex)))
@@ -67,8 +68,7 @@ def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V1
             for Findex, face in lowerStar['faces'].items():
                 if (num_unpaired_conforming_faces(Findex, face, PQzero, star_labels) == 1 and face.has_face(delta_edge)):
                     PQone.insert(tuple((face, Findex)))
-                elif (num_unpaired_conforming_faces(Findex, face, PQzero, star_labels) == 0): #??? otherwise some faces might never be visited?
-                    PQzero.insert(tuple((face, Findex)))
+                    VisitedFaces.append(Findex)
 
             while (PQone.notEmpty() or PQzero.notEmpty()):
                 while PQone.notEmpty():
@@ -81,11 +81,10 @@ def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V1
                         pair_index, pair_simplex = conforming_pair(alpha_index, alpha_simplex, PQzero, star_labels)
                         V23[pair_index] = alpha_index
 
-                        ########
-
                         for Findex, face in lowerStar['faces'].items():
                             if (num_unpaired_conforming_faces(alpha_index, alpha_simplex, PQzero, star_labels) == 1 and (face.has_face(alpha_simplex) or face.has_face(pair_simplex))):
                                 PQone.insert(tuple((face, Findex)))
+                                VisitedFaces.append(Findex)
                 
                 if PQzero.notEmpty():
                     gamma_simplex, gamma_index = PQzero.pop_front()
@@ -98,6 +97,10 @@ def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V1
                     for Findex, face in lowerStar['faces'].items():
                         if (num_unpaired_conforming_faces(alpha_index, alpha_simplex, PQzero, star_labels) == 1 and face.has_face(gamma_simplex)):
                             PQone.insert(tuple((face, Findex)))
+
+            for Findex, face in lowerStar['faces'].items(): #all leftover faces are critical
+                if not (Findex in VisitedFaces):
+                    C[2].add(Findex)
 
     time_eff = timeit.default_timer() -start_eff
     print('Time ProcessLowerStar:', time_eff)
