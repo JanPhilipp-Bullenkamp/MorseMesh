@@ -414,7 +414,7 @@ class Morse(Mesh):
         PersistenceDiagram(self.reducedMorseComplexes[persistence], self.reducedMorseComplexes[persistence].partner, 
                            self.max, self.min, pointsize = pointsize, save = save, filepath = filepath)
             
-    def salient_edge_statistics(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
+    def salient_edge_statistics(self, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
         """! @brief Creates statistics of the separatrix persistences of the cancelled separatrices in the maximally
         reduced Morse Complex and allows to optionally plot and save a histogram as well.
 
@@ -435,7 +435,7 @@ class Morse(Mesh):
                                         log=log, save=save, filepath=filepath, show=show)
         return stats
             
-    def funval_statistics(self, nb_bins = 15, log=False, save = False, filepath = None, show = True):
+    def funval_statistics(self, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
         """! @brief Creates statistics of function values on all vertices and allows to optionally plot 
         and save a histogram as well.
 
@@ -453,7 +453,7 @@ class Morse(Mesh):
                                    save=save, filepath=filepath, show=show)
         return stats
     
-    def critical_funval_statistics(self, persistence, nb_bins=15, log=False, save = False, filepath = None, show = True):
+    def critical_funval_statistics(self, persistence, nb_bins=15, log=False, save=False, filepath='histogram', show=True):
         """! @brief Creates statistics of function values on all critical vertices, edges and faces of the 
         Morse Complex at a given persitence separately and allows to optionally plot and save the histograms as well.
 

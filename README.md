@@ -25,13 +25,18 @@ Looking at the gradient of the scalar function we get minima, saddle points and 
 
 We get a Morse-Smale complex, which represents the topology of the underlying mesh, by taking the critical points of their respective dimension for the chain groups and the adjacency information as boundary operator. Further the separatrices span a skeleton on the mesh, which leads to separated areas of the mesh enclosed by separatrices. These cells are called Morse cells and give a first segmentation of the mesh.
 
+![MS Complex](./pictures/MSComplexMorsecell_arrows.png)
+
 ## Noise Reduction
+\TODO explain persistence and cancellation
+![MS Complex red](./pictures/MSComplex_cancelled_arrows_onered_better.png)
+
 
 ## Edge Detection
 </details>
 
 # Segmentation Method
-
+Method described as in our Paper .... \TODO explain
 # Dependencies
 
 - Python 3.x (3.9 definitely works, probably also before)
@@ -77,13 +82,107 @@ data.ReduceMorseComplex(persistence)
 then removes spurious critical points up to a *persistence*.
 
 ### 3. Morse Cell Computation
+We can get the Morse cells, so the enclosed areas of a Morse Complex at any persistence level:
+```python
+data.ExtractMorseCells(persistence)
+```
+
+### 4. Segmentation
+We can perform a segmentation for given four parameters
+```python
+data.Segmentation(persistence, thresh_large, thresh_small, merge_threshold, minimum_labels=3)
+```
+The *minimum_labels* makes sure at least this number of labels is returned (unless the original Morse cells have fewer than that labels)
+
+![Segmentation Pipeline](./pictures/DMT_Segmentation_Pipeline_art_31.png)
+
 
 # Visualization
+We offer different ways to visualize what's going on: 
+1. Overlay .ply files to be loaded on top of the original mesh.
+2. Label .txt files to be imported by GigaMesh.
+3. Statistics/ histograms can be saved as images.
+
+The first option are .ply files that contain colored points. Loading the original mesh with e.g. MeshLab and than importing the overlay file, allows to visualize (interim) results by enlarging the point size of the overlay file.
+
+The second option is only suitable for Morse cell or segmentation result visualization, but offers a better looking result in these cases. Therefore the original mesh needs to be loaded in GigaMesh and the according labels .txt file should be imported under **File - Import - Import Labels** (confirm YES when asked whether the vertex is in the first column and choose **Labels-Connected Comp.** on the right to see the results.)
+
+The third option can be opened by any image viewer.
+
+<details>
+  <summary>Visualize features</summary>
 
 ## Morse Cells / Segmentation Cells
 
+<details>
+  <summary>Show</summary>
+
+For the initial Morse Cells or the Morse cells of a reduced Morse Complex visualization can be done with overlay .ply files or label .txt files using one of the following functions: 
+```python
+data.plot_MorseCells_ply(persistence, filename)
+data.plot_MorseCells_label_txt(persistence, filename)
+```
+where *filename* does not need to contain the file extension.
+
+For segmentation results currently only the labels .txt option is available and a calculated parameter combination can be visulaized by:
+```python
+data.plot_Segmentation_label_txt(persistence, thresh_large, thresh_small, merge_threshold, filename)
+```
+</details>
+
 ## Morse Complex
+
+<details>
+  <summary>Show</summary>
+
+A Morse complex can only be visualized by an overlay .ply file as follows:
+```python
+data.plot_MorseComplex_ply(persistence, filename, path_color=[255,0,255])
+```
+This returns minima (critical vertices) as red points, saddles (critical edges) as green points in the middle of the edge and maxima (critical faces) as blue points in the center of the face. The separatrix points are by default colored pink, but can be changed using *path_color*.
+</details>
 
 ## Edges
 
-## Histograms
+<details>
+  <summary>Show</summary>
+
+Salient edges can only be visualized as overlay .ply files as well. Using
+```python
+data.plot_SalientEdges_ply(filename, thresh_high, thresh_low = None)
+```
+gives a .ply file of optionally double thresholded salient edges. If only *thresh_high* is given, it works as if there only is one threshold. All vertices contained in strong edges will be marked as red points, weak edges as blue.
+</details>
+
+## Histograms/Statistics
+
+<details>
+  <summary>Show</summary>
+
+There are several options to show and/or save images of histograms, persistence diagrams or other statistics. 
+
+A persistence diagram can be obtained as follows
+```python
+data.plot_PersistenceDiagram(persistence=0, pointsize=4, save=False, filepath='persistenceDiagram')
+```
+All parameters are optional, the *persistence* parameter should make all points disappear that are closer than its value to the birth-death line of the persistence diagram.
+
+Persistence Diagram             |  Persistence Diagram with persistence
+:-------------------------:|:-------------------------:
+![Pers_dia](./pictures/persistenceDiagram_original.png)  |  ![Pers_dia_red](./pictures/persistenceDiagram_0_04P.png)
+
+We can get the statistics of the separatrix persistences (includes mean, standard deviation and all values) as well as plot and/or show a histogram of their distribution
+```python
+statistics = data.salient_edge_statistics(nb_bins=15, log=False, save=False, filepath='histogram', show=True)
+```
+The *log* parameter switches the y-Axis to log scale.
+
+We can also obtain statisctics and histograms from the function values of all vertices or specifically for the vertices making up the critical simplices of a Morse complex with given persistence
+```python
+statistics1 = data.funval_statistics(nb_bins=15, log=False, save=False, filepath='histogram', show=True)
+statistics2 = data.critical_funval_statistics(persistence, nb_bins=15, log=False, save=False, filepath='histogram', show=True)
+```
+The *statistics2* returned from the second function here contains separate dictionaries with mean, standard deviation and all the values for minima, saddles and maxima.
+</details>
+
+</details>

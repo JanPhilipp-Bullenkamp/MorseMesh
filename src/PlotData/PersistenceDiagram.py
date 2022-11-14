@@ -68,7 +68,10 @@ def PersistenceDiagram(MorseComplex, partner, maxval, minval, pointsize = 4, sav
     plt.legend()
     plt.xlabel('birth times')
     plt.ylabel('death times')
-    plt.title('Persistence Diagram')
+    if MorseComplex.persistence == 0:
+        plt.title('Persistence Diagram')
+    else:
+        plt.title('Persistence Diagram with '+str(MorseComplex.persistence)+' persistence')
     if save == True:
         plt.savefig(filepath, dpi=1200)
     plt.show()
