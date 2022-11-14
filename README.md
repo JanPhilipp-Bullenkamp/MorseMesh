@@ -25,11 +25,12 @@ Looking at the gradient of the scalar function we get minima, saddle points and 
 
 We get a Morse-Smale complex, which represents the topology of the underlying mesh, by taking the critical points of their respective dimension for the chain groups and the adjacency information as boundary operator. Further the separatrices span a skeleton on the mesh, which leads to separated areas of the mesh enclosed by separatrices. These cells are called Morse cells and give a first segmentation of the mesh.
 
-![MS Complex](./pictures/MSComplexMorsecell_arrows.png)
+<img src="./pictures/MSComplexMorsecell_arrows.png"  width="300">
 
 ## Noise Reduction
 \TODO explain persistence and cancellation
-![MS Complex red](./pictures/MSComplex_cancelled_arrows_onered_better.png)
+
+<img src="./pictures/MSComplex_cancelled_arrows_onered_better.png"  width="300">
 
 
 ## Edge Detection
@@ -94,7 +95,7 @@ data.Segmentation(persistence, thresh_large, thresh_small, merge_threshold, mini
 ```
 The *minimum_labels* makes sure at least this number of labels is returned (unless the original Morse cells have fewer than that labels)
 
-![Segmentation Pipeline](./pictures/DMT_Segmentation_Pipeline_art_31.png)
+<img src="./pictures/DMT_Segmentation_Pipeline_art_31.png"  width="500">
 
 
 # Visualization
@@ -169,7 +170,7 @@ All parameters are optional, the *persistence* parameter should make all points 
 
 Persistence Diagram             |  Persistence Diagram with persistence
 :-------------------------:|:-------------------------:
-![Pers_dia](./pictures/persistenceDiagram_original.png)  |  ![Pers_dia_red](./pictures/persistenceDiagram_0_04P.png)
+<img src="./pictures/persistenceDiagram_original.png"  width="300"> |  <img src="./pictures/persistenceDiagram_0_04P.png"  width="300">
 
 We can get the statistics of the separatrix persistences (includes mean, standard deviation and all values) as well as plot and/or show a histogram of their distribution
 ```python
