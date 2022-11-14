@@ -38,6 +38,9 @@ We get a Morse-Smale complex, which represents the topology of the underlying me
 
 # Segmentation Method
 Method described as in our Paper .... \TODO explain
+
+<img src="./pictures/DMT_Segmentation_Pipeline_art_31.png"  width="500">
+
 # Dependencies
 
 - Python 3.x (3.9 definitely works, probably also before)
@@ -94,8 +97,6 @@ We can perform a segmentation for given four parameters
 data.Segmentation(persistence, thresh_large, thresh_small, merge_threshold, minimum_labels=3)
 ```
 The *minimum_labels* makes sure at least this number of labels is returned (unless the original Morse cells have fewer than that labels)
-
-<img src="./pictures/DMT_Segmentation_Pipeline_art_31.png"  width="500">
 
 
 # Visualization
