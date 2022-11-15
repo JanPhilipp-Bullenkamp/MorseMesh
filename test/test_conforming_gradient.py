@@ -10,7 +10,7 @@ def trivial_labels(morse):
 
 def test_trivial_labels():
     # Initialize test data
-    file = "Data/vase_reduced_cleaned_painted.ply"
+    file = "Data/minimal_torus.ply"
 
     data1 = Morse()
     data2 = Morse()

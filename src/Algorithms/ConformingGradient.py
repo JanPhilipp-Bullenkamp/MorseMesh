@@ -25,16 +25,18 @@ def num_unpaired_conforming_faces(Findex, face, PQzero, star_labels):
     # since all edges from lower star go to PQzero or are paired/ added to C and removed from PQzero)
     number = 0
     for simplex, index in PQzero.items():
-        if face.has_face(simplex) and star_labels['faces'][Findex] == star_labels['edges'][index]:
-            number+=1
+        if len(simplex.indices) == 2:
+            if face.has_face(simplex) and star_labels['faces'][Findex] == star_labels['edges'][index]:
+                number+=1
     return number
 
 def conforming_pair(Findex, face, PQzero, star_labels):
     for simplex, index in PQzero.items():
-        if face.has_face(simplex) and star_labels['faces'][Findex] == star_labels['edges'][index]:
-            # need to pop the element from the Priority queue
-            PQzero.pop(tuple((simplex,index)))
-            return index, simplex
+        if len(simplex.indices) == 2:
+            if face.has_face(simplex) and star_labels['faces'][Findex] == star_labels['edges'][index]:
+                # need to pop the element from the Priority queue
+                PQzero.pop(tuple((simplex,index)))
+                return index, simplex
 
 def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V12, V23):
     start_eff = timeit.default_timer()
@@ -82,7 +84,7 @@ def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V1
                         V23[pair_index] = alpha_index
 
                         for Findex, face in lowerStar['faces'].items():
-                            if (num_unpaired_conforming_faces(alpha_index, alpha_simplex, PQzero, star_labels) == 1 and (face.has_face(alpha_simplex) or face.has_face(pair_simplex))):
+                            if (num_unpaired_conforming_faces(Findex, face, PQzero, star_labels) == 1 and (face.has_face(alpha_simplex) or face.has_face(pair_simplex))):
                                 PQone.insert(tuple((face, Findex)))
                                 VisitedFaces.append(Findex)
                 

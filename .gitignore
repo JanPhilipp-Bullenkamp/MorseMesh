@@ -1,4 +1,5 @@
 Data/
+labels/
 .ipynb_checkpoints/
 __pycache__/
 Algorithms/LoadData/__pycache__/
