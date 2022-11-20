@@ -1,7 +1,7 @@
 import timeit
 import os
 
-def read_label_txt(filename, params=False):
+def read_labels_txt(filename, params=False):
     start_total_time = timeit.default_timer()
     
     labels = {}
@@ -38,4 +38,7 @@ def read_label_txt(filename, params=False):
     end_total_time = timeit.default_timer() - start_total_time
     print('Time read labels in txt file:', end_total_time)
     
-    return labels, pers, high_thr, low_thr, merge_thr
+    if params:
+        return labels, pers, high_thr, low_thr, merge_thr
+    else:
+        return labels

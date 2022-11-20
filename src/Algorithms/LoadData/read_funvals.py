@@ -8,13 +8,10 @@
 # - numpy standard library
 # - collections standard library
 #   - need Counter for unique values
-# - timeit standard library
-#   - timing functions
 
 #Imports
 import numpy as np
 from collections import Counter
-import timeit
 
 def read_funvals(filename, vertices_dict, edges_dict, faces_dict):
     """! @brief Reads a feature vector file and uses the max of each vector as new Morse function values.
@@ -29,8 +26,6 @@ def read_funvals(filename, vertices_dict, edges_dict, faces_dict):
     
     @return Despite updating the dictionaries, returns the minimum and maximum function value as min, max.
     """
-    start_total_time = timeit.default_timer()
-    
     vals = []
     with open(filename, "r") as f:
         for line in f:
@@ -55,8 +50,4 @@ def read_funvals(filename, vertices_dict, edges_dict, faces_dict):
         edge.set_fun_val(vertices_dict)
     for face in faces_dict.values():
         face.set_fun_val(vertices_dict)
-    
-    end_total_time = timeit.default_timer() - start_total_time
-    print('Time read new function values:', end_total_time)
-    
     return min(vals), max(vals) 

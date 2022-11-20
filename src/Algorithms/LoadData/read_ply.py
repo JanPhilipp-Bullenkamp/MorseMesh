@@ -9,8 +9,6 @@
 # - numpy standard library
 # - collections standard library
 #   - need Counter for unique values
-# - timeit standard library
-#   - timing functions
 # - Datastructure module (local)
 #   - Access to Vertex, Edge and Face classes.
 
@@ -18,7 +16,6 @@
 from plyfile import PlyData, PlyElement, PlyProperty, PlyListProperty
 import numpy as np
 from collections import Counter
-import timeit
 
 from .Datastructure import Vertex, Simplex
 
@@ -41,13 +38,7 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
     
     @return Despite filling the dictionaries, returns the minimum and maximum function value as min, max.
     """
-    start_total_time = timeit.default_timer()
-    start_time = timeit.default_timer()
-    
     rawdata = PlyData.read(filename)
-    
-    end_time = timeit.default_timer() - start_time
-    print('Time read data file:', end_time) 
     
     vals = []
     for vindex, pt in enumerate(rawdata['vertex']):
@@ -95,9 +86,5 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
                 eindex+=1
                 
                 unique_edges.add(frozenset(tmp))
-                
-    end_total_time = timeit.default_timer() - start_total_time
-    print('Time read and prepare data:', end_total_time)
-    
     return min(vals), max(vals)
     

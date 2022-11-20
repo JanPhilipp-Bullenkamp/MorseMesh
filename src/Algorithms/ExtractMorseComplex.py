@@ -6,15 +6,12 @@
 #
 # @section libraries_ExtractMorseComplex Libraries/Modules
 # - numpy standard library
-# - timeit standard library
-#   - timing functions
 # - Datastructure module (local)
 #   - need CritVertex, CritEdge, CritFace, MorseComplex structures
 # - Tree module (local)
 #   - need Tree for path finding to get adjacency between critical cells in the MS complex
 
 import numpy as np
-import timeit
 from .Tree import Tree, Node
 
 from .LoadData.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex
@@ -58,8 +55,6 @@ def ExtractMorseComplex(vert_dict, edge_dict, face_dict, V12, V23, C):
     
     @return initial_complex The initial (unreduced) Morse complex.
     """
-    start_eff = timeit.default_timer()
-    
     initial_complex = MorseComplex()
     
     for C_index in C[0]:
@@ -150,9 +145,5 @@ def ExtractMorseComplex(vert_dict, edge_dict, face_dict, V12, V23, C):
             if p == 1:
                 initial_complex.CritEdges[C_index] = crit_cell
             else:
-                initial_complex.CritFaces[C_index] = crit_cell
-
-        
-    time_eff = timeit.default_timer() -start_eff
-    print('Time ExtractMorseComplex and Separatrices:', time_eff)  
+                initial_complex.CritFaces[C_index] = crit_cell 
     return initial_complex

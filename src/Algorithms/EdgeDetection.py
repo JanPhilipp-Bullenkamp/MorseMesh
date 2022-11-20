@@ -2,11 +2,6 @@
 # @file EdgeDetection.py
 #
 # @brief Contains functions for edge detection based on salient edges
-#
-# @section libraries_EdgeDetection Libraries/Modules
-# - timeit standard library
-
-import timeit
 
 def edge_detection(maxRedComp, thresh_high, thresh_low, vert_dict, edge_dict, face_dict):
     """! @brief Uses double threshold to get strong and weak edges and adds weak edges to strong
@@ -21,7 +16,6 @@ def edge_detection(maxRedComp, thresh_high, thresh_low, vert_dict, edge_dict, fa
     
     @return strong_edge The double thresholded edges stored as a single set of vertex indices.
     """
-    start_timer = timeit.default_timer()
     strong_edge, weak_edge = get_salient_edge_indices(maxRedComp, thresh_high, thresh_low, 
                                                       vert_dict, edge_dict, face_dict)
 
@@ -43,9 +37,6 @@ def edge_detection(maxRedComp, thresh_high, thresh_low, vert_dict, edge_dict, fa
                     queue.append(nei)
                     strong_edge.add(nei)
                     weak_edge.remove(nei)
-                    
-    time = timeit.default_timer() - start_timer
-    print('Time Edge Detection for ',thresh_high,"-",thresh_low, 'threshold:', time)   
     return strong_edge
 
 def get_salient_edge_indices(MorseComplex, thresh_high, thresh_low, 

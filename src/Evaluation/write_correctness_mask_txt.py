@@ -12,20 +12,15 @@ def write_header(file, correctness, gt_file):
     file.write("# | Format: index label                                 |\n")
     file.write("# +-----------------------------------------------------+\n")
     
-def write_labels_txt_file(total_points, points, gt_file, target_file, label_correct=1, label_wrong=2):
+def write_correctness_mask_txt(total_points, points, gt_file, target_file, label_correct=1, label_wrong=2):
     start_timer = timeit.default_timer()
     
     if label_wrong == label_correct:
         raise ValueError('cannot label correct and wrong points the same')
     
-    # write points
-    #rawdata = PlyData.read(input_file)
-    
     correctness = len(points)/total_points*100
-    #print("Total correct points:", len(points), " of ", len(rawdata['vertex']))
-    print(target_file,"\n"+"has correctness of: ", correctness,"%")
     
-    f = open(target_file + "_correct.txt", "w")
+    f = open(target_file + ".txt", "w")
     write_header(f, correctness, gt_file)
     
     for ind in range(total_points):
@@ -39,6 +34,4 @@ def write_labels_txt_file(total_points, points, gt_file, target_file, label_corr
     f.close()
     time_writing_file = timeit.default_timer() - start_timer
     print('Time writing correctness label txt file:', time_writing_file)
-    
-    return correctness
     

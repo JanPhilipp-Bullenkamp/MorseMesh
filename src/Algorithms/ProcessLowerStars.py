@@ -8,8 +8,6 @@
 # - numpy standard library
 # - collections standard library
 #   - need Counter and deque
-# - timeit standard library
-#   - timing functions
 # - PriorityQueue module (local)
 #   - PriorityQueue
 
@@ -17,7 +15,6 @@
 from .PriorityQueue import PriorityQueue
 
 import numpy as np
-import timeit
 from collections import Counter, deque
 
 def lower_star(vertex, edges_dict, faces_dict):
@@ -100,8 +97,6 @@ def ProcessLowerStars(vertices_dict, edges_dict, faces_dict, C, V12, V23):
     
     @return Updated C, V12 and V23.
     """
-    start_eff = timeit.default_timer()
-    
     for vertex in vertices_dict.values():
         lowerStar = lower_star(vertex, edges_dict, faces_dict)
         
@@ -148,6 +143,3 @@ def ProcessLowerStars(vertices_dict, edges_dict, faces_dict, C, V12, V23):
                     for Findex, face in lowerStar['faces'].items():
                         if (num_unpaired_faces(face, PQzero) == 1 and face.has_face(gamma_simplex)):
                             PQone.insert(tuple((face, Findex)))
-
-    time_eff = timeit.default_timer() -start_eff
-    print('Time ProcessLowerStar:', time_eff)

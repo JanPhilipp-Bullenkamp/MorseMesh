@@ -1,6 +1,5 @@
 from collections import Counter
 import numpy as np
-import timeit
 from copy import deepcopy
 
 from .CancellationQueue import CancellationQueue
@@ -261,8 +260,6 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, edge_dict, face_
     return MorseComplex
             
 def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict):
-    start_eff = timeit.default_timer()
-
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     
@@ -300,8 +297,5 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
                     redMorseComplex = cancel_one_critical_pair_max(saddle, redMorseComplex.CritFaces[closest], redMorseComplex, edge_dict, face_dict)
             else:
                 CancelPairs.insert(tuple((dist, obj_id, saddle)))
-    
-    time_eff = timeit.default_timer() - start_eff
-    print('Time cancel critical points with ', threshold, " persistence: ", time_eff)
     return redMorseComplex
     

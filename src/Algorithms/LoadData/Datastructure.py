@@ -37,8 +37,6 @@ class Vertex:
     - a function value
     - an index
     
-    - two angles theta and phi (for normals e.g.)
-    
     - a star dictionary with keys "F", which can store the adjacent face-indices in a list, 
       and "E", which can store the adjacent edge-indices in a list
     - a set .neighbors to store the neighbors of the vertex
@@ -56,15 +54,17 @@ class Vertex:
     ##  @var index 
     # The index of the vertex. Should be an int or None.
     
-    ##  @var theta 
-    # An angle for a normal direction e.g. Should be a float or None.
-    ##  @var phi 
-    # An angle for a normal direction e.g. Should be a float or None.
-    
     ##  @var star 
     # The surrounding faces "F" and edges "E" in a dictionary with keys "F" and "E".
     ##  @var neighbors 
     # A set containing all neighbor vertices (their indices).
+    
+    ## @var label
+    # needed for Morse cell computation
+    ## @var boundary
+    # needed for Morse cell computation
+    
+    __slots__ = ("x", "y", "z", "quality", "fun_val", "index", "star", "neighbors", "label", "boundary")
     
     def __init__(self, x=None, y=None, z=None,
                 quality=None, fun_val=None,
@@ -84,9 +84,6 @@ class Vertex:
         self.fun_val = fun_val #float
         self.index = index #int
         
-        self.theta = None #float
-        self.phi = None #float
-
         self.star = {}
         self.star["F"] = [] #list
         self.star["E"] = [] #list
@@ -148,8 +145,8 @@ def compare_heights(small, big):
                 return True
             elif small[i] > big[i]:
                 return False
-        return True
-
+        return True   
+     
 class Simplex:
     """! @brief Simplex class used for normal edges and faces.
     
@@ -167,6 +164,8 @@ class Simplex:
     ## @var index
     # The index of this simplex (edge-index or face-index)
     
+    __slots__ = ("indices", "fun_val", "index", "max_fun_val_index")
+    
     def __init__(self, indices=None, index=None):
         """! The Constructor of a Simplex
         @param indices A set of indices representing the vertices of the simplex. Default is None.
@@ -174,9 +173,10 @@ class Simplex:
         """
         self.indices = indices #set
         self.fun_val = None #list
+        self.max_fun_val_index = None
 
         self.index = index #int
-        
+    
     def set_fun_val(self, vertices_dict):
         """! @brief Sets the function value of the simplex.
         @details Uses the function values of the vertices and sorts them such 
@@ -188,6 +188,8 @@ class Simplex:
         self.fun_val = []
         for ind in self.indices:
             self.fun_val.append(vertices_dict[ind].fun_val)
+            if vertices_dict[ind].fun_val == max(self.fun_val):
+                self.max_fun_val_index = ind
         self.fun_val.sort(reverse=True)
         
     def has_face(self, other_simplex):
@@ -204,6 +206,9 @@ class Simplex:
             return True
         else:
             return False
+       
+    def get_max_fun_val_index(self):
+        return self.max_fun_val_index
         
     def __lt__(self, other_simplex):
         """! @brief Checks if another simplex has a smaller function value (according to the metric described in compare_heights)
@@ -235,6 +240,8 @@ class CritVertex:
     ## @var connected_saddles
     # A list with saddles (critical edges) which are connected to this critical vertex
     # via separatrices.
+    
+    __slots__ = ("index", "fun_val", "connected_saddles")
     
     def __init__(self, vert):
         """! The Constructor of a CritVertex.
@@ -274,6 +281,9 @@ class CritEdge:
     ## @var paths
     # A dictionary used in MorseComplex computation, to create the breadth first search
     # to find the critical vertices that are connected to this edge.
+    
+    
+    __slots__ = ("indices", "fun_val", "index", "connected_minima", "connected_maxima", "paths")
     
     def __init__(self, edge):
         """! The Constructor of a CritEdge.
@@ -316,6 +326,8 @@ class CritFace:
     # A dictionary used in MorseComplex computation, to create the breadth first search
     # to find the critical edges that are connected to this face.
     
+    __slots__ = ("indices", "fun_val", "index", "connected_saddles", "paths")
+    
     def __init__(self, face):
         """! The Constructor of a CritFace.
         @param face A Face class object.
@@ -355,6 +367,9 @@ class Separatrix:
     # that give the path from the origin to the destination.
     ## @var separatrix_persistence 
     # A float that gives a measure of importance for this separatrix.
+    
+    
+    __slots__ = ("origin", "destination", "dimension", "path", "separatrix_persistence")
     
     def __init__(self, origin, destination, dimension, path, separatrix_persistence):
         """! The Constructor of a Separatrix.
@@ -431,6 +446,8 @@ class MorseComplex:
     # The persistence level up to which this complex has been reduced to.
     ## @var filename
     # The filenmae of the underlying mesh.
+    
+    __slots__ = ("CritVertices", "CritEdges", "CritFaces", "Separatrices", "_flag_MorseCells", "MorseCells", "Segmentations", "_flag_BettiNumbers", "BettiNumbers", "partners", "maximalReduced", "persistence", "filename")
         
     def __init__(self, persistence=0, filename=None):
         """! The Constructor of a MorseComplex.
@@ -535,6 +552,9 @@ class Cell:
     ## @var neighbors_weights
     # A dictionary storing neighbor_label, weight pairs, where the weight gives the weight for the 
     # connection between these two cells.
+    
+    __slots__ = ("label", "vertices", "boundary", "neighbors", "neighbors_weights")
+    
     def __init__(self, label):
         """! @brief The constructor of a Cell object.
         @param label The label of this cell object.
@@ -562,6 +582,9 @@ class MorseCells:
     # Double threshold that was used to get these edge points. A tuple of (large_thr, small_thr).
     ## @var merge_threshold
     # The merge threhsold that was used in the segmentation.
+    
+    __slots__ = ("Cells", "salient_edge_points", "threshold", "merge_threshold")
+    
     def __init__(self):
         """! @brief The constructor of the MorseCells object.
         """

@@ -9,12 +9,9 @@
 # - numpy standard library
 # - collections standard library
 #   - need Counter
-# - timeit standard library
-#   - timing functions
 
 # imports
 import numpy as np
-import timeit
 from collections import Counter
 
 
@@ -30,8 +27,6 @@ def BettiViaPairCells(MorseComplex):
     @return betti, partner0, partner1, partner2 The betti numbers in a 3 long array, and the paired 
     cells for each dimension in dictionaries.
     """
-    start_eff = timeit.default_timer()
-    
     partner0, partner1, partner2 = pair_cells(MorseComplex)
 
     betti = np.zeros(3)
@@ -44,9 +39,6 @@ def BettiViaPairCells(MorseComplex):
     for cell in MorseComplex.CritFaces.keys():
         if np.array(partner2[cell]).size == 0:
             betti[2] += 1
-    
-    time_eff = timeit.default_timer() -start_eff
-    print('Time Betti numbers:', time_eff)  
     return betti, partner0, partner1, partner2
 
 

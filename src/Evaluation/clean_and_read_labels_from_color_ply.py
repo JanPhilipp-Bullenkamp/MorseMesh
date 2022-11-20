@@ -31,7 +31,7 @@ def neighbor_labels(vert_dict, ind):
             labels.append(vert_dict[vert_ind].label)
     return labels
         
-def clean_gt(mesh_filename, label_filename, threshold=10):
+def clean_and_read_labels_from_color_ply(mesh_filename, label_filename, threshold=10):
     start_total_time = timeit.default_timer()
     
     rawdata = PlyData.read(mesh_filename)
@@ -116,29 +116,5 @@ def clean_gt(mesh_filename, label_filename, threshold=10):
                 
     end_total_time = timeit.default_timer() - start_total_time
     print('Time read labels in ply file data:', end_total_time)
-    
-    return labels
-
-def read_label_txt(filename):
-    start_total_time = timeit.default_timer()
-    
-    labels = {}
-    
-    with open(filename, "r") as f:
-        for line in f:
-            if line[0] == "#":
-                continue
-            else:
-                ind = int(line.split()[0])
-                label = int(line.split()[1])
-                
-                if label not in labels.keys():
-                    labels[label] = set()
-                    labels[label].add(ind)
-                else:
-                    labels[label].add(ind)
-                
-    end_total_time = timeit.default_timer() - start_total_time
-    print('Time read labels in txt file:', end_total_time)
     
     return labels

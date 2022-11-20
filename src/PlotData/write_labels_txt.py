@@ -1,5 +1,4 @@
 import numpy as np
-import timeit
 
 def write_header(file):
     file.write("# +-----------------------------------------------------+\n")
@@ -21,8 +20,6 @@ def write_header_params(file, pers, thr_high, thr_low, merge_thr):
     file.write("# +-----------------------------------------------------+\n")
     
 def write_Cell_labels_txt_file(label_dict, target_file, params = None):
-    start_timer = timeit.default_timer()
-    
     with open(target_file + ".txt", "w") as f:
         if params == None:
             write_header(f)
@@ -36,13 +33,8 @@ def write_Cell_labels_txt_file(label_dict, target_file, params = None):
         for label, indices in enumerate(label_dict.values()):
             for index in indices.vertices:
                 f.write(str(index) + " " + str(label+1) + "\n")
-            
-    time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing label txt file:', time_writing_file)
     
 def write_funval_thresh_labels_txt_file(vert_dict, thresh, target_file):
-    start_timer = timeit.default_timer()
-    
     with open(target_file + "_" + str(thresh) + "thresh.txt", "w") as f:
         write_header(f)
 
@@ -52,7 +44,4 @@ def write_funval_thresh_labels_txt_file(vert_dict, thresh, target_file):
                 f.write(str(ind) + " " +str(1) + "\n")
             else:
                 f.write(str(ind) + " " +str(2) + "\n")
-        
-    time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing label txt file:', time_writing_file)
  
