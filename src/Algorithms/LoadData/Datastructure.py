@@ -516,24 +516,23 @@ class MorseComplex:
         end_time = timeit.default_timer() - start_time
         print("Time Segmentation: ", end_time)
         
-    def info(self):
-        """! @brief Prints out an info block about this Morse Complex."""
-        print("+-------------------------------------------------------")
-        print("| MorseComplex Info")
-        print("+-------------------------------------------------------")
-        if self.filename != None:
-            print("| Filename: ", self.filename)
-        if self.persistence != None:
-            print("| Persistence of this Complex: ", self.persistence)
-            print("+-------------------------------------------------------")
-        print("| Number of Vertices: ", len(self.CritVertices))
-        print("| Number of Edges: ", len(self.CritEdges))
-        print("| Number of Faces: ", len(self.CritFaces))
-        print("+-------------------------------------------------------")
-        print("| Euler characteristic: ", len(self.CritVertices) - len(self.CritEdges) +len(self.CritFaces))
-        if self._flag_BettiNumbers:
-            print("| Betti numbers: ", self.BettiNumbers)
-        print("+-------------------------------------------------------")
+    def __repr__(self):
+        """! @brief Prints out an info block about this Morse Complex.
+        @return Info as string.
+        """
+        return("+-------------------------------------------------------\n"
+                "| MorseComplex Info\n"
+                "+-------------------------------------------------------\n"
+                "| Filename: " + str(self.filename) + "\n"
+                "| Persistence of this Complex: " + str(self.persistence) + "\n"
+                "+-------------------------------------------------------\n"
+                "| Number of Vertices: " + str(len(self.CritVertices)) + "\n"
+                "| Number of Edges: " + str(len(self.CritEdges)) + "\n"
+                "| Number of Faces: " + str(len(self.CritFaces)) + "\n"
+                "+-------------------------------------------------------\n"
+                "| Euler characteristic: " + str(len(self.CritVertices) - len(self.CritEdges) +len(self.CritFaces)) + "\n"
+                "| Betti numbers: " + str(self.BettiNumbers) + "\n"
+                "+-------------------------------------------------------")
         
         
 class Cell:
@@ -567,6 +566,16 @@ class Cell:
         self.neighbors = {}
         self.neighbors_weights = {}
         
+    def __repr__(self):
+        """! @brief Gives info on this Cell.
+        @return Info as string.
+        """
+        return("+-----------------------\n"
+               "| Cell info for label: " +str(self.label) + "\n"
+               "+-----------------------\n"
+               "| Number of vertices: " + str(len(self.vertices)) + "\n"
+               "| Neighbors: " + str(list(self.neighbors.keys())) + "\n"
+               "+-----------------------\n")
         
 class MorseCells:
     """! @brief An object storing Morse Cells that segment the given mesh. Also allows to use further 

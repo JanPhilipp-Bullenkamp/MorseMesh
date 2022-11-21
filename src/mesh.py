@@ -102,22 +102,21 @@ class Mesh:
         
         self.maximalReducedComplex = None
         
-    def info(self):
+    def __repr__(self):
         """! @brief Prints out Mesh information.
         @return A string that gives information on the loaded mesh.
         """
-        print("+-------------------------------------------------------")
-        print("| Mesh Info")
-        print("+-------------------------------------------------------")
-        print("| Filename: ", self.filename)
-        print("| Morse function values range: ", [self.min,self.max])
-        print("+-------------------------------------------------------")
-        print("| Number of Vertices: ", len(self.Vertices))
-        print("| Number of Edges: ", len(self.Edges))
-        print("| Number of Faces: ", len(self.Faces))
-        print("+-------------------------------------------------------")
-        print("| Euler characteristic: ", len(self.Vertices) + len(self.Faces) -len(self.Edges))
-        if self._flag_BettiNumbers:
-            print("| Betti numbers: ", self.BettiNumbers)
-        print("+-------------------------------------------------------")
+        return ("+-------------------------------------------------------\n"
+        "| Mesh Info\n"
+        "+-------------------------------------------------------\n"
+        "| Filename: " + self.filename + "\n"
+        "| Morse function values range: " + str([self.min,self.max]) + "\n"
+        "+-------------------------------------------------------\n"
+        "| Number of Vertices: " + str(len(self.Vertices)) + "\n"
+        "| Number of Edges: " + str(len(self.Edges)) + "\n"
+        "| Number of Faces: " + str(len(self.Faces)) + "\n"
+        "+-------------------------------------------------------\n"
+        "| Euler characteristic: " + str(len(self.Vertices) + len(self.Faces) -len(self.Edges)) + "\n"
+        "| Betti numbers: " + str(self.BettiNumbers) + "\n" 
+        "+-------------------------------------------------------")
         
