@@ -97,8 +97,9 @@ def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels_dict, C, V1
                         C[2].add(gamma_index)
                     
                     for Findex, face in lowerStar['faces'].items():
-                        if (num_unpaired_conforming_faces(alpha_index, alpha_simplex, PQzero, star_labels) == 1 and face.has_face(gamma_simplex)):
+                        if (num_unpaired_conforming_faces(Findex, face, PQzero, star_labels) == 1 and face.has_face(gamma_simplex)):
                             PQone.insert(tuple((face, Findex)))
+                            VisitedFaces.append(Findex)
 
             for Findex, face in lowerStar['faces'].items(): #all leftover faces are critical
                 if not (Findex in VisitedFaces):

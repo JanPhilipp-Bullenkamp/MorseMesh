@@ -9,8 +9,10 @@ def trivial_labels(morse):
     morse.InitialLabels = labels
 
 def test_trivial_labels():
+    p = False
+
     # Initialize test data
-    file = "Data/minimal_torus.ply"
+    file = "Data/vase_reduced_cleaned_painted.ply"
 
     data1 = Morse()
     data2 = Morse()
@@ -23,5 +25,16 @@ def test_trivial_labels():
     #data2.load_labels("Data/vase_reduced_cleaned_painted_labels.txt") #need trivial label file
     trivial_labels(data2)
     data2.ConformingGradient()
+
+    if p:
+        print("Critical Simplices")
+        print(data1.C)
+        print(data2.C)
+        print("Point-Edge Pairings")
+        print(data1.V12)
+        print(data2.V12)
+        print("Edge-Face Pairings")
+        print(data1.V23)
+        print(data2.V23)
 
     assert(data1.C == data2.C and data1.V12 == data2.V12 and data1.V23 == data2.V23)
