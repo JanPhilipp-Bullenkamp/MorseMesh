@@ -181,7 +181,7 @@ def write_MSComplex_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, 
         for ind in path_faces:
             write_face(f, face_dict[ind], vert_dict, color=color_paths)
             
-def write_MSComplex_detailed_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_file, color_paths=[0,0,0]):
+def write_MSComplex_detailed_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_file, color_paths=[0,0,0], separate_points_file=False):
     with open(target_file + "_" + str(MorseCpx.persistence) + "P_DetailedOverlayMorseComplex.ply", "w") as f:
         path_vert = set()
         path_edges = set()
@@ -362,6 +362,19 @@ def write_MSComplex_detailed_overlay_ply_file(MorseCpx, vert_dict, edge_dict, fa
         
         for face_ind, first_index in crit_face_transfer.items():
             write_real_face(f, first_index, first_index+1, first_index+2, color=[0,0,255], alpha=255)
+            
+    if separate_points_file == True:
+        with open(target_file + "_" + str(MorseCpx.persistence) + "P_DetailedOverlayMorseComplex_CritPoints.ply", "w") as f:
+            
+            write_header(f, len(MorseCpx.CritVertices))
+            #v_index = 0
+        
+            '''Write Vertices'''
+            for vert in MorseCpx.CritVertices.values():
+                #crit_vert_transfer[vert.index] = v_index # vert can be chosen as v_ind, v_ind+1, v_ind+2
+                #for i in range(3):
+                write_vertex(f, vert, vert_dict, color=[255,0,0])
+                #    v_index+=1
         
          
 

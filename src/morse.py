@@ -346,7 +346,7 @@ class Morse(Mesh):
         write_funval_thresh_labels_txt_file(self.Vertices, thresh, filename)
     
     @timed
-    def plot_MorseComplex_ply(self, persistence, filename, path_color=[255,0,255], detailed=False):
+    def plot_MorseComplex_ply(self, persistence, filename, path_color=[255,0,255], detailed=False, separate_points_file=False):
         """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh. 
         Visualizes the Morse Complex at the given persistence level with red = minima, green = saddles, 
         blue = maxima, and separatrix = given color (default pink).
@@ -357,11 +357,15 @@ class Morse(Mesh):
         Default is pink (255,0,255)
         @param detailed (Optional) Boolean which tells whether we want to visualize the separatrices connected
         or not. Default is false.
+        @param separate_points_file (Optional) Boolean whether to write critical points into separate file (for 
+        very nice visualization only, as it allows visualizing crit points without the points of the edges and faces
+        in the Morse Complex. Default is False.
         """
         if detailed:
             write_MSComplex_detailed_overlay_ply_file(self.reducedMorseComplexes[persistence], 
                                                       self.Vertices, self.Edges, self.Faces, 
-                                                      filename, color_paths=path_color)
+                                                      filename, color_paths=path_color,
+                                                      separate_points_file=separate_points_file)
         else:
             write_MSComplex_overlay_ply_file(self.reducedMorseComplexes[persistence], 
                                              self.Vertices, self.Edges, self.Faces, 
