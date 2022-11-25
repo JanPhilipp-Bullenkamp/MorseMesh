@@ -30,9 +30,9 @@ def write_Cell_labels_txt_file(label_dict, target_file, params = None):
             raise ValueError("The params variable needs the 4 parameters: pers, thr_high, thr_low, merge_thr!")
 
         # write labels
-        for label, indices in enumerate(label_dict.values()):
+        for label, indices in enumerate(label_dict.values(), start=1):
             for index in indices.vertices:
-                f.write(str(index) + " " + str(label+1) + "\n")
+                f.write(str(index) + " " + str(label) + "\n")
     
 def write_funval_thresh_labels_txt_file(vert_dict, thresh, target_file):
     with open(target_file + "_" + str(thresh) + "thresh.txt", "w") as f:

@@ -8,6 +8,6 @@ def timed(function, flag=True):
         after = time.time()
         fname = function.__name__
         if flag:
-            print(f"{fname} took {after-before} seconds to execute!")
+            print(f"{fname} took {(after-before):.5f} seconds to execute!")
         return return_value
     return wrapper

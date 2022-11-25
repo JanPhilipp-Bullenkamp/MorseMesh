@@ -69,7 +69,7 @@ class Vertex:
     def __init__(self, x=None, y=None, z=None,
                 quality=None, fun_val=None,
                 index=None):
-        """! The Constructor of a Vertex
+        """! @brief The Constructor of a Vertex
         @param x The x coordinate of the vertex. Default is None.
         @param y The y coordinate of the vertex. Default is None.
         @param z The z coordinate of the vertex. Default is None.
@@ -103,7 +103,7 @@ class Vertex:
         return neighbor_labels, neighbor_indices
         
     def __str__(self):
-        """! Retrieves the index of the vertex.
+        """! @brief Retrieves the index of the vertex.
         @return A string of the index of the vertex.
         """
         return str(self.index)

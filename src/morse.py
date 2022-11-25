@@ -43,7 +43,7 @@ from src.Algorithms.MorseCells import get_MorseCells
 from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
 
 from src.PlotData.PersistenceDiagram import PersistenceDiagram
-from src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
+from src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_MSComplex_detailed_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
 from src.PlotData.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file
 from src.PlotData.statistics import fun_val_statistics, critical_fun_val_statistics, salient_edge_statistics
 
@@ -346,7 +346,7 @@ class Morse(Mesh):
         write_funval_thresh_labels_txt_file(self.Vertices, thresh, filename)
     
     @timed
-    def plot_MorseComplex_ply(self, persistence, filename, path_color=[255,0,255]):
+    def plot_MorseComplex_ply(self, persistence, filename, path_color=[255,0,255], detailed=False):
         """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh. 
         Visualizes the Morse Complex at the given persistence level with red = minima, green = saddles, 
         blue = maxima, and separatrix = given color (default pink).
@@ -355,10 +355,17 @@ class Morse(Mesh):
         @param filename The name of the output file. "_(persistence)P_OverlayMorseComplex" will be added.
         @param path_color (Optional) A 3-array (RGB) which gives the color of the separatrices. 
         Default is pink (255,0,255)
+        @param detailed (Optional) Boolean which tells whether we want to visualize the separatrices connected
+        or not. Default is false.
         """
-        write_MSComplex_overlay_ply_file(self.reducedMorseComplexes[persistence], 
-                                         self.Vertices, self.Edges, self.Faces, 
-                                         filename, color_paths=path_color)
+        if detailed:
+            write_MSComplex_detailed_overlay_ply_file(self.reducedMorseComplexes[persistence], 
+                                                      self.Vertices, self.Edges, self.Faces, 
+                                                      filename, color_paths=path_color)
+        else:
+            write_MSComplex_overlay_ply_file(self.reducedMorseComplexes[persistence], 
+                                             self.Vertices, self.Edges, self.Faces, 
+                                             filename, color_paths=path_color)
     @timed  
     def plot_MorseCells_ply(self, persistence, filename):
         """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh.
@@ -417,7 +424,7 @@ class Morse(Mesh):
                                        params = [persistence, thresh_large, thresh_small, merge_threshold])
     
     @timed
-    def plot_SalientEdges_ply(self, filename, thresh_high, thresh_low = None):
+    def plot_SalientEdges_ply(self, filename, thresh_high, thresh_low = None, only_strong = False):
         """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh.
         Visualizes the (double) threshold salient edges. Points belonging to a strong edge are colored red, points
         from weak edges are colored blue.
@@ -425,16 +432,22 @@ class Morse(Mesh):
         @param filename The name of the output file. "_()Tlow_()Thigh_OverlaySalientEdge" will be added to the filename.
         @param thresh_high The high threshold for salient edges (or single threshold)
         @param thresh_low (Optional) The low threshold for salient edges. Not necessary if single threshold is wished. 
+        @param only_strong (Optional) Whether to exclude weak edges that are not connected to a strong edge.
         """
         if thresh_low == None:
             thresh_low = thresh_high
         if not self._flag_SalientEdge:
             print("Need to maximally reduce MorseComplex first...")
             self.ReduceMorseComplex(self.range)
-        write_SalientEdge_overlay_ply_file(self.maximalReducedComplex, 
-                                            self.Vertices, self.Edges, self.Faces,
-                                            thresh_high, thresh_low, 
-                                            filename, color_high=[255,0,0], color_low=[0,0,255])
+            
+        if only_strong:
+            edge_pts = self.get_salient_edges(thresh_high, thresh_low)
+            write_overlay_points(edge_pts, self.Vertices,filename)
+        else:
+            write_SalientEdge_overlay_ply_file(self.maximalReducedComplex, 
+                                                self.Vertices, self.Edges, self.Faces,
+                                                thresh_high, thresh_low, 
+                                                filename, color_high=[255,0,0], color_low=[0,0,255])
     
     @timed
     def plot_PersistenceDiagram(self, persistence = 0, pointsize = 4, save = False, filepath = 'persistenceDiagram'):
