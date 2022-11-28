@@ -137,11 +137,27 @@ data.plot_Segmentation_label_txt(persistence, thresh_large, thresh_small, merge_
 <details>
   <summary>Show</summary>
 
-A Morse complex can only be visualized by an overlay .ply file as follows:
+A Morse complex can be visualized by an overlay .ply file as follows:
 ```python
-data.plot_MorseComplex_ply(persistence, filename, path_color=[255,0,255])
+data.plot_MorseComplex_ply(persistence, filename, path_color=[255,0,255], detailed=False, separate_points_file=False)
 ```
 This returns minima (critical vertices) as red points, saddles (critical edges) as green points in the middle of the edge and maxima (critical faces) as blue points in the center of the face. The separatrix points are by default colored pink, but can be changed using *path_color*.
+
+The options *detailed* and *separate_points_file* refer to plotting options where a more exact and detailed Morse Complex is plotted: Instead of just giving the middle points of edges and faces as colored points, the *detailed* option allows to visualize the critical vertices, edges and faces as red points, green edges and blue triangles, while the separatrix is visualized as paths between the middle points of edges and faces or paths between edges and vertices.
+Setting the *separate_points_file* to True additionally writes another .ply file containing only the red critical points, which is required for a better visualization in Meshlab.
+The visualization in Meshlab for the detailed Morse complexes is a bit complicated, but you can follow these steps:
+1. Load the overlay file first (if the additional points file is there, load both overlay files before the original mesh) It is important, that the overlay files are listed above the original mesh in the project!
+2. For the general overlay file now use the following settings:
+  - **Points:** Shading - Dot Decorator; Color - Vert; Point Size - (not too small, can be adjusted)
+  - **Edges:** Shading - None; Color - Vert; Edge Width - (not too small, can be adjusted)
+  - **Face:** Shading - Face; Color - Face; Back Face - Double
+3. For the optional points overlay file, use the same settings, but just required for **Points**
+4. Now turn on points, edges and faces on the overlay file and optionally the edges on the original mesh file to see the structure. Unfortuantely you can now see the points of each part of the separatrix as well, which does not look pleasant, but turning off the points will hide the red critical vertices. Therefore the additional points overlay can be used, to avoid this: Just turn off the points in the general overlay file and turn on only points in the points overlay file and you will get a good looking complete visualization of the Morse Complex.
+
+This will give you a visualization as here:
+
+<img src="./pictures/MSComplex_detailed_visualization_meshlab.png"  width="500">
+
 </details>
 
 ## Edges
