@@ -28,12 +28,15 @@ We get a Morse-Smale complex, which represents the topology of the underlying me
 <img src="./pictures/MSComplexMorsecell_arrows.png"  width="300">
 
 ## Noise Reduction
-\TODO explain persistence and cancellation
+The initial segmentation usually is very noisy due to the nature of the input data containing a large amount of small local minima and maxima. We are not interested on this small scale structure when looking at segmentations for the whole mesh. Therefore we use a *persistence* [REF]parameter to clean the initial Morse complex from local extrema whose function values are less than the persistence away from the next connected critical simplex. A extremum - saddle point separatrix can be reversed to cancel two critical simplices. This cuts some other separatrices and thereby enlarges Morse cells.
 
 <img src="./pictures/MSComplex_cancelled_arrows_onered_better.png"  width="300">
 
 
 ## Edge Detection
+In the cancellation process for noise reduction we remove some separatrices and prolong some separatrices. While we can stop the cancellation process such that we preserve the topologically most persistent features, we can also cancel as many critical simplices as possible and reduce the complex to only the minimum number of critical simplices (representing topological features).
+When reducing to such a minimal complex, we can store a so called *separatrix persistence* [REF] for each cancelled separatrix. Giving them a meaningful metric, e.g. average curvature value along the separatrix, allows us to threshold out only important separatrices. These than work as an edge detector on the mesh. Using a double threshold for strong and weak edges as in the Canny edge detector, allows to extend the strong, clear edges with some weak edges if they can be prolonged.
+
 </details>
 
 # Segmentation Method
