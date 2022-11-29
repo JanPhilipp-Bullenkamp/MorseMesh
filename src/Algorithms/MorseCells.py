@@ -66,8 +66,8 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
     # boundary_points stored in a set. contains all vert that are either boundary themselves
     # or contained in a boundary edge or face
     boundary_points = get_boundary(MorseComplex, vert_dict, edge_dict, face_dict)
-    print("BD points: ", len(boundary_points))
-    write_overlay_points(boundary_points, vert_dict, "../../Data/test_objects/boundary_overlay001")
+    #print("BD points: ", len(boundary_points))
+    #write_overlay_points(boundary_points, vert_dict, "../../Data/test_objects/boundary_overlay001")
     
     # find cells and label without looking at boundary points
     label = 1 # start labelling with label 1, since label 0 is used for unlabeld points in gigamesh
@@ -84,7 +84,6 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
                 # pop one elt from queue
                 queue_elt = queue.pop()
                 queue_elt.label = label
-                print(queue_elt.index," gets label ", label)
                 
                 for ind in queue_elt.neighbors:
                     # only treat non boundary points:

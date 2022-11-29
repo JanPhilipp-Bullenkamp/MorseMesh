@@ -5,6 +5,7 @@ from .read_labels_from_color_ply import read_labels_from_color_ply
 from .write_correctness_mask_txt import write_correctness_mask_txt
 from ..PlotData.write_labels_txt import write_Cell_labels_txt_file
 from .clean_and_read_labels_from_color_ply import clean_and_read_labels_from_color_ply
+from .artifact3D_to_labels import artifact3D_to_labels
 
 def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename, metric = "IoU", plot_correctness_mask = False):
     
@@ -77,3 +78,7 @@ def label_txt_to_sorted_label_txt(filename, outfilename):
     sorted_labels = label_txt_to_label_dict(filename, sort_enum = True)
     write_Cell_labels_txt_file(sorted_labels, outfilename)
     return sorted_labels
+
+def artifact3D_to_label_dict(filename, scarfilename, sortenum = True):
+    label_dict = artifact3D_to_labels(filename, scarfilename)
+
