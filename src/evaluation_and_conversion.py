@@ -1,4 +1,15 @@
-# Collection of evaluation functions
+##
+# @file evaluation_and_conversion.py
+#
+# @brief Collection of evaluation functions and conversion functions for different types of results.
+#
+# @details Contains: \todo
+#
+# @section libraries_evaluation_and_conversion Libraries/Modules
+# - os standard library
+# - various local imports....
+
+# imports
 from .Evaluation.evaluate_metrics import compute_IoU, compute_F1_Score, get_correct_points
 from .Evaluation.read_labels_txt import read_labels_txt
 from .Evaluation.read_labels_from_color_ply import read_labels_from_color_ply
@@ -10,7 +21,17 @@ from .Evaluation.artifact3D_conversions import artifact3D_to_labels, artifact3D_
 import os
 
 def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename, metric = "IoU", plot_correctness_mask = False):
-    
+    """! @brief Takes a result .txt labels file and compares to a groundtruth given as a colored .ply file.
+    @param result_filename The result .txt filename and location.
+    @param groundtruth_filename The colored .ply groundtruth filename and location.
+    @param metric (Optional) Which metric to use for evaluation: Intersection of Union ("IoU") 
+    or F1-Score ("F1). Default is "IoU".
+    @param plot_correctness_mask (Optional) Boolean whether to plot a mask (labels txt file) 
+    with correct points or not. Default is False. 
+
+    @return correctness The percentage of correctly labelled vertices in the result file 
+    compared to the groundtruth file.
+    """    
     comp_label, pers, high_thr, low_thr, merge_thr = read_labels_txt(result_filename, params=True)
     
     gt_label, total_points = read_labels_from_color_ply(groundtruth_filename)
@@ -36,7 +57,17 @@ def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename,
     return correctness
     
 def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename, metric = "IoU", plot_correctness_mask = False):
-    
+    """! @brief Takes a result .txt labels file and compares to a groundtruth given as a labels .txt file.
+    @param result_filename The result .txt filename and location.
+    @param groundtruth_filename The labels .txt groundtruth filename and location.
+    @param metric (Optional) Which metric to use for evaluation: Intersection of Union ("IoU") 
+    or F1-Score ("F1). Default is "IoU".
+    @param plot_correctness_mask (Optional) Boolean whether to plot a mask (labels txt file) 
+    with correct points or not. Default is False. 
+
+    @return correctness The percentage of correctly labelled vertices in the result file 
+    compared to the groundtruth file.
+    """    
     comp_label, pers, high_thr, low_thr, merge_thr = read_labels_txt(result_filename, params=True)
     
     gt_label = read_labels_txt(groundtruth_filename, params = False)
@@ -62,11 +93,27 @@ def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename,
     return correctness
     
 def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 0):
+    """! @brief Takes a colored .ply file and returns a labels .txt file based on those colors.
+    @param filename The colored .ply filename and location.
+    @param outfilename The .txt labels filename that will be created.
+    @param clean_thresh (Optional) Threshold that gives the minimum number of vertices each label should have.
+    If one color has fewer than this vertices, they are merged into the surrounding larger labels. Default
+    is 0 (so no removal of any small labels). 
+
+    @return labels Returns a label dictionary of the labels that were written to the output file.
+    """
     labels = clean_and_read_labels_from_color_ply(filename, outfilename, threshold=clean_thresh)
     return labels
     
     
 def label_txt_to_label_dict(filename, sort_enum = True):
+    """! @brief Takes a labels .txt file and returns a label dictionary.
+    @param filename The labels .txt file to be read.
+    @param sort_enum (Optional) Boolean whether to sort and enumerate the labels, so that the largest label 
+    is label 1, the second largest label is label 2, etc. Default is True.
+
+    @return labels Returns a label dictionary of the labels with key=label_id and value=set of vertex indices.
+    """
     labels = read_labels_txt(filename, params = False)
     
     if sort_enum:
@@ -77,14 +124,33 @@ def label_txt_to_label_dict(filename, sort_enum = True):
     return labels
 
 def label_dict_to_label_txt(labels, filename):
+    """! @brief Takes a label dictionary and writes a corresponding labels .txt file.
+    @param labels A label dictionary with key=label_id and value=set of vertex indices.
+    @filename The filename of the labels .txt file to be written. (.txt will be added automatically)
+    """
     write_Cell_labels_txt_file(labels, filename)
     
 def label_txt_to_sorted_label_txt(filename, outfilename):
+    """! @brief Takes a labels .txt file and writes another labels .txt file with the labels being sorted and enumerated.
+    @param filename The labels .txt file to be read.
+    @param outfilename The labels .txt file to be written (sorted and enumerated).
+    """
     sorted_labels = label_txt_to_label_dict(filename, sort_enum = True)
     label_dict_to_label_txt(sorted_labels, outfilename)
     return sorted_labels
 
 def artifact3D_to_label_dict(filename, scarfilename, sort_enum = True, get_trafo = False):
+    """! @brief Takes the output of the Artifact3D Software and returns their resulting labelling as a 
+    label dictionary with key=label_id and value=set of vertex indices.
+    @param filename An Artifact3D .mat file. Should be called "Qins-(object_name).mat" or so.
+    @param scarfilename An Artifact3D .mat file containing the scar information. Should be called 
+    "ScarsQins-(object_name).mat" or so.
+    @param sort_enum (Optional) Boolean, whether to sort and enumerate the labels. Default is True.
+    @param get_trafo (Optional) Boolean, whether to return the transformation as well or not. Default is False.
+
+    return label_dict, (reorientation_trafo) The label dictionary of the Artifact3D Software result and optionally the 
+    reorientation trafo used in Artifact3D.
+    """
     label_dict, reorientation_trafo = artifact3D_to_labels(filename, scarfilename)
     if sort_enum:
         sort_enum_labels = {}
@@ -98,10 +164,33 @@ def artifact3D_to_label_dict(filename, scarfilename, sort_enum = True, get_trafo
         return label_dict
 
 def artifact3D_get_trafo_dict(filename, scarfilename):
+    """! @brief Reads the Artifact3D Softwares results and returns the reorientation they got to align the artefacts.
+    @details The reorientation returned can be used to recreate the alignment done by the Artifact3D Software as follows:
+    Flipvector (f1,f2,f3)T; Trafomat A (3x3 Matrix); Translationvector (delta_x, delta_y, delta_z)T
+    A point (x,y,z)T in the Artifact3D coordinate system is translated back to the original mesh coordinate system,
+    by performing the foloowing calculations:
+    (x_orig,y_orig,z_orig)T = (f1,f2,f3)T * (A.dot((x,y,z)T)) - (delta_x, delta_y, delta_z)T
+    So to get the Artifact3D coordinates from the original points, we have to reverse this operation: \todo
+
+    @param filename An Artifact3D .mat file. Should be called "Qins-(object_name).mat" or so.
+    @param scarfilename An Artifact3D .mat file containing the scar information. Should be called 
+    "ScarsQins-(object_name).mat" or so.
+
+    @return reorientation_trafo A dictionary containing 'Flipvector', 'Trafomatrix' and 'Translationvector' that 
+    make up the reorientation.
+    """
     reorientation_trafo = artifact3D_get_trafo(filename, scarfilename)
     return reorientation_trafo
 
 def artifact3D_to_label_txt(filename, scarfilename, outfilename, sort_enum = True):
+    """! @brief Takes the output of the Artifact3D Software and writes their resulting labelling as a 
+    label .txt file.
+    @param filename An Artifact3D .mat file. Should be called "Qins-(object_name).mat" or so.
+    @param scarfilename An Artifact3D .mat file containing the scar information. Should be called 
+    "ScarsQins-(object_name).mat" or so.
+    @param outfilename The name of the labels .txt file to be written.
+    @param sort_enum (Optional) Boolean, whether to sort and enumerate the labels. Default is True.
+    """
     label_dict = artifact3D_to_label_dict(filename, scarfilename, sort_enum=sort_enum, get_trafo=False)
     label_dict_to_label_txt(label_dict, outfilename)
 

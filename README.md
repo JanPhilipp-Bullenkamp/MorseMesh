@@ -97,7 +97,9 @@ data.ExtractMorseCells(persistence)
 ### 4. Segmentation
 We can perform a segmentation for given four parameters
 ```python
-data.Segmentation(persistence, thresh_large, thresh_small, merge_threshold, minimum_labels=3)
+data.Segmentation(persistence, thresh_large, 
+                  thresh_small, merge_threshold, 
+                  minimum_labels=3)
 ```
 The *minimum_labels* makes sure at least this number of labels is returned (unless the original Morse cells have fewer than that labels)
 
@@ -131,7 +133,9 @@ where *filename* does not need to contain the file extension.
 
 For segmentation results currently only the labels .txt option is available and a calculated parameter combination can be visulaized by:
 ```python
-data.plot_Segmentation_label_txt(persistence, thresh_large, thresh_small, merge_threshold, filename)
+data.plot_Segmentation_label_txt(persistence, thresh_large, 
+                                 thresh_small, merge_threshold, 
+                                 filename)
 ```
 </details>
 
@@ -142,7 +146,10 @@ data.plot_Segmentation_label_txt(persistence, thresh_large, thresh_small, merge_
 
 A Morse complex can be visualized by an overlay .ply file as follows:
 ```python
-data.plot_MorseComplex_ply(persistence, filename, path_color=[255,0,255], detailed=False, separate_points_file=False)
+data.plot_MorseComplex_ply(persistence, filename, 
+                           path_color=[255,0,255], 
+                           detailed=False, 
+                           separate_points_file=False)
 ```
 This returns minima (critical vertices) as red points, saddles (critical edges) as green points in the middle of the edge and maxima (critical faces) as blue points in the center of the face. The separatrix points are by default colored pink, but can be changed using *path_color*.
 
@@ -184,7 +191,8 @@ There are several options to show and/or save images of histograms, persistence 
 
 A persistence diagram can be obtained as follows
 ```python
-data.plot_PersistenceDiagram(persistence=0, pointsize=4, save=False, filepath='persistenceDiagram')
+data.plot_PersistenceDiagram(persistence=0, pointsize=4, 
+                             save=False, filepath='persistenceDiagram')
 ```
 All parameters are optional, the *persistence* parameter should make all points disappear that are closer than its value to the birth-death line of the persistence diagram.
 
@@ -194,14 +202,19 @@ Persistence Diagram             |  Persistence Diagram with persistence
 
 We can get the statistics of the separatrix persistences (includes mean, standard deviation and all values) as well as plot and/or show a histogram of their distribution
 ```python
-statistics = data.salient_edge_statistics(nb_bins=15, log=False, save=False, filepath='histogram', show=True)
+statistics = data.salient_edge_statistics(nb_bins=15, log=False, save=False, 
+                                          filepath='histogram', show=True)
 ```
 The *log* parameter switches the y-Axis to log scale.
 
 We can also obtain statisctics and histograms from the function values of all vertices or specifically for the vertices making up the critical simplices of a Morse complex with given persistence
 ```python
-statistics1 = data.funval_statistics(nb_bins=15, log=False, save=False, filepath='histogram', show=True)
-statistics2 = data.critical_funval_statistics(persistence, nb_bins=15, log=False, save=False, filepath='histogram', show=True)
+statistics1 = data.funval_statistics(nb_bins=15, log=False, save=False, 
+                                     filepath='histogram', show=True)
+                                     
+statistics2 = data.critical_funval_statistics(persistence, nb_bins=15, 
+                                              log=False, save=False, 
+                                              filepath='histogram', show=True)
 ```
 The *statistics2* returned from the second function here contains separate dictionaries with mean, standard deviation and all the values for minima, saddles and maxima.
 </details>
