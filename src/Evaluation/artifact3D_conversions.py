@@ -7,8 +7,15 @@ def artifact3D_to_labels(filename, scarfilename):
     mat = scipy.io.loadmat(filename)
     scarmat = scipy.io.loadmat(scarfilename)
     
+    reorientation_trafo = {}
+    reorientation_trafo['Flipvector'] = [scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]
+    reorientation_trafo['Trafomatrix'] = scarmat['ds'][0][0][0]
     print("Flipparameter: ",scarmat['ds'][0][0][1][0][0])
+    print("Flipvector: ",[scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1])
+    print("Trafomat:\n",scarmat['ds'][0][0][0])
     data = ([scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]*mat['vertices'].dot(scarmat['ds'][0][0][0])[:,:])
+    reorientation_trafo['Translationvector'] = np.sum(data,axis=0)/len(data)
+    print("Translation: ",np.sum(data,axis=0)/len(data))
     data = data - np.sum(data,axis=0)/len(data)
     
     pt_list = [pt for pt in data]
@@ -54,4 +61,15 @@ def artifact3D_to_labels(filename, scarfilename):
     for ind in not_visited:
         dist, closest_labelled_ind = tree_visited.query(pt_list[ind], k=1)
         label_dict[lab_pt_dict[transf[closest_labelled_ind]]].add(ind)
-    return label_dict
+    return label_dict, reorientation_trafo
+
+def artifact3D_get_trafo(filename, scarfilename):
+    mat = scipy.io.loadmat(filename)
+    scarmat = scipy.io.loadmat(scarfilename)
+    
+    reorientation_trafo = {}
+    reorientation_trafo['Flipvector'] = [scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]
+    reorientation_trafo['Trafomatrix'] = scarmat['ds'][0][0][0]
+    data = ([scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]*mat['vertices'].dot(scarmat['ds'][0][0][0])[:,:])
+    reorientation_trafo['Translationvector'] = np.sum(data,axis=0)/len(data)
+    return reorientation_trafo
