@@ -10,12 +10,12 @@ def artifact3D_to_labels(filename, scarfilename):
     reorientation_trafo = {}
     reorientation_trafo['Flipvector'] = [scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]
     reorientation_trafo['Trafomatrix'] = scarmat['ds'][0][0][0]
-    print("Flipparameter: ",scarmat['ds'][0][0][1][0][0])
-    print("Flipvector: ",[scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1])
-    print("Trafomat:\n",scarmat['ds'][0][0][0])
+    #print("Flipparameter: ",scarmat['ds'][0][0][1][0][0])
+    #print("Flipvector: ",[scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1])
+    #print("Trafomat:\n",scarmat['ds'][0][0][0])
     data = ([scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]*mat['vertices'].dot(scarmat['ds'][0][0][0])[:,:])
     reorientation_trafo['Translationvector'] = np.sum(data,axis=0)/len(data)
-    print("Translation: ",np.sum(data,axis=0)/len(data))
+    #print("Translation: ",np.sum(data,axis=0)/len(data))
     data = data - np.sum(data,axis=0)/len(data)
     
     pt_list = [pt for pt in data]

@@ -166,11 +166,16 @@ def artifact3D_to_label_dict(filename, scarfilename, sort_enum = True, get_trafo
 def artifact3D_get_trafo_dict(filename, scarfilename):
     """! @brief Reads the Artifact3D Softwares results and returns the reorientation they got to align the artefacts.
     @details The reorientation returned can be used to recreate the alignment done by the Artifact3D Software as follows:
-    Flipvector (f1,f2,f3)T; Trafomat A (3x3 Matrix); Translationvector (delta_x, delta_y, delta_z)T
-    A point (x,y,z)T in the Artifact3D coordinate system is translated back to the original mesh coordinate system,
+    Flipvector f = (f1,f2,f3); Trafomat A (3x3 Matrix); Translationvector t = (delta_x, delta_y, delta_z)
+    A point (x,y,z) in the Artifact3D coordinate system is translated back to the original mesh coordinate system,
     by performing the foloowing calculations:
-    (x_orig,y_orig,z_orig)T = (f1,f2,f3)T * (A.dot((x,y,z)T)) - (delta_x, delta_y, delta_z)T
-    So to get the Artifact3D coordinates from the original points, we have to reverse this operation: \todo
+    (x_orig,y_orig,z_orig) = (f1,f2,f3) * ((x,y,z).dot(A)) - (delta_x, delta_y, delta_z) 
+    or
+    x_orig = f * (x.dot(A)) - t
+    So to get the Artifact3D coordinates from the original points, we have to reverse this operation:
+    (x_art, y_art, z_art) = [(f1,f2,f3) * ((x_orig,y_orig,z_orig) + (delta_x, delta_y, delta_z))}.dot(A_inverse)
+    or
+    x_artifact3d = (f * (x_orig + t)).dot(A-1)  (A-1 = A inverted)
 
     @param filename An Artifact3D .mat file. Should be called "Qins-(object_name).mat" or so.
     @param scarfilename An Artifact3D .mat file containing the scar information. Should be called 
