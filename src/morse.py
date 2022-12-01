@@ -253,8 +253,8 @@ class Morse(Mesh):
         return edges
     
     @timed
-    def Pipeline_no_Pers(self, infilename, outfilename, quality_index, inverted, 
-                 high_thresh, low_thresh, merge_thresh):
+    def Pipeline(self, infilename, outfilename, quality_index, inverted, 
+                 persistence, high_thresh, low_thresh, merge_thresh):
         
         with open(outfilename+"_timings.txt", "w") as f:
             t1 = timeit.default_timer()
@@ -271,21 +271,22 @@ class Morse(Mesh):
             t5 = timeit.default_timer()
             f.write("ReduceMaximally: "+str(t5-t4)+"\n")
             
-            self.ReduceMorseComplex(0.04)
+            for pers in persistence:
+                self.ReduceMorseComplex(pers)
 
-            t7 = timeit.default_timer()
-            self.ExtractMorseCells(0)
-            t8 = timeit.default_timer()
-            f.write("MorseCells: "+str(t8-t7)+"\n")
+                t7 = timeit.default_timer()
+                self.ExtractMorseCells(pers)
+                t8 = timeit.default_timer()
+                f.write("MorseCells: "+str(t8-t7)+"\n")
 
-            f.write("\tSegmentation (high,low,merge): time\n")
-            for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
-                if high > low:
-                    t9 = timeit.default_timer()
-                    self.Segmentation(0.04, high, low, merge, minimum_labels=5)
-                    t10 = timeit.default_timer()
-                    f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
-                    self.plot_Segmentation_label_txt(0.04, high, low, merge, outfilename)
+                f.write("\tSegmentation (high,low,merge): time\n")
+                for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
+                    if high > low:
+                        t9 = timeit.default_timer()
+                        self.Segmentation(pers, high, low, merge, minimum_labels=5)
+                        t10 = timeit.default_timer()
+                        f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
+                        self.plot_Segmentation_label_txt(pers, high, low, merge, outfilename)
      
     @timed
     def Pipeline_semiAuto(self, infilename, outfilename, quality_index, inverted, 

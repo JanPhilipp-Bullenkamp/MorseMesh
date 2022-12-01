@@ -848,10 +848,7 @@ class MorseCells:
             raise AssertionError("Cannot segment if no salient edge points are loaded to these Morse cells!")
         if self.merge_threshold != None:
             raise AssertionError("Already has a merge threshold assigned... Shouldnt be so, probably messed up the order of functions somewhere.")
-            
-        # remove small enclosures
-        self.remove_small_enclosures(size_threshold=500)
-        
+           
         # 1. calculate weights between cells
         self.calculate_all_weights()
         
@@ -874,7 +871,7 @@ class MorseCells:
                     if weight == self.Cells[label1].neighbors_weights[label2]:
                         # can merge cells
                         updated_weights = self.merge_cells(label1, label2)
-                        self.remove_small_enclosures(size_threshold=500)
+                        #self.remove_small_enclosures(size_threshold=500)
                         # insert updated weights into queue if necessary
                         if len(updated_weights) != 0:
                             for new_tuple in updated_weights:
@@ -887,4 +884,6 @@ class MorseCells:
                         #print("weight has changed but connection still there...")
                         
         # remove small patches
-        self.remove_small_patches(size_threshold=500)         
+        self.remove_small_patches(size_threshold=500)    
+        # remove small enclosures
+        self.remove_small_enclosures(size_threshold=500)     
