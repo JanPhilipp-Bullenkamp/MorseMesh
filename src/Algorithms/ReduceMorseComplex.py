@@ -5,7 +5,7 @@ from copy import deepcopy
 from .CancellationQueue import CancellationQueue
 from .LoadData.Datastructure import Separatrix, MorseCells
 
-def get_closest_extremum(crit_edge, vert_dict, face_dict):
+def get_closest_extremum(crit_edge, crit_faces_dict, vert_dict, edge_dict, face_dict, salient_edge_pts=None):
     distances = []
     
     # first add distances to all maxima
@@ -34,10 +34,35 @@ def get_closest_extremum(crit_edge, vert_dict, face_dict):
             distances.append(tuple((vert_ind, 0, abs(crit_edge.fun_val[0]-vert_dict[vert_ind].fun_val)))) 
             
     if sorted(distances, key=lambda item: item[2]):
-        closest, dim, distance = sorted(distances, key=lambda item: item[2])[0] 
-        return closest, dim, distance
+        if salient_edge_pts != None:
+            for closest, dim, distance in sorted(distances, key=lambda item: item[2]):
+                if dim == 0:
+                    if len(get_indices(crit_edge.paths[closest], edge_dict, face_dict, dim=1).intersection(salient_edge_pts)) < 10:
+                            return closest, dim, distance
+                elif dim == 2:
+                    if len(get_indices(crit_faces_dict[closest].paths[crit_edge.index], edge_dict, face_dict, dim=2).intersection(salient_edge_pts)) < 10:
+                            return closest, dim, distance
+                    
+            return None
+        else:    
+            closest, dim, distance = sorted(distances, key=lambda item: item[2])[0] 
+            return closest, dim, distance
     else: 
         return None
+    
+def get_indices(path, edge_dict, face_dict, dim):
+    indices = set()
+    # edge-vert separatrix -> only need to add edge indices
+    if dim == 1:
+        for i, elt in enumerate(path):
+            if i%2 == 0:
+                indices.update(edge_dict[elt].indices)
+    # face-edge separatrix -> only need to add face indices        
+    elif dim == 2:
+        for i, elt in enumerate(path):
+            if i%2 == 0:
+                indices.update(face_dict[elt].indices)
+    return indices
     
 #def compute_min_sad_persistence(path, min_maximum_val, vert_dict, edge_dict):
 def compute_min_sad_persistence(path, vert_dict, edge_dict):
@@ -259,7 +284,7 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, edge_dict, face_
     
     return MorseComplex
             
-def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict):
+def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict, salient_edge_pts=None):
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     
@@ -278,7 +303,7 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
     
     # fill queue
     for crit_edge in redMorseComplex.CritEdges.values():
-        closest_extremum = get_closest_extremum(crit_edge, redMorseComplex.CritVertices, redMorseComplex.CritFaces)
+        closest_extremum = get_closest_extremum(crit_edge, redMorseComplex.CritFaces, vert_dict, edge_dict, face_dict, salient_edge_pts=salient_edge_pts)
         if closest_extremum != None:
             index, dim, dist = closest_extremum
             if dist < threshold:
@@ -287,7 +312,7 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
     # work down queue
     while CancelPairs.notEmpty():
         prio, obj_id, saddle = CancelPairs.pop_front()
-        check = get_closest_extremum(saddle, redMorseComplex.CritVertices, redMorseComplex.CritFaces)
+        check = get_closest_extremum(saddle, redMorseComplex.CritFaces, vert_dict, edge_dict, face_dict, salient_edge_pts=salient_edge_pts)
         if check != None:
             closest, dim, dist = check
             if dist <= CancelPairs.check_distance():

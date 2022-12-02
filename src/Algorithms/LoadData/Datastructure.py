@@ -177,7 +177,7 @@ class Simplex:
 
         self.index = index #int
     
-    def set_fun_val(self, vertices_dict):
+    def set_fun_val(self, vertices_dict: dict):
         """! @brief Sets the function value of the simplex.
         @details Uses the function values of the vertices and sorts them such 
         that the first value is the larger function value.
@@ -243,7 +243,7 @@ class CritVertex:
     
     __slots__ = ("index", "fun_val", "connected_saddles")
     
-    def __init__(self, vert):
+    def __init__(self, vert: Vertex):
         """! The Constructor of a CritVertex.
         @param vert A Vertex class object.
         """
@@ -285,9 +285,9 @@ class CritEdge:
     
     __slots__ = ("indices", "fun_val", "index", "connected_minima", "connected_maxima", "paths")
     
-    def __init__(self, edge):
+    def __init__(self, edge: Simplex):
         """! The Constructor of a CritEdge.
-        @param edge An Edge class object.
+        @param edge An Simplex class object representing an edge.
         """
         self.indices = edge.indices #set
         self.fun_val = edge.fun_val #list
@@ -328,9 +328,9 @@ class CritFace:
     
     __slots__ = ("indices", "fun_val", "index", "connected_saddles", "paths")
     
-    def __init__(self, face):
+    def __init__(self, face: Simplex):
         """! The Constructor of a CritFace.
-        @param face A Face class object.
+        @param face A Simplex class object representing a face.
         """
         self.indices = face.indices #set
         self.fun_val = face.fun_val #list
@@ -371,7 +371,7 @@ class Separatrix:
     
     __slots__ = ("origin", "destination", "dimension", "path", "separatrix_persistence")
     
-    def __init__(self, origin, destination, dimension, path, separatrix_persistence):
+    def __init__(self, origin: int, destination: int, dimension: int, path: list, separatrix_persistence: float):
         """! The Constructor of a Separatrix.
         @param origin The higher dimensional critical simplex where this separatrix starts from.
         @param destination The lower dimensional critical simplex where this separatrix is going to.
@@ -397,6 +397,26 @@ class Separatrix:
         
         # float
         self.separatrix_persistence = separatrix_persistence
+
+    def get_indices(self, edge_dict: dict, face_dict: dict):
+        """! @brief Returns a set of indices that make up this separatrix.
+        @param edge_dict A dictionary containing the edges.
+        @param face_dict A dictionary containing the faces.
+
+        @return indices A set of (vertex) indices that make up this separatrix.
+        """
+        indices = set()
+        # edge-vert separatrix -> only need to add edge indices
+        if self.dimension == 1:
+            for i, elt in enumerate(self.path):
+                if i%2 == 0:
+                    indices.add(edge_dict[elt].indices)
+        # face-edge separatrix -> only need to add face indices        
+        elif self.dimension == 2:
+            for i, elt in enumerate(self.path):
+                if i%2 == 0:
+                    indices.add(face_dict[elt].indices)
+        return indices
         
     def __str__(self):
         """! Retrieves information on this separatrix.

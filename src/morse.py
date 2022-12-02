@@ -120,7 +120,7 @@ class Morse(Mesh):
         if not self._flag_MorseComplex:
             print("Need to call ExtractMorseComplex first...")
             self.ExtractMorseComplex()
-        elif persistence in self.reducedMorseComplexes.keys():
+        if persistence in self.reducedMorseComplexes.keys():
             print("This persistence has already been calculated!")
             print("You can access it via .reducedMorseComplexes[persistence] ") 
         else:
@@ -160,6 +160,29 @@ class Morse(Mesh):
                     print("Persistence was high enough that this complex is maximally reduced.")
                '''  
         return self.reducedMorseComplexes[persistence]
+
+    @timed
+    def ReduceMorseComplex_SalientEdge(self, thresh_high: float, thresh_low=None):
+        if not self._flag_MorseComplex:
+            print("Need to call ExtractMorseComplex first...")
+            self.ExtractMorseComplex() 
+        if not self._flag_SalientEdge:
+            print("Need to reduce maximally first...")
+            self.ReduceMorseComplex(self.range)
+
+        salient_edge_pts = self.get_salient_edges(thresh_high, thresh_low)
+
+        self.salientreducedMorseComplexes[(thresh_high, thresh_low)] = CancelCriticalPairs(self.MorseComplex, self.range, 
+                                                                        self.Vertices, self.Edges, self.Faces, salient_edge_pts=salient_edge_pts)
+        return self.salientreducedMorseComplexes[(thresh_high, thresh_low)]
+
+    @timed
+    def ExtractCellsSalientComplex(self, thresh_high: float, thresh_low=None):
+        if (thresh_high, thresh_low) not in self.salientreducedMorseComplexes.keys():
+            print("Need to reduce with these edge thresholds first...")
+            self.ReduceMorseComplex_SalientEdge(thresh_high, thresh_low)
+        get_MorseCells(self.salientreducedMorseComplexes[(thresh_high,thresh_low)], self.Vertices, self.Edges, self.Faces)
+        return self.salientreducedMorseComplexes[(thresh_high,thresh_low)].MorseCells
     
     @timed
     def ExtractMorseCells(self, persistence):
@@ -222,6 +245,17 @@ class Morse(Mesh):
                                                                     merge_threshold, minimum_labels=minimum_labels)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
+
+    @timed
+    def Segmentation_SalientReduction(self, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+        self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small)
+        self.ExtractCellsSalientComplex(thresh_large, thresh_small)
+
+        salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
+
+        self.salientreducedMorseComplexes[(thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
+                                                                                           merge_threshold, minimum_labels)
+        return self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
     def Segmentation_no_Pers(self, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
@@ -427,6 +461,10 @@ class Morse(Mesh):
                                        filename+ "_" + str(persistence) + "P_" + str(thresh_large) + "-" + str(thresh_small) 
                                        + "T_" + str(merge_threshold),
                                        params = [persistence, thresh_large, thresh_small, merge_threshold])
+    
+    @timed
+    def plot_Segmentation_SalientEdge_label_txt(self, thresh_large, thresh_small, merge_threshold, filename):
+        write_Cell_labels_txt_file(self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells, filename, params=[None, thresh_large, thresh_small, merge_threshold])
     
     @timed
     def plot_SalientEdges_ply(self, filename, thresh_high, thresh_low = None, only_strong = False):
