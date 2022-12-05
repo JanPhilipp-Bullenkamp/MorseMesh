@@ -39,6 +39,7 @@ from src.Algorithms.ProcessLowerStars import ProcessLowerStars
 from src.Algorithms.ConformingGradient import ConformingGradient
 from src.Algorithms.ExtractMorseComplex import ExtractMorseComplex
 from src.Algorithms.ReduceMorseComplex import CancelCriticalPairs
+from src.Algorithms.ReduceMorseComplex import CancelCriticalConformingPairs
 from src.Algorithms.BettiNumbers import BettiViaPairCells
 
 from src.Algorithms.MorseCells import get_MorseCells
@@ -151,7 +152,7 @@ class Morse(Mesh):
             self._flag_MorseComplex = True
         
     @timed
-    def ReduceMorseComplex(self, persistence):
+    def ReduceMorseComplex(self, persistence, conforming = False):
         if not self._flag_MorseComplex:
             print("Need to call ExtractMorseComplex first...")
             self.ExtractMorseComplex()
@@ -159,8 +160,12 @@ class Morse(Mesh):
             print("This persistence has already been calculated!")
             print("You can access it via .reducedMorseComplexes[persistence] ") 
         else:
-            self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, 
-                                                                          self.Vertices, self.Edges, self.Faces)
+            if conforming:
+                self.reducedMorseComplexes[persistence] = CancelCriticalConformingPairs(self.MorseComplex, persistence, 
+                                                                              self.Vertices, self.Edges, self.Faces, self.UserLabels)
+            else:
+                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, 
+                                                                              self.Vertices, self.Edges, self.Faces)
             if persistence >= self.range and not self._flag_SalientEdge:
                 self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
                 self.maximalReducedComplex.maximalReduced = True
