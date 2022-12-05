@@ -3,10 +3,23 @@ import pytest
 from src.morse import Morse
 
 def trivial_labels(morse):
-    labels = {}
+    vertexLabels = {}
     for ind in morse.Vertices.keys():
-        labels[ind] = 1
-    morse.InitialLabels = labels
+        vertexLabels[ind] = 1
+    edgeLabels = {}
+    faceLabels = {}
+
+    for key in morse.Edges.keys():
+        edgeLabels[key] = set()
+        for i in morse.Edges[key].indices:
+            edgeLabels[key].add(vertexLabels[i])
+
+    for key in morse.Faces.keys():
+        faceLabels[key] = set()
+        for i in morse.Faces[key].indices:
+            faceLabels[key].add(vertexLabels[i])
+
+    morse.UserLabels = {'vertices': vertexLabels, 'edges': edgeLabels, 'faces': faceLabels}
 
 def test_trivial_labels():
     p = False

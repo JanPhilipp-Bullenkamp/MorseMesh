@@ -88,7 +88,21 @@ class Morse(Mesh):
         self.range = max_val - min_val
         
     def load_labels(self, filename):
-        self.InitialLabels = read_label_txt(filename)
+        vertexLabels = read_label_txt(filename)
+        edgeLabels = {}
+        faceLabels = {}
+
+        for key in self.Edges.keys():
+            edgeLabels[key] = set()
+            for i in self.Edges[key].indices:
+                edgeLabels[key].add(vertexLabels[i])
+
+        for key in self.Faces.keys():
+            faceLabels[key] = set()
+            for i in self.Faces[key].indices:
+                faceLabels[key].add(vertexLabels[i])
+
+        self.UserLabels = {'vertices': vertexLabels, 'edges': edgeLabels, 'faces': faceLabels}
  
     ''' MORSE THEORY'''
 
@@ -118,7 +132,7 @@ class Morse(Mesh):
             self.C[1] = set()
             self.C[2] = set()
             
-        ConformingGradient(self.Vertices, self.Edges, self.Faces, self.InitialLabels, self.C, self.V12, self.V23)
+        ConformingGradient(self.Vertices, self.Edges, self.Faces, self.UserLabels, self.C, self.V12, self.V23)
         self._flag_ProcessLowerStars = True
     
     @timed
