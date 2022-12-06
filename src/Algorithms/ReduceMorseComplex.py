@@ -37,10 +37,10 @@ def get_closest_extremum(crit_edge, crit_faces_dict, vert_dict, edge_dict, face_
         if salient_edge_pts != None:
             for closest, dim, distance in sorted(distances, key=lambda item: item[2]):
                 if dim == 0:
-                    if len(get_indices(crit_edge.paths[closest], edge_dict, face_dict, dim=1).intersection(salient_edge_pts)) < 10:
+                    if len(get_indices(crit_edge.paths[closest], edge_dict, face_dict, dim=1).intersection(salient_edge_pts)) < 6:
                             return closest, dim, distance
                 elif dim == 2:
-                    if len(get_indices(crit_faces_dict[closest].paths[crit_edge.index], edge_dict, face_dict, dim=2).intersection(salient_edge_pts)) < 10:
+                    if len(get_indices(crit_faces_dict[closest].paths[crit_edge.index], edge_dict, face_dict, dim=2).intersection(salient_edge_pts)) < 6:
                             return closest, dim, distance
                     
             return None

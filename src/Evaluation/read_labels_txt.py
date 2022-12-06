@@ -1,9 +1,4 @@
-import timeit
-import os
-
 def read_labels_txt(filename, params=False):
-    start_total_time = timeit.default_timer()
-    
     labels = {}
     pers = None
     high_thr = None
@@ -35,9 +30,6 @@ def read_labels_txt(filename, params=False):
                 else:
                     labels[label].add(ind)
                 
-    end_total_time = timeit.default_timer() - start_total_time
-    print('Time read labels in txt file:', end_total_time)
-    
     if params:
         return labels, pers, high_thr, low_thr, merge_thr
     else:

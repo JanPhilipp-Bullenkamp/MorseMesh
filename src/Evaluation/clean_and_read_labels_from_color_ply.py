@@ -1,5 +1,4 @@
-from plyfile import PlyData, PlyElement, PlyProperty, PlyListProperty
-import timeit
+from plyfile import PlyData
 from collections import Counter
 
 def write_header(file):
@@ -31,9 +30,7 @@ def neighbor_labels(vert_dict, ind):
             labels.append(vert_dict[vert_ind].label)
     return labels
         
-def clean_and_read_labels_from_color_ply(mesh_filename, label_filename, threshold=10):
-    start_total_time = timeit.default_timer()
-    
+def clean_and_read_labels_from_color_ply(mesh_filename, label_filename=None, threshold=10):
     rawdata = PlyData.read(mesh_filename)
     
     data = Mesh(mesh_filename)
@@ -57,8 +54,6 @@ def clean_and_read_labels_from_color_ply(mesh_filename, label_filename, threshol
             
             vert = Vertex(pt['x'], pt['y'], pt['z'], conversion[ tuple((pt['red'], pt['green'], pt['blue'])) ])
             data.Vertices[ind] = vert
-            
-    print("Length labels: ", len(labels))
             
     for face in rawdata['face']:
         indices = set(face[0])
@@ -103,18 +98,14 @@ def clean_and_read_labels_from_color_ply(mesh_filename, label_filename, threshol
         it+=1
         if it%50000==0:
             break
-            
-            
-    print("Length labels after clean: ", len(labels))       
-    with open(label_filename +".txt", "w") as f:
-        write_header(f)
+              
+    if label_filename != None:    
+        with open(label_filename +".txt", "w") as f:
+            write_header(f)
 
-        for count, indices in enumerate(sorted(labels.values(), key=lambda kv: len(kv), reverse=True)):
-            label = count+1 # start with label 1
-            for index in indices:
-                f.write(str(index) + " " + str(label) + "\n")
+            for count, indices in enumerate(sorted(labels.values(), key=lambda kv: len(kv), reverse=True)):
+                label = count+1 # start with label 1
+                for index in indices:
+                    f.write(str(index) + " " + str(label) + "\n")
                 
-    end_total_time = timeit.default_timer() - start_total_time
-    print('Time read labels in ply file data:', end_total_time)
-    
     return labels

@@ -1,7 +1,3 @@
-import numpy as np
-import timeit
-from plyfile import PlyData, PlyElement, PlyProperty, PlyListProperty
-
 def write_header(file, correctness, gt_file):
     file.write("# +-----------------------------------------------------+\n")
     file.write("# | txt file with labels                                |\n")
@@ -13,8 +9,6 @@ def write_header(file, correctness, gt_file):
     file.write("# +-----------------------------------------------------+\n")
     
 def write_correctness_mask_txt(total_points, points, gt_file, target_file, label_correct=1, label_wrong=2):
-    start_timer = timeit.default_timer()
-    
     if label_wrong == label_correct:
         raise ValueError('cannot label correct and wrong points the same')
     
@@ -32,6 +26,4 @@ def write_correctness_mask_txt(total_points, points, gt_file, target_file, label
             f.write(str(ind) + " " + str(label_wrong) + "\n") 
         
     f.close()
-    time_writing_file = timeit.default_timer() - start_timer
-    print('Time writing correctness label txt file:', time_writing_file)
     

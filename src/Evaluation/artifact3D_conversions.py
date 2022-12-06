@@ -1,6 +1,5 @@
 import scipy.io
 import numpy as np
-import math
 from scipy.spatial import KDTree
 
 def artifact3D_to_labels(filename, scarfilename):
@@ -10,17 +9,11 @@ def artifact3D_to_labels(filename, scarfilename):
     reorientation_trafo = {}
     reorientation_trafo['Flipvector'] = [scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]
     reorientation_trafo['Trafomatrix'] = scarmat['ds'][0][0][0]
-    #print("Flipparameter: ",scarmat['ds'][0][0][1][0][0])
-    #print("Flipvector: ",[scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1])
-    #print("Trafomat:\n",scarmat['ds'][0][0][0])
     data = ([scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]*mat['vertices'].dot(scarmat['ds'][0][0][0])[:,:])
     reorientation_trafo['Translationvector'] = np.sum(data,axis=0)/len(data)
-    #print("Translation: ",np.sum(data,axis=0)/len(data))
     data = data - np.sum(data,axis=0)/len(data)
     
     pt_list = [pt for pt in data]
-    #for ind, pt in enumerate(data):
-    #    pt_list.append(pt)
         
     tree = KDTree(pt_list, leafsize=1000)
 
@@ -43,7 +36,6 @@ def artifact3D_to_labels(filename, scarfilename):
                 label_dict[label+1].add(closest_ind)
                 lab_pt_dict[closest_ind] = label+1
                 visited.add(closest_ind)
-        #print("Label: ", label+1," done!")
     print(label+1," labels")
     print(counter,"/",len(pt_list) ," points far away nearest neighbor")
     

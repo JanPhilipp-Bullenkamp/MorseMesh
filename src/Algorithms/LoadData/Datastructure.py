@@ -516,8 +516,6 @@ class MorseComplex:
         neighborhood graph of the Morse cells will be above this threshold.
         @param minimum_labels The minimum number of labels we want to keep. Default is set to 3
         """
-        start_time = timeit.default_timer()
-        
         if self._flag_MorseCells == False:
             raise AssertionError("No Morse Cells calculated yet...")
         SegmentationCells = deepcopy(self.MorseCells)
@@ -532,9 +530,38 @@ class MorseComplex:
             raise AssertionError("This parameter combination has already been calculated...")
         else:
             self.Segmentations[(thresh_large, thresh_small)][merge_threshold] = SegmentationCells
+
+    def create_segmentation_old(self, salient_edge_points, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+        """! @brief Creates a segmentation from this MorseComplex with the given double edge threshold 
+        and the merging threshold.
+        
+        @details Creates a copy of the Morse cells at this persistence level and than segments 
+        based on the given parameters. Segemntation stops when either no more cells can be
+        merged due to no more adjacent cells having a weight below the merge threshold, or 
+        reaching the optional minimum number of labels (which is defaulted to 3).
+        
+        @param salient_edge_points The salient edge points that have been calcualted from the double threshold
+        @param thresh_large The larger threshold of the double threshold that was used to get the edge points.
+        @param thresh_small The smaller threshold of the double threshold that was used to get the edge points.
+        @param merge_threshold The threshold that determines when to stop merging cells. Weights in the 
+        neighborhood graph of the Morse cells will be above this threshold.
+        @param minimum_labels The minimum number of labels we want to keep. Default is set to 3
+        """
+        if self._flag_MorseCells == False:
+            raise AssertionError("No Morse Cells calculated yet...")
+        SegmentationCells = deepcopy(self.MorseCells)
+        
+        SegmentationCells.add_salient_edge_points(salient_edge_points, (thresh_large, thresh_small))
+        
+        SegmentationCells.segment_old(merge_threshold, minimum_labels=minimum_labels)
+        
+        if (thresh_large, thresh_small) not in self.Segmentations.keys():
+            self.Segmentations[(thresh_large, thresh_small)] = {}
+        if merge_threshold in self.Segmentations[(thresh_large, thresh_small)].keys():
+            raise AssertionError("This parameter combination has already been calculated...")
+        else:
+            self.Segmentations[(thresh_large, thresh_small)][merge_threshold] = SegmentationCells
             
-        end_time = timeit.default_timer() - start_time
-        print("Time Segmentation: ", end_time)
         
     def __repr__(self):
         """! @brief Prints out an info block about this Morse Complex.
@@ -906,4 +933,63 @@ class MorseCells:
         # remove small patches
         self.remove_small_patches(size_threshold=500)    
         # remove small enclosures
-        self.remove_small_enclosures(size_threshold=500)     
+        self.remove_small_enclosures(size_threshold=500)  
+
+    def segment_old(self, merge_threshold, minimum_labels):
+        """! @brief Makes this MorseCells object a Segmentation, based on the salient edge points stored 
+        in this MorseCells object and a given merge_threshold and minim_labels number.
+        
+        @details Requires this MorseCells object to contain salient edge points. Based on those, the 
+        weights between neighboring cells are calculated and then cells are merged using a Priority 
+        Queue to make sure to merge cells first if they have a low weight. Merging stops if either 
+        no more cell adjacencies have a weight below the threshold or the minimum number of labels 
+        is reached. This MorseCell object then becomes the segmentation.
+        
+        @param merge_threshold The threshold for weights between adjacent cells to stop merging.
+        @param minimum_labels A minimum number of labels that will stop the merging process if it is reached.
+        (Otherwise the merge threshold is the stopping criterium)
+        """
+        if self.salient_edge_points == None or self.threshold == None:
+            raise AssertionError("Cannot segment if no salient edge points are loaded to these Morse cells!")
+        if self.merge_threshold != None:
+            raise AssertionError("Already has a merge threshold assigned... Shouldnt be so, probably messed up the order of functions somewhere.")
+           
+        # 1. calculate weights between cells
+        self.calculate_all_weights()
+        '''
+        # 2. create and fill Cancellation Queue
+        queue = CancellationQueue()
+        
+        for label, cell in self.Cells.items():
+            for neighbor, weight in cell.neighbors_weights.items():
+                if weight < merge_threshold:
+                    queue.insert(tuple((weight,label, neighbor)))
+               '''     
+        still_changing = True
+        # pop from queue until no more elements are below the merge threshold or we reach the minimum number of labels
+        while len(self.Cells) > minimum_labels and still_changing: #and queue.length() != 0:
+            # 2. create and fill Cancellation Queue
+            queue = CancellationQueue()
+            before = len(self.Cells)
+            for label, cell in self.Cells.items():
+                for neighbor, weight in cell.neighbors_weights.items():
+                    if weight < merge_threshold:
+                        queue.insert(tuple((weight,label, neighbor)))
+
+            while queue.length() != 0:
+                weight, label1, label2 = queue.pop_front()
+                
+                # need to make sure the popped tuple is still available for merging and their weight is also the same.
+                if label1 in self.Cells.keys() and label2 in self.Cells.keys():
+                    if label2 in self.Cells[label1].neighbors.keys():
+                        if weight == self.Cells[label1].neighbors_weights[label2]:
+                            # can merge cells
+                            updated_weights = self.merge_cells(label1, label2)
+            after = len(self.Cells)
+            if before == after:
+                still_changing = False
+                        
+        # remove small patches
+        self.remove_small_patches(size_threshold=500)    
+        # remove small enclosures
+        self.remove_small_enclosures(size_threshold=500)   

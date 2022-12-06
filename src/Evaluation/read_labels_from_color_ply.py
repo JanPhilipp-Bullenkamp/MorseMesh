@@ -1,9 +1,6 @@
-from plyfile import PlyData, PlyElement, PlyProperty, PlyListProperty
-import timeit
+from plyfile import PlyData
 
 def read_labels_from_color_ply(filename):
-    start_total_time = timeit.default_timer()
-    
     rawdata = PlyData.read(filename)
     
     labels = {}
@@ -20,9 +17,5 @@ def read_labels_from_color_ply(filename):
         else:
             labels[conversion[ tuple((pt['red'], pt['green'], pt['blue'])) ]].add(ind)
             
-                
-    end_total_time = timeit.default_timer() - start_total_time
-    print('Time read labels in ply file data:', end_total_time)
-    
     return labels, len(rawdata['vertex'])
          

@@ -162,15 +162,15 @@ class Morse(Mesh):
         return self.reducedMorseComplexes[persistence]
 
     @timed
-    def ReduceMorseComplex_SalientEdge(self, thresh_high: float, thresh_low=None):
+    def ReduceMorseComplex_SalientEdge(self, thresh_high: float, thresh_low=None, salient_edge_pts=None):
         if not self._flag_MorseComplex:
             print("Need to call ExtractMorseComplex first...")
             self.ExtractMorseComplex() 
         if not self._flag_SalientEdge:
             print("Need to reduce maximally first...")
             self.ReduceMorseComplex(self.range)
-
-        salient_edge_pts = self.get_salient_edges(thresh_high, thresh_low)
+        if salient_edge_pts == None:
+            salient_edge_pts = self.get_salient_edges(thresh_high, thresh_low)
 
         self.salientreducedMorseComplexes[(thresh_high, thresh_low)] = CancelCriticalPairs(self.MorseComplex, self.range, 
                                                                         self.Vertices, self.Edges, self.Faces, salient_edge_pts=salient_edge_pts)
@@ -241,17 +241,18 @@ class Morse(Mesh):
             
         salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
         
-        self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, thresh_large, thresh_small, 
+        self.reducedMorseComplexes[persistence].create_segmentation_old(salient_edge_points, thresh_large, thresh_small, 
                                                                     merge_threshold, minimum_labels=minimum_labels)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
     @timed
     def Segmentation_SalientReduction(self, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
-        self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small)
+        salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
+
+        self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small, salient_edge_points)
         self.ExtractCellsSalientComplex(thresh_large, thresh_small)
 
-        salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
 
         self.salientreducedMorseComplexes[(thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
                                                                                            merge_threshold, minimum_labels)
@@ -285,6 +286,33 @@ class Morse(Mesh):
         edges = edge_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
                                self.Vertices, self.Edges, self.Faces)
         return edges
+
+    @timed
+    def Pipeline_SalientSegmentation(self, infilename, outfilename, quality_index, inverted, 
+                                     high_thresh, low_thresh, merge_thresh):
+        
+        with open(outfilename+"_timings.txt", "w") as f:
+            t1 = timeit.default_timer()
+            self.load_mesh_ply(infilename, quality_index, inverted)
+            t2 = timeit.default_timer()
+            f.write("ReadData: "+str(t2-t1)+"\n")
+            self.ProcessLowerStars()
+            t3 = timeit.default_timer()
+            f.write("ProcessLowerStars: "+str(t3-t2)+"\n")
+            self.ExtractMorseComplex()
+            t4 = timeit.default_timer()
+            f.write("ExtractMorseComplex: "+str(t4-t3)+"\n")
+            self.ReduceMorseComplex(self.range)
+            t5 = timeit.default_timer()
+            f.write("ReduceMaximally: "+str(t5-t4)+"\n")
+            f.write("\tSegmentation (high,low,merge): time\n")
+            for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
+                if high > low:
+                    t9 = timeit.default_timer()
+                    self.Segmentation_SalientReduction(high, low, merge, minimum_labels=5)
+                    t10 = timeit.default_timer()
+                    f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
+                    self.plot_Segmentation_SalientEdge_label_txt(high, low, merge, outfilename+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
     
     @timed
     def Pipeline(self, infilename, outfilename, quality_index, inverted, 
