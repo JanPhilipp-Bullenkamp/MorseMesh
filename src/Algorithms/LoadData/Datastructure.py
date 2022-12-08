@@ -101,7 +101,25 @@ class Vertex:
                 neighbor_indices.append([elt, vert_dict[elt].label])
                 neighbor_labels.add(vert_dict[elt].label)
         return neighbor_labels, neighbor_indices
-        
+
+    def get_n_neighborhood(self, vert_dict, n):
+        n_rings = {}
+        n_rings[0] = self.neighbors
+        for i in range(1,n):
+            n_rings[i] = set()
+            for ind in n_rings[i-1]:
+                n_rings[i].update(vert_dict[ind].neighbors)
+
+            for j in range(0,i):
+                n_rings[i] -= n_rings[j]
+
+        n_neighborhood = set()
+        n_neighborhood.add(self.index)
+        for i in range(0,n):
+            n_neighborhood.update(n_rings[i])
+
+        return n_neighborhood
+
     def __str__(self):
         """! @brief Retrieves the index of the vertex.
         @return A string of the index of the vertex.

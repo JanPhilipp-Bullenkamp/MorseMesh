@@ -42,9 +42,11 @@ from src.Algorithms.BettiNumbers import BettiViaPairCells
 from src.Algorithms.MorseCells import get_MorseCells
 from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
 
+from src.Algorithms.Roughness_test import variance_heat_map
+
 from src.PlotData.PersistenceDiagram import PersistenceDiagram
 from src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_MSComplex_detailed_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
-from src.PlotData.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file
+from src.PlotData.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file, write_variance_heat_map_labels_txt_file
 from src.PlotData.statistics import fun_val_statistics, critical_fun_val_statistics, salient_edge_statistics
 
 from src.PlotData.plot_points_for_debugging import write_overlay_points
@@ -395,8 +397,16 @@ class Morse(Mesh):
                 t10 = timeit.default_timer()
                 f.write("\t\t"+str(high_thresh)+" "+str(low_thresh)+" "+str(merge)+": "+str(t10-t9)+"\n")
                 self.write_DualSegmentationLabels(pers, high_thresh, low_thresh, merge, outfilename)
+
+    ''' SURFACE ROUGHNESS'''
+    @timed
+    def get_variance(self,n):
+        return variance_heat_map(self.Vertices, n)
     
     ''' PLOTTING'''
+    @timed
+    def write_variance_heat_map_labels(self, variance, thresh1, thresh2, filename):
+        write_variance_heat_map_labels_txt_file(variance, thresh1, thresh2, filename)
     
     @timed
     def write_funval_thresh_labels(self, thresh, filename):

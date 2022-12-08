@@ -19,7 +19,7 @@ def write_header_params(file, pers, thr_high, thr_low, merge_thr):
     file.write("# | Format: index label                                 |\n")
     file.write("# +-----------------------------------------------------+\n")
     
-def write_Cell_labels_txt_file(label_dict, target_file, params = None):
+def write_Cell_labels_txt_file(label_dict: dict, target_file: str, params = None):
     with open(target_file + ".txt", "w") as f:
         if params == None:
             write_header(f)
@@ -34,7 +34,7 @@ def write_Cell_labels_txt_file(label_dict, target_file, params = None):
             for index in indices.vertices:
                 f.write(str(index) + " " + str(label) + "\n")
     
-def write_funval_thresh_labels_txt_file(vert_dict, thresh, target_file):
+def write_funval_thresh_labels_txt_file(vert_dict: dict, thresh: float, target_file: str):
     with open(target_file + "_" + str(thresh) + "thresh.txt", "w") as f:
         write_header(f)
 
@@ -44,4 +44,17 @@ def write_funval_thresh_labels_txt_file(vert_dict, thresh, target_file):
                 f.write(str(ind) + " " +str(1) + "\n")
             else:
                 f.write(str(ind) + " " +str(2) + "\n")
+
+def write_variance_heat_map_labels_txt_file(variance: dict, thresh1: float, thresh2: float, target_file: str):
+    with open(target_file + "_" + str(thresh1) + "_" + str(thresh2) + "thresh.txt", "w") as f:
+        write_header(f)
+
+        # write labels
+        for ind, var in variance.items():
+            if var < thresh1:
+                f.write(str(ind) + " " +str(1) + "\n")
+            elif var >= thresh1 and var < thresh2:
+                f.write(str(ind) + " " +str(2) + "\n")
+            else:
+                f.write(str(ind) + " " +str(3) + "\n")
  
