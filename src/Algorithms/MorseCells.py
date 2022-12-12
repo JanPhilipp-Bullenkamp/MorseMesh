@@ -8,6 +8,7 @@ def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
     
     for vert_ind in MorseComplex.CritVertices.keys():
         bd_points.add(vert_ind)
+        vert_dict[vert_ind].boundary = True
     for edge in MorseComplex.CritEdges.values():
         minima = Counter(edge.connected_minima)
         for mini, nb in minima.items():
@@ -37,9 +38,6 @@ def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
                     if count%2 == 0: # add all faces
                         bd_points.add(face_dict[elt].get_max_fun_val_index())
                         vert_dict[face_dict[elt].get_max_fun_val_index()].boundary = True
-                        #bd_points.update(face_dict[elt].indices)
-                        #for ind in face_dict[elt].indices:
-                        #    vert_dict[ind].boundary = True
                     elif count%2 == 1: # add all edges
                         bd_points.add(edge_dict[elt].get_max_fun_val_index())
                         vert_dict[edge_dict[elt].get_max_fun_val_index()].boundary = True
@@ -49,9 +47,6 @@ def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
                         if count%2 == 0: # add all faces
                             bd_points.add(face_dict[elt].get_max_fun_val_index())
                             vert_dict[face_dict[elt].get_max_fun_val_index()].boundary = True
-                            #bd_points.update(face_dict[elt].indices)
-                            #for ind in face_dict[elt].indices:
-                            #    vert_dict[ind].boundary = True
                         elif count%2 == 1: # add all edges
                             bd_points.add(edge_dict[elt].get_max_fun_val_index())
                             vert_dict[edge_dict[elt].get_max_fun_val_index()].boundary = True
@@ -71,7 +66,7 @@ def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborh
     
     # find cells and label without looking at boundary points
     label = 1 # start labelling with label 1, since label 0 is used for unlabeld points in gigamesh
-    for vert_ind, vert in vert_dict.items():
+    for vert in vert_dict.values():
         if vert.boundary or vert.label != -1:
             continue
         else:

@@ -42,7 +42,7 @@ from src.Algorithms.BettiNumbers import BettiViaPairCells
 from src.Algorithms.MorseCells import get_MorseCells
 from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
 
-from src.Algorithms.Roughness_test import variance_heat_map
+from src.Algorithms.Roughness_test import variance_heat_map, extremal_points_ratio
 
 from src.PlotData.PersistenceDiagram import PersistenceDiagram
 from src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_MSComplex_detailed_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
@@ -187,7 +187,7 @@ class Morse(Mesh):
         return self.salientreducedMorseComplexes[(thresh_high,thresh_low)].MorseCells
     
     @timed
-    def ExtractMorseCells(self, persistence):
+    def ExtractMorseCells(self, persistence: float):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
             self.ReduceMorseComplex(persistence)
@@ -230,7 +230,7 @@ class Morse(Mesh):
     ''' SEGMENTATION'''
     
     @timed
-    def Segmentation(self, persistence, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+    def Segmentation(self, persistence: float, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels=3):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
             self.ReduceMorseComplex(persistence)
@@ -249,7 +249,7 @@ class Morse(Mesh):
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
     @timed
-    def Segmentation_SalientReduction(self, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+    def Segmentation_SalientReduction(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels=3):
         salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
 
         self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small, salient_edge_points)
@@ -261,7 +261,7 @@ class Morse(Mesh):
         return self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
-    def Segmentation_no_Pers(self, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+    def Segmentation_no_Pers(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels=3):
         if self.MorseComplex._flag_MorseCells == False:
             print("No Morse Cells computed for initial complex, computing now...")
             self.ExtractMorseCells(0)
@@ -277,7 +277,7 @@ class Morse(Mesh):
         return self.MorseComplex.Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
-    def get_salient_edges(self, thresh_high, thresh_low=None):
+    def get_salient_edges(self, thresh_high: float, thresh_low=None):
         # if only one threshold given: use same strong and weak edge threshold
         if thresh_low == None:
             thresh_low = thresh_high
@@ -290,8 +290,8 @@ class Morse(Mesh):
         return edges
 
     @timed
-    def Pipeline_SalientSegmentation(self, infilename, outfilename, quality_index, inverted, 
-                                     high_thresh, low_thresh, merge_thresh):
+    def Pipeline_SalientSegmentation(self, infilename: str, outfilename: str, quality_index: int, inverted: bool, 
+                                     high_thresh: float, low_thresh: float, merge_thresh: float):
         
         with open(outfilename+"_timings.txt", "w") as f:
             t1 = timeit.default_timer()
@@ -401,7 +401,21 @@ class Morse(Mesh):
     ''' SURFACE ROUGHNESS'''
     @timed
     def get_variance(self,n):
-        return variance_heat_map(self.Vertices, n)
+        fun_vals = [v.fun_val for v in self.Vertices.values()]
+        mean_fun_val = np.mean(fun_vals)
+        return variance_heat_map(self.Vertices, mean_fun_val, n)
+
+    @timed
+    def get_extremal_point_ratio(self, pers, n):
+        self.ReduceMorseComplex(pers)
+        extremal_points = set()
+        for ind in self.reducedMorseComplexes[pers].CritVertices.keys():
+            extremal_points.add(ind)
+        for edge_ind in self.reducedMorseComplexes[pers].CritEdges.keys():
+            extremal_points.add(self.Edges[edge_ind].get_max_fun_val_index())
+        for face_ind in self.reducedMorseComplexes[pers].CritFaces.keys():
+            extremal_points.add(self.Faces[face_ind].get_max_fun_val_index())
+        return extremal_points_ratio(self.Vertices, extremal_points, n)
     
     ''' PLOTTING'''
     @timed
