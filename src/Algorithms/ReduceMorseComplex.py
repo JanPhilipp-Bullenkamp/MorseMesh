@@ -346,7 +346,7 @@ def get_closest_conforming_extremum(crit_edge, vert_dict, face_dict, labels):
     vert_counter = Counter(crit_edge.connected_minima)
     for vert_ind, nb in vert_counter.items():
         # cannot cancel loops, so only if there is a single path we can add the extremum
-        if (labels['edges'][crit_edge.index] == labels['vertices'][vert_ind]) and nb==1:
+        if (labels['edges'][crit_edge.index] == {labels['vertices'][vert_ind]}) and nb==1:
             #check for valuable max-edge connections:
             max_dist = []
             for elt in crit_edge.connected_maxima:
