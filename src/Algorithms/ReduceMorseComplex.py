@@ -334,7 +334,7 @@ def get_closest_conforming_extremum(crit_edge, vert_dict, face_dict, labels):
     face_counter = Counter(crit_edge.connected_maxima)
     for face_ind, nb in face_counter.items():
         # cannot cancel loops, so only if there is a single path we can add the extremum
-        if nb==1:
+        if (labels['edges'][crit_edge.index] == labels['faces'][face_ind]) and nb==1:
             # check for valuebale edge-min connections:
             min_dist = []
             for elt in crit_edge.connected_minima:
@@ -346,7 +346,7 @@ def get_closest_conforming_extremum(crit_edge, vert_dict, face_dict, labels):
     vert_counter = Counter(crit_edge.connected_minima)
     for vert_ind, nb in vert_counter.items():
         # cannot cancel loops, so only if there is a single path we can add the extremum
-        if nb==1:
+        if (labels['edges'][crit_edge.index] == labels['vertices'][vert_ind]) and nb==1:
             #check for valuable max-edge connections:
             max_dist = []
             for elt in crit_edge.connected_maxima:
@@ -382,7 +382,7 @@ def CancelCriticalConformingPairs(MorseComplex, threshold, vert_dict, edge_dict,
     
     # fill queue
     for crit_edge in redMorseComplex.CritEdges.values():
-        closest_extremum = get_closest_conforming_extremum(crit_edge, redMorseComplex.CritVertices, redMorseComplex.CritFaces)
+        closest_extremum = get_closest_conforming_extremum(crit_edge, redMorseComplex.CritVertices, redMorseComplex.CritFaces, labels)
         if closest_extremum != None:
             index, dim, dist = closest_extremum
             if dist < threshold:
@@ -391,7 +391,7 @@ def CancelCriticalConformingPairs(MorseComplex, threshold, vert_dict, edge_dict,
     # work down queue
     while CancelPairs.notEmpty():
         prio, obj_id, saddle = CancelPairs.pop_front()
-        check = get_closest_conforming_extremum(saddle, redMorseComplex.CritVertices, redMorseComplex.CritFaces)
+        check = get_closest_conforming_extremum(saddle, redMorseComplex.CritVertices, redMorseComplex.CritFaces, labels)
         if check != None:
             closest, dim, dist = check
             if dist <= CancelPairs.check_distance():
