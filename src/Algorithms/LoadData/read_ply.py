@@ -13,8 +13,7 @@
 #   - Access to Vertex, Edge and Face classes.
 
 #Imports
-from plyfile import PlyData, PlyElement, PlyProperty, PlyListProperty
-import numpy as np
+from plyfile import PlyData
 from collections import Counter
 
 from .Datastructure import Vertex, Simplex
@@ -47,12 +46,11 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
             vert.fun_val = -1 * vert.quality
         else:
             vert.fun_val = vert.quality
-        #vert.fun_val = np.sqrt((vert.x)**2 + (vert.y)**2 + (vert.z)**2)
         vals.append(vert.fun_val)
         vertices_dict[vindex] = vert
         
     counts = Counter(vals)
-    for key, value in vertices_dict.items():
+    for value in vertices_dict.values():
         if counts[value.fun_val] > 1:
             tmp = value.fun_val
             value.fun_val = value.fun_val + (counts[value.fun_val] - 1) * 0.0000001
