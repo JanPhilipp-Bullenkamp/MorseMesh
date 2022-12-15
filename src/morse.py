@@ -70,6 +70,12 @@ class Morse(Mesh):
     
     @timed
     def load_mesh_ply(self, filename: str, quality_index: int, inverted: bool = False):
+        """! @brief Loads a .ply file with a Morse function taken from the given index.
+
+        @param filename The location and filename of the ply file that should be loaded.
+        @param quality_index The index position where the Morse function should be taken from in the vertices.
+        @param inverted (Optional) Boolean, whether the Morse function should be inverted or not (multiplied with -1).
+        """
         min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
                                     self.Edges, self.Faces, inverted=inverted)
         self.filename = os.path.splitext(filename)[0]
@@ -79,6 +85,9 @@ class Morse(Mesh):
         
     @timed    
     def load_new_funvals(self, filename: str):
+        """! @brief Loads new function values into the Mesh. Currently expects a feature vector file from Gigamesh i think.
+        @param filename The location and filename of the feature vector file that should give new Morse function values.
+        """
         min_val, max_val = read_funvals(filename, self.Vertices, self.Edges, self.Faces)
         self.min = min_val
         self.max = max_val
@@ -88,6 +97,10 @@ class Morse(Mesh):
     
     @timed
     def ProcessLowerStars(self):
+        """! @brief Runs the ProcessLowerStars algorithm to get a discrete vector field representing the gradient of the discrete Morse function.
+
+        @details Implementation of the algorithm described in Robins et al......
+        """
         # reset if has been computed already
         if self._flag_ProcessLowerStars:
             self.V12 = {}
@@ -103,6 +116,10 @@ class Morse(Mesh):
         
     @timed
     def ExtractMorseComplex(self):
+        """! @brief Runs the ExtractMorseComplex algorithm to get a Morse Complex.
+        
+        @details Implementation of the algorithm described in Robins et al ....
+        """
         if not self._flag_ProcessLowerStars:
             print('Need to call ProcessLowerStars first...')
             self.ProcessLowerStars()
@@ -118,6 +135,14 @@ class Morse(Mesh):
         
     @timed
     def ReduceMorseComplex(self, persistence: float):
+        """! @brief Reduces the Morse complex up to the given persistence.
+        @details Always cancels two critical simplices of consectutive dimensions if their function values are closer than the given 
+        persistence. The resulting simplified Morse Complex is stored as a copy under reducedMorseComplexes[persistence].
+        
+        @param persistence The persistence up to which the Morse complex should be simplified.
+        
+        @return The reduced Morse Complex object.
+        """
         if not self._flag_MorseComplex:
             print("Need to call ExtractMorseComplex first...")
             self.ExtractMorseComplex()
