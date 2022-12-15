@@ -22,7 +22,6 @@
 
 # imports
 from copy import deepcopy
-import timeit
 
 from .weight_metrics import compute_weight_saledge
 from ..CancellationQueue import CancellationQueue
@@ -66,9 +65,9 @@ class Vertex:
     
     __slots__ = ("x", "y", "z", "quality", "fun_val", "index", "star", "neighbors", "label", "boundary")
     
-    def __init__(self, x=None, y=None, z=None,
-                quality=None, fun_val=None,
-                index=None):
+    def __init__(self, x: int = None, y: int = None, z: int = None,
+                quality: int = None, fun_val: int = None,
+                index: int = None):
         """! @brief The Constructor of a Vertex
         @param x The x coordinate of the vertex. Default is None.
         @param y The y coordinate of the vertex. Default is None.
@@ -93,7 +92,7 @@ class Vertex:
         self.label = -1 #int
         self.boundary = False #bool
         
-    def has_neighbor_label(self, vert_dict):
+    def has_neighbor_label(self, vert_dict: dict) -> tuple[set, list]:
         neighbor_labels = set()
         neighbor_indices = []
         for elt in self.neighbors:
@@ -102,7 +101,7 @@ class Vertex:
                 neighbor_labels.add(vert_dict[elt].label)
         return neighbor_labels, neighbor_indices
 
-    def get_n_neighborhood(self, vert_dict, n):
+    def get_n_neighborhood(self, vert_dict: dict, n: int) -> set:
         n_rings = {}
         n_rings[0] = self.neighbors
         for i in range(1,n):
@@ -120,13 +119,13 @@ class Vertex:
 
         return n_neighborhood
 
-    def __str__(self):
+    def __str__(self) -> str:
         """! @brief Retrieves the index of the vertex.
         @return A string of the index of the vertex.
         """
         return str(self.index)
     
-def compare_heights(small, big):
+def compare_heights(small: tuple, big: tuple) -> bool:
     """! @brief Compares two tuples of sorted values.
     
     @details Compares two sorted tuples of possibly different length and returns True if the second
@@ -184,7 +183,7 @@ class Simplex:
     
     __slots__ = ("indices", "fun_val", "index", "max_fun_val_index")
     
-    def __init__(self, indices=None, index=None):
+    def __init__(self, indices: set = None, index: int = None):
         """! The Constructor of a Simplex
         @param indices A set of indices representing the vertices of the simplex. Default is None.
         @param index The index of this simplex. Default is None. 
@@ -210,7 +209,7 @@ class Simplex:
                 self.max_fun_val_index = ind
         self.fun_val.sort(reverse=True)
         
-    def has_face(self, other_simplex):
+    def has_face(self, other_simplex) -> bool:
         """! @brief Checks if a given other simplex is a face of this simplex.
         @details Another simplex is a face of this simplex, if its vertices are a real subset of this simplex
         vertices and there is only one vertex not contained. (e.g. an edge with 2 indices can be the face of a
@@ -225,10 +224,10 @@ class Simplex:
         else:
             return False
        
-    def get_max_fun_val_index(self):
+    def get_max_fun_val_index(self) -> int:
         return self.max_fun_val_index
         
-    def __lt__(self, other_simplex):
+    def __lt__(self, other_simplex) -> bool:
         """! @brief Checks if another simplex has a smaller function value (according to the metric described in compare_heights)
         
         @param other_simplex The simplex we want to know of whether it has a higher function value than this simplex.
@@ -238,7 +237,7 @@ class Simplex:
         # return true if own fun_val is smaller than the fun_val of other_simplex
         return compare_heights(self.fun_val, other_simplex.fun_val)
         
-    def __str__(self):
+    def __str__(self) -> str:
         """! Retrieves the index of the simplex.
         @return A string of the index of the simplex.
         """
@@ -270,7 +269,7 @@ class CritVertex:
         
         self.connected_saddles = []
         
-    def __str__(self):
+    def __str__(self) -> str:
         """! Retrieves the index of the critical vertex.
         @return A string of the index of the critical vertex.
         """
@@ -317,7 +316,7 @@ class CritEdge:
         
         self.paths = {}
         
-    def __str__(self):
+    def __str__(self) -> str:
         """! Retrieves the index of the critical edge.
         @return A string of the index of the critical edge.
         """
@@ -359,7 +358,7 @@ class CritFace:
         
         self.paths = {}
         
-    def __str__(self):
+    def __str__(self) -> str:
         """! Retrieves the index of the critical face.
         @return A string of the index of the critical face.
         """
@@ -416,7 +415,7 @@ class Separatrix:
         # float
         self.separatrix_persistence = separatrix_persistence
 
-    def get_indices(self, edge_dict: dict, face_dict: dict):
+    def get_indices(self, edge_dict: dict, face_dict: dict) -> set:
         """! @brief Returns a set of indices that make up this separatrix.
         @param edge_dict A dictionary containing the edges.
         @param face_dict A dictionary containing the faces.
@@ -436,7 +435,7 @@ class Separatrix:
                     indices.add(face_dict[elt].indices)
         return indices
         
-    def __str__(self):
+    def __str__(self) -> str:
         """! Retrieves information on this separatrix.
         @return A string telling wether its a minimal or maximal line, origin, destination and the length of the path.
         """
@@ -487,7 +486,7 @@ class MorseComplex:
     
     __slots__ = ("CritVertices", "CritEdges", "CritFaces", "Separatrices", "_flag_MorseCells", "MorseCells", "Segmentations", "_flag_BettiNumbers", "BettiNumbers", "partners", "maximalReduced", "persistence", "filename")
         
-    def __init__(self, persistence=0, filename=None):
+    def __init__(self, persistence: float = 0, filename: str = None):
         """! The Constructor of a MorseComplex.
         @param persistence The persistence up to which this complex has been reduced to. Optional, default is 0 (not reduced at all).
         @param filename The filename of the original mesh. Optional, default is None.
@@ -511,14 +510,15 @@ class MorseComplex:
         self.persistence = persistence
         self.filename = filename
         
-    def add_vertex(self, vert):
+    def add_vertex(self, vert: Vertex):
         """! @brief Adds a critical vertex to the Morse Complex.
         @param vert A Vertex class object.
         """
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
         
-    def create_segmentation(self, salient_edge_points, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+    def create_segmentation(self, salient_edge_points: set, thresh_large: float, thresh_small: float, 
+                            merge_threshold: float, minimum_labels: int = 3):
         """! @brief Creates a segmentation from this MorseComplex with the given double edge threshold 
         and the merging threshold.
         
@@ -549,7 +549,8 @@ class MorseComplex:
         else:
             self.Segmentations[(thresh_large, thresh_small)][merge_threshold] = SegmentationCells
 
-    def create_segmentation_old(self, salient_edge_points, thresh_large, thresh_small, merge_threshold, minimum_labels=3):
+    def create_segmentation_old(self, salient_edge_points: set, thresh_large: float, thresh_small: float, 
+                                merge_threshold: float, minimum_labels: int = 3):
         """! @brief Creates a segmentation from this MorseComplex with the given double edge threshold 
         and the merging threshold.
         
@@ -581,7 +582,7 @@ class MorseComplex:
             self.Segmentations[(thresh_large, thresh_small)][merge_threshold] = SegmentationCells
             
         
-    def __repr__(self):
+    def __repr__(self) -> str:
         """! @brief Prints out an info block about this Morse Complex.
         @return Info as string.
         """
@@ -619,7 +620,7 @@ class Cell:
     
     __slots__ = ("label", "vertices", "boundary", "neighbors", "neighbors_weights")
     
-    def __init__(self, label):
+    def __init__(self, label: int):
         """! @brief The constructor of a Cell object.
         @param label The label of this cell object.
         """
@@ -631,7 +632,7 @@ class Cell:
         self.neighbors = {}
         self.neighbors_weights = {}
         
-    def __repr__(self):
+    def __repr__(self) -> str:
         """! @brief Gives info on this Cell.
         @return Info as string.
         """
@@ -671,7 +672,7 @@ class MorseCells:
         self.merge_threshold = None # stores the merge threshold, is a float
         
         
-    def add_salient_edge_points(self, salient_edge_points, threshold):
+    def add_salient_edge_points(self, salient_edge_points: set, threshold: tuple[float, float]):
         """! @brief Adds salient edge points for a given threshold to this MorseCells object.
         
         @param salient_edge_points The salient edge points we want to use for further segmentation.
@@ -685,14 +686,14 @@ class MorseCells:
         self.salient_edge_points = salient_edge_points
         self.threshold = threshold
         
-    def add_cell(self, cell):
+    def add_cell(self, cell: Cell):
         """! @brief Adds a cell to the MorseCells.
         
         @param cell A Cell object that is added the the MorseCells.
         """
         self.Cells[cell.label] = cell
         
-    def add_vertex_to_label(self, label, index):
+    def add_vertex_to_label(self, label: int, index: int):
         """! @brief Adds a vertex to a cell with a given label.
         
         @param label The label of the cell that the vertex should be added to.
@@ -702,7 +703,7 @@ class MorseCells:
             raise ValueError("This label is not part of the Morse cells: ", label)
         self.Cells[label].vertices.add(index)
         
-    def add_boundary_to_label(self, label, index):
+    def add_boundary_to_label(self, label: int, index: int):
         """! @brief Adds a boundary vertex to a cell with a given label.
         
         @param label The label of the cell that the vertex should be added to.
@@ -713,7 +714,7 @@ class MorseCells:
         self.Cells[label].vertices.add(index)
         self.Cells[label].boundary.add(index)
         
-    def add_neighboring_cell_labels(self, label1, v1, label2, v2):
+    def add_neighboring_cell_labels(self, label1: int, v1: int, label2: int, v2: int):
         """! @brief Connects two cells if necessary and updates their boundray points.
         
         @details Connects label 1 and label 2 if necessary and stores the vertices v1 and v2 as
@@ -761,7 +762,7 @@ class MorseCells:
                 cell.neighbors_weights[nei_label] = weight
                 self.Cells[nei_label].neighbors_weights[label] = weight
                 
-    def calculate_weight_between_two_cells(self, label1, label2):
+    def calculate_weight_between_two_cells(self, label1: int, label2: int):
         """! @brief Calculate weights between two adjacent labels.
         
         @param label1 One of the neigboring labels.
@@ -779,7 +780,7 @@ class MorseCells:
         
         return weight
                 
-    def merge_cells(self, label1, label2, pop_label2=True):
+    def merge_cells(self, label1: int, label2: int, pop_label2: bool = True) -> list:
         """! @brief Merges the label2 cell into the label1 cell and updates the weights and surrounding
         adjacencies.
         
@@ -853,7 +854,7 @@ class MorseCells:
         return updated_weights
         
         
-    def remove_small_enclosures(self, size_threshold = 15):
+    def remove_small_enclosures(self, size_threshold: int = 15):
         """! @brief Removes small cells, that are fully enclosed by a single other label.
         
         @param size_threshold (Optional) Default is set to 15. If cells have fewer than this parameter
@@ -877,7 +878,7 @@ class MorseCells:
         for label in remove:
             self.Cells.pop(label)
             
-    def remove_small_patches(self, size_threshold = 15):
+    def remove_small_patches(self, size_threshold: int = 15):
         """! @brief Removes small cells, that have fewer than a threshold vertices.
         
         @param size_threshold (Optional) Default is set to 15. If cells have fewer than this parameter
@@ -895,7 +896,7 @@ class MorseCells:
         for label in remove:
             self.Cells.pop(label)
                 
-    def segment(self, merge_threshold, minimum_labels):
+    def segment(self, merge_threshold: float, minimum_labels: int):
         """! @brief Makes this MorseCells object a Segmentation, based on the salient edge points stored 
         in this MorseCells object and a given merge_threshold and minim_labels number.
         
@@ -953,7 +954,7 @@ class MorseCells:
         # remove small enclosures
         self.remove_small_enclosures(size_threshold=500)  
 
-    def segment_old(self, merge_threshold, minimum_labels):
+    def segment_old(self, merge_threshold: float, minimum_labels: int):
         """! @brief Makes this MorseCells object a Segmentation, based on the salient edge points stored 
         in this MorseCells object and a given merge_threshold and minim_labels number.
         

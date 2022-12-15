@@ -14,7 +14,6 @@
 #  imports
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import Counter
 
 def fun_val_statistics(vert_dict, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
     """! @brief Creates statistics of function values on all vertices and allows to optionally plot 
@@ -46,8 +45,8 @@ def fun_val_statistics(vert_dict, nb_bins = 15, log=False, save = False, filepat
         plt.show()
     
     stat = {}
-    stat['mean'] = sum(fun_vals)/len(fun_vals)
-    stat['std'] = np.sqrt( np.square(sum(fun_vals - stat['mean'])) / len(fun_vals) )
+    stat['mean'] = np.mean(fun_vals)
+    stat['std'] = np.std(fun_vals)
     stat['fun_vals'] = fun_vals
     return stat
 
@@ -120,16 +119,16 @@ def critical_fun_val_statistics(MSComplex, nb_bins = 15, log=False, save = False
     stat['E'] = {}
     stat['F'] = {}
     
-    stat['V']['mean'] = sum(fun_vals_CritV)/len(fun_vals_CritV)
-    stat['V']['std'] = np.sqrt( np.square(sum(fun_vals_CritV - stat['V']['mean'])) / len(fun_vals_CritV) )
+    stat['V']['mean'] = np.mean(fun_vals_CritV)
+    stat['V']['std'] = np.std(fun_vals_CritV)
     stat['V']['fun_vals'] = fun_vals_CritV
     
-    stat['E']['mean'] = sum(fun_vals_CritE)/len(fun_vals_CritE)
-    stat['E']['std'] = np.sqrt( np.square(sum(fun_vals_CritE - stat['E']['mean'])) / len(fun_vals_CritE) )
+    stat['E']['mean'] = np.mean(fun_vals_CritE)
+    stat['E']['std'] = np.std(fun_vals_CritE)
     stat['E']['fun_vals'] = fun_vals_CritE
     
-    stat['F']['mean'] = sum(fun_vals_CritF)/len(fun_vals_CritF)
-    stat['F']['std'] = np.sqrt( np.square(sum(fun_vals_CritF - stat['F']['mean'])) / len(fun_vals_CritF) )
+    stat['F']['mean'] = np.mean(fun_vals_CritF)
+    stat['F']['std'] = np.std(fun_vals_CritF)
     stat['F']['fun_vals'] = fun_vals_CritF
     return stat
 
@@ -149,7 +148,7 @@ def salient_edge_statistics(Complex, nb_bins=15, log=False, save=False, filepath
     the standard deviation and a list of the separatrix persistences.
     """
     persistences = []
-    for pers, sepa in Complex.Separatrices:
+    for pers, _ in Complex.Separatrices:
         persistences.append(pers)
         
     if save or show:
@@ -163,7 +162,7 @@ def salient_edge_statistics(Complex, nb_bins=15, log=False, save=False, filepath
         plt.show()
     
     stat = {}
-    stat['mean'] = sum(persistences)/len(persistences)
-    stat['std'] = np.sqrt( np.square(sum(persistences - stat['mean'])) / len(persistences) )
+    stat['mean'] = np.mean(persistences)
+    stat['std'] = np.std(persistences)
     stat['persistences'] = persistences
     return stat

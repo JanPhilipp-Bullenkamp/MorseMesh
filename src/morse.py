@@ -59,7 +59,6 @@ from src.timer import timed
 import timeit
 import os
 import numpy as np
-from copy import deepcopy
 import itertools
 
 
@@ -70,7 +69,7 @@ class Morse(Mesh):
     ''' DATALOADING'''
     
     @timed
-    def load_mesh_ply(self, filename, quality_index, inverted=False):
+    def load_mesh_ply(self, filename: str, quality_index: int, inverted: bool = False):
         min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
                                     self.Edges, self.Faces, inverted=inverted)
         self.filename = os.path.splitext(filename)[0]
@@ -79,7 +78,7 @@ class Morse(Mesh):
         self.range = max_val - min_val
         
     @timed    
-    def load_new_funvals(self, filename):
+    def load_new_funvals(self, filename: str):
         min_val, max_val = read_funvals(filename, self.Vertices, self.Edges, self.Faces)
         self.min = min_val
         self.max = max_val
@@ -118,7 +117,7 @@ class Morse(Mesh):
             self._flag_MorseComplex = True
         
     @timed
-    def ReduceMorseComplex(self, persistence):
+    def ReduceMorseComplex(self, persistence: float):
         if not self._flag_MorseComplex:
             print("Need to call ExtractMorseComplex first...")
             self.ExtractMorseComplex()
@@ -133,38 +132,10 @@ class Morse(Mesh):
                 self.maximalReducedComplex.maximalReduced = True
                 self._flag_SalientEdge = True
                 print("Persistence was high enough that this complex is maximally reduced.")
-            '''
-            # in these cases we need to calculate it from the original Morse Complex
-            if len(self.reducedMorseComplexes.keys())==0:
-                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, 
-                                                                              self.Vertices, self.Edges, self.Faces)
-                if persistence >= self.range and not self._flag_SalientEdge:
-                    self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
-                    self.maximalReducedComplex.maximalReduced = True
-                    self._flag_SalientEdge = True
-                    print("Persistence was high enough that this complex is maximally reduced.")
-            elif min(self.reducedMorseComplexes.keys()) > persistence:
-                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.MorseComplex, persistence, 
-                                                                              self.Vertices, self.Edges, self.Faces)
-                
-            # else: choose the closest already calculated persistence and start from there
-            else:
-                key_array = np.array([list(self.reducedMorseComplexes.keys())])
-                closest_smaller = key_array[key_array < persistence].max()
-                self.reducedMorseComplexes[persistence] = CancelCriticalPairs(self.reducedMorseComplexes[closest_smaller], 
-                                                                              persistence, self.Vertices, 
-                                                                              self.Edges, self.Faces)
-                
-                if persistence >= self.range and not self._flag_SalientEdge:
-                    self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
-                    self.maximalReducedComplex.maximalReduced = True
-                    self._flag_SalientEdge = True
-                    print("Persistence was high enough that this complex is maximally reduced.")
-               '''  
         return self.reducedMorseComplexes[persistence]
 
     @timed
-    def ReduceMorseComplex_SalientEdge(self, thresh_high: float, thresh_low=None, salient_edge_pts=None):
+    def ReduceMorseComplex_SalientEdge(self, thresh_high: float, thresh_low: float = None, salient_edge_pts: set = None):
         if not self._flag_MorseComplex:
             print("Need to call ExtractMorseComplex first...")
             self.ExtractMorseComplex() 
@@ -179,7 +150,7 @@ class Morse(Mesh):
         return self.salientreducedMorseComplexes[(thresh_high, thresh_low)]
 
     @timed
-    def ExtractCellsSalientComplex(self, thresh_high: float, thresh_low=None):
+    def ExtractCellsSalientComplex(self, thresh_high: float, thresh_low: float = None):
         if (thresh_high, thresh_low) not in self.salientreducedMorseComplexes.keys():
             print("Need to reduce with these edge thresholds first...")
             self.ReduceMorseComplex_SalientEdge(thresh_high, thresh_low)
@@ -198,7 +169,7 @@ class Morse(Mesh):
             print("MorseCells for the MorseComplex with this persistence have already been calculated!")
     
     @timed
-    def calculate_BettiNumbers(self, persistence = 0):
+    def calculate_BettiNumbers(self, persistence: float = 0):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce to this persistence first...")
             self.ReduceMorseComplex(persistence)
@@ -226,11 +197,12 @@ class Morse(Mesh):
         self.BettiNumbers = betti
         self._flag_BettiNumbers = True
         print("Betti Numbers: ", betti)
+        return self.BettiNumbers
     
     ''' SEGMENTATION'''
     
     @timed
-    def Segmentation(self, persistence: float, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels=3):
+    def Segmentation(self, persistence: float, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
             self.ReduceMorseComplex(persistence)
@@ -249,7 +221,7 @@ class Morse(Mesh):
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
     @timed
-    def Segmentation_SalientReduction(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels=3):
+    def Segmentation_SalientReduction(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3):
         salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
 
         self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small, salient_edge_points)
@@ -261,7 +233,7 @@ class Morse(Mesh):
         return self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
-    def Segmentation_no_Pers(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels=3):
+    def Segmentation_no_Pers(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3):
         if self.MorseComplex._flag_MorseCells == False:
             print("No Morse Cells computed for initial complex, computing now...")
             self.ExtractMorseCells(0)
@@ -277,7 +249,7 @@ class Morse(Mesh):
         return self.MorseComplex.Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
-    def get_salient_edges(self, thresh_high: float, thresh_low=None):
+    def get_salient_edges(self, thresh_high: float, thresh_low: float = None):
         # if only one threshold given: use same strong and weak edge threshold
         if thresh_low == None:
             thresh_low = thresh_high
@@ -317,8 +289,8 @@ class Morse(Mesh):
                     self.plot_Segmentation_SalientEdge_label_txt(high, low, merge, outfilename+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
     
     @timed
-    def Pipeline(self, infilename, outfilename, quality_index, inverted, 
-                 persistence, high_thresh, low_thresh, merge_thresh):
+    def Pipeline(self, infilename: str, outfilename: str, quality_index: int, inverted: bool, 
+                 persistence: float, high_thresh: float, low_thresh: float, merge_thresh: float):
         
         with open(outfilename+"_timings.txt", "w") as f:
             t1 = timeit.default_timer()
@@ -353,8 +325,8 @@ class Morse(Mesh):
                         self.plot_Segmentation_label_txt(pers, high, low, merge, outfilename)
      
     @timed
-    def Pipeline_semiAuto(self, infilename, outfilename, quality_index, inverted, 
-                          merge_thresh):
+    def Pipeline_semiAuto(self, infilename: str, outfilename: str, quality_index: int, inverted: bool, 
+                          merge_thresh: float):
         
         with open(outfilename+"_timings.txt", "w") as f:
             t1 = timeit.default_timer()
@@ -400,13 +372,13 @@ class Morse(Mesh):
 
     ''' SURFACE ROUGHNESS'''
     @timed
-    def get_variance(self,n):
+    def get_variance(self, n: int):
         fun_vals = [v.fun_val for v in self.Vertices.values()]
         mean_fun_val = np.mean(fun_vals)
         return variance_heat_map(self.Vertices, mean_fun_val, n)
 
     @timed
-    def get_extremal_point_ratio(self, pers, n):
+    def get_extremal_point_ratio(self, pers: float, n: int):
         self.ReduceMorseComplex(pers)
         extremal_points = set()
         for ind in self.reducedMorseComplexes[pers].CritVertices.keys():
@@ -419,11 +391,11 @@ class Morse(Mesh):
     
     ''' PLOTTING'''
     @timed
-    def write_variance_heat_map_labels(self, variance, thresh1, thresh2, filename):
+    def write_variance_heat_map_labels(self, variance: dict, thresh1: float, thresh2: float, filename: str):
         write_variance_heat_map_labels_txt_file(variance, thresh1, thresh2, filename)
     
     @timed
-    def write_funval_thresh_labels(self, thresh, filename):
+    def write_funval_thresh_labels(self, thresh: float, filename: str):
         """! @brief Writes a txt label file (first col index, second col label) that can be read in by GigaMesh as labels.
         Labels vertices with a lower function value than the threshold blue, vertices above in green. (Labels 1 and 2).
         
@@ -433,7 +405,8 @@ class Morse(Mesh):
         write_funval_thresh_labels_txt_file(self.Vertices, thresh, filename)
     
     @timed
-    def plot_MorseComplex_ply(self, persistence, filename, path_color=[255,0,255], detailed=False, separate_points_file=False):
+    def plot_MorseComplex_ply(self, persistence: float, filename: str, path_color: tuple[int, int, int] = [255,0,255], 
+                              detailed: bool = False, separate_points_file: bool = False):
         """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh. 
         Visualizes the Morse Complex at the given persistence level with red = minima, green = saddles, 
         blue = maxima, and separatrix = given color (default pink).
@@ -458,7 +431,7 @@ class Morse(Mesh):
                                              self.Vertices, self.Edges, self.Faces, 
                                              filename, color_paths=path_color)
     @timed  
-    def plot_MorseCells_ply(self, persistence, filename):
+    def plot_MorseCells_ply(self, persistence: float, filename: str):
         """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh.
         Visualizes the MorseCells for the MorseComplex of the given persistence in 13 different colors. (Cannot 
         guarantee that neighboring labels have different colors!).
@@ -475,7 +448,7 @@ class Morse(Mesh):
                                                self.Vertices, filename + "_"+str(persistence)+"P")
     
     @timed
-    def plot_MorseCells_label_txt(self, persistence, filename):
+    def plot_MorseCells_label_txt(self, persistence: float, filename: str):
         """! @brief Writes a txt label file (first col index, second col label) that can be read in by GigaMesh as labels.
         Each label is a Morse Cell from the Morse Complex of the given persistence.
         
@@ -490,7 +463,8 @@ class Morse(Mesh):
             write_Cell_labels_txt_file(self.reducedMorseComplexes[persistence].MorseCells.Cells, filename)
     
     @timed        
-    def plot_Segmentation_label_txt(self, persistence, thresh_large, thresh_small, merge_threshold, filename):
+    def plot_Segmentation_label_txt(self, persistence: float, thresh_large: float, thresh_small: float, 
+                                    merge_threshold: float, filename: str):
         """! @brief Writes a txt label file (first col index, second col label) that can be read in by GigaMesh as labels.
         Each label is a Cell from the Segmentation of the given parameter combination. 
         
@@ -515,11 +489,11 @@ class Morse(Mesh):
                                        params = [persistence, thresh_large, thresh_small, merge_threshold])
     
     @timed
-    def plot_Segmentation_SalientEdge_label_txt(self, thresh_large, thresh_small, merge_threshold, filename):
+    def plot_Segmentation_SalientEdge_label_txt(self, thresh_large: float, thresh_small: float, merge_threshold: float, filename: str):
         write_Cell_labels_txt_file(self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells, filename, params=[None, thresh_large, thresh_small, merge_threshold])
     
     @timed
-    def plot_SalientEdges_ply(self, filename, thresh_high, thresh_low = None, only_strong = False):
+    def plot_SalientEdges_ply(self, filename: str, thresh_high: float, thresh_low: float = None, only_strong: bool = False):
         """! @brief Writes a ply file that contains colored points to be viewed on top of the original mesh.
         Visualizes the (double) threshold salient edges. Points belonging to a strong edge are colored red, points
         from weak edges are colored blue.
@@ -545,7 +519,8 @@ class Morse(Mesh):
                                                 filename, color_high=[255,0,0], color_low=[0,0,255])
     
     @timed
-    def plot_PersistenceDiagram(self, persistence = 0, pointsize = 4, save = False, filepath = 'persistenceDiagram'):
+    def plot_PersistenceDiagram(self, persistence: float = 0, pointsize: int = 4, 
+                                save: bool = False, filepath: str = 'persistenceDiagram'):
         """! @brief Plots the persistence diagram for the Morse Complex of the given persistence.
         
         @param persistence (Optional) The persistence of the Morse Complex we want to get the persistence diagram from.
@@ -564,7 +539,8 @@ class Morse(Mesh):
                            self.max, self.min, pointsize = pointsize, save = save, filepath = filepath)
     
     @timed
-    def salient_edge_statistics(self, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
+    def salient_edge_statistics(self, nb_bins: int = 15, log: bool = False, save: bool = False, 
+                                filepath: str = 'histogram', show: bool = True):
         """! @brief Creates statistics of the separatrix persistences of the cancelled separatrices in the maximally
         reduced Morse Complex and allows to optionally plot and save a histogram as well.
 
@@ -586,7 +562,8 @@ class Morse(Mesh):
         return stats
     
     @timed
-    def funval_statistics(self, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
+    def funval_statistics(self, nb_bins: int = 15, log: bool = False, save: bool = False, 
+                          filepath: str = 'histogram', show: bool = True):
         """! @brief Creates statistics of function values on all vertices and allows to optionally plot 
         and save a histogram as well.
 
@@ -605,7 +582,8 @@ class Morse(Mesh):
         return stats
     
     @timed
-    def critical_funval_statistics(self, persistence, nb_bins=15, log=False, save=False, filepath='histogram', show=True):
+    def critical_funval_statistics(self, persistence: float, nb_bins: int = 15, log: bool = False, 
+                                   save: bool = False, filepath: str = 'histogram', show: bool = True):
         """! @brief Creates statistics of function values on all critical vertices, edges and faces of the 
         Morse Complex at a given persitence separately and allows to optionally plot and save the histograms as well.
 
