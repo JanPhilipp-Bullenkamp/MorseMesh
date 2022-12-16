@@ -176,6 +176,18 @@ class Morse(Mesh):
 
     @timed
     def ExtractCellsSalientComplex(self, thresh_high: float, thresh_low: float = None):
+        """! @brief Extracts the Morse Cells of the salient reduced Morse complex.
+        
+        @details The ExtractCellsSalientComplex method extracts cells from a salient reduced Morse complex. It takes 
+        in two parameters: thresh_high and thresh_low. If a Morse complex with the given thresholds has not been reduced 
+        yet, it will be reduced using the ReduceMorseComplex_SalientEdge method. The method then calls the 
+        get_MorseCells function on the reduced Morse complex, and returns the resulting MorseCells object.
+
+        @param thresh_high The higher threshold for the salient edges.
+        @param thresh_low (Optional) The lower threshold for the salient edges.
+
+        @return Morse Cells object containing the cells of the salient reduced Morse Complex.
+        """
         if (thresh_high, thresh_low) not in self.salientreducedMorseComplexes.keys():
             print("Need to reduce with these edge thresholds first...")
             self.ReduceMorseComplex_SalientEdge(thresh_high, thresh_low)

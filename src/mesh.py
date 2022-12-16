@@ -26,6 +26,7 @@
 # - reducedMorseComplexes
 # - maximalReducedComplex
 
+
 class Mesh:
     """! @brief Mesh class used to store mesh, Morse Theory and Segmentation related structures."""
     ## @var filename
@@ -91,10 +92,7 @@ class Mesh:
         self.V12 = {}
         self.V23 = {}
 
-        self.C = {}
-        self.C[0] = set()
-        self.C[1] = set()
-        self.C[2] = set()
+        self.C = {0: set(), 1: set(), 2: set()}
         
         self.MorseComplex = None
         
