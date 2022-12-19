@@ -327,7 +327,7 @@ def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict
 
 ########################################
 
-def get_closest_conforming_extremum(crit_edge, vert_dict, face_dict, labels):
+def get_closest_conforming_extremum(crit_edge, crit_faces_dict, vert_dict, edge_dict, face_dict, labels, salient_edge_pts=None):
     distances = []
     
     # first add distances to all maxima
@@ -356,14 +356,25 @@ def get_closest_conforming_extremum(crit_edge, vert_dict, face_dict, labels):
             distances.append(tuple((vert_ind, 0, abs(crit_edge.fun_val[0]-vert_dict[vert_ind].fun_val)))) 
             
     if sorted(distances, key=lambda item: item[2]):
-        closest, dim, distance = sorted(distances, key=lambda item: item[2])[0] 
-        return closest, dim, distance
+        if salient_edge_pts != None:
+            for closest, dim, distance in sorted(distances, key=lambda item: item[2]):
+                if dim == 0:
+                    if len(get_indices(crit_edge.paths[closest], edge_dict, face_dict, dim=1).intersection(salient_edge_pts)) < 6:
+                            return closest, dim, distance
+                elif dim == 2:
+                    if len(get_indices(crit_faces_dict[closest].paths[crit_edge.index], edge_dict, face_dict, dim=2).intersection(salient_edge_pts)) < 6:
+                            return closest, dim, distance
+                    
+            return None
+        else:    
+            closest, dim, distance = sorted(distances, key=lambda item: item[2])[0] 
+            return closest, dim, distance
     else: 
         return None
 
 
 
-def CancelCriticalConformingPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict, labels):
+def CancelCriticalConformingPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict, labels, salient_edge_pts=None):
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     
@@ -382,7 +393,7 @@ def CancelCriticalConformingPairs(MorseComplex, threshold, vert_dict, edge_dict,
     
     # fill queue
     for crit_edge in redMorseComplex.CritEdges.values():
-        closest_extremum = get_closest_conforming_extremum(crit_edge, redMorseComplex.CritVertices, redMorseComplex.CritFaces, labels)
+        closest_extremum = get_closest_conforming_extremum(crit_edge, redMorseComplex.CritFaces, vert_dict, edge_dict, face_dict, labels, salient_edge_pts=salient_edge_pts)
         if closest_extremum != None:
             index, dim, dist = closest_extremum
             if dist < threshold:
@@ -391,7 +402,7 @@ def CancelCriticalConformingPairs(MorseComplex, threshold, vert_dict, edge_dict,
     # work down queue
     while CancelPairs.notEmpty():
         prio, obj_id, saddle = CancelPairs.pop_front()
-        check = get_closest_conforming_extremum(saddle, redMorseComplex.CritVertices, redMorseComplex.CritFaces, labels)
+        check = get_closest_conforming_extremum(saddle, redMorseComplex.CritFaces, vert_dict, edge_dict, face_dict, labels, salient_edge_pts=salient_edge_pts)
         if check != None:
             closest, dim, dist = check
             if dist <= CancelPairs.check_distance():
