@@ -268,21 +268,21 @@ class Morse(Mesh):
     ''' SEGMENTATION'''
     
     @timed
-    def Segmentation(self, persistence: float, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels=3):
+    def Segmentation(self, persistence: float, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels=3, conforming=False):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
-            self.ReduceMorseComplex(persistence)
+            self.ReduceMorseComplex(persistence, conforming=conforming)
         if self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
             print("No Morse Cells computed for this persistence, computing now...")
             self.ExtractMorseCells(persistence)
         if not self._flag_SalientEdge:
             print("Need maximally reduced complex for salient edges...")
-            self.ReduceMorseComplex(self.range)
+            self.ReduceMorseComplex(self.range, conforming=conforming)
             
         salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
         
         self.reducedMorseComplexes[persistence].create_segmentation_old(salient_edge_points, thresh_large, thresh_small, 
-                                                                    merge_threshold, minimum_labels=minimum_labels)
+                                                                    merge_threshold, minimum_labels=minimum_labels, conforming=conforming, UserLabels=self.UserLabels)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
