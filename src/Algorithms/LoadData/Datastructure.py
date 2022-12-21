@@ -641,6 +641,21 @@ class Cell:
                "| Number of vertices: " + str(len(self.vertices)) + "\n"
                "| Neighbors: " + str(list(self.neighbors.keys())) + "\n"
                "+-----------------------\n")
+
+    def getUserLabels(self, UserLabels):
+        labels = set()
+        for v in self.vertices:
+            if v not in self.boundary:
+                label = UserLabels['vertices'][v]
+                labels.add(label)
+                # if label not in labels.keys():
+                #     labels[label] = 0
+                # labels[label] += 1
+        if len(labels) == 0:
+            for v in self.vertices:
+                label = UserLabels['vertices'][v]
+                labels.add(label)
+        return labels
         
 class MorseCells:
     """! @brief An object storing Morse Cells that segment the given mesh. Also allows to use further 
@@ -756,7 +771,17 @@ class MorseCells:
                 # need points on both sides of the bopundary
                 points_there = self.Cells[nei_label].neighbors[label]
                 
-                weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
+                #TODO: If both cells have the critical Label, make the weight infinitely LOW = highest priority, if they have different labels make the weigh infinitely HIGH = lowest priority
+                # use float(‘inf’) and float(‘-inf’)?
+                if conforming:
+                    ulabel_here = cell.getUserLabels(UserLabels)
+                    ulabel_there = self.Cells[nei_label].getUserLabels(UserLabels)
+                    if ulabel_here.isdisjoint(ulabel_there):
+                        weight = float('inf')
+                    else:
+                        weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
+                else:
+                    weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
                 # add weight to both cells
                 cell.neighbors_weights[nei_label] = weight
                 self.Cells[nei_label].neighbors_weights[label] = weight
@@ -772,7 +797,16 @@ class MorseCells:
         points1 = self.Cells[label1].neighbors[label2]
         points2 = self.Cells[label2].neighbors[label1]
         
-        weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
+        #TODO: same as above
+        if conforming:
+            ulabel1 = self.Cells[label1].getUserLabels(UserLabels)
+            ulabel2 = self.Cells[label2].getUserLabels(UserLabels)
+            if ulabel1.isdisjoint(ulabel2):
+                weight = float('inf')
+            else:
+                weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
+        else:
+            weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
         
         self.Cells[label1].neighbors_weights[label2] = weight
         self.Cells[label2].neighbors_weights[label1] = weight

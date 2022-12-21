@@ -69,6 +69,7 @@ import itertools
 class Morse(Mesh):
     def __init__(self):
         super().__init__()
+        self.UserLabels = None
     
     ''' DATALOADING'''
     
