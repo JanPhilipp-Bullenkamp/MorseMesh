@@ -643,18 +643,18 @@ class Cell:
                "+-----------------------\n")
 
     def getUserLabels(self, UserLabels):
-        labels = set()
+        labels = {'interior': {}, 'boundary': {}, 'all': set()}
         for v in self.vertices:
+            label = UserLabels['vertices'][v]
+            labels['all'].add(label)
             if v not in self.boundary:
-                label = UserLabels['vertices'][v]
-                labels.add(label)
-                # if label not in labels.keys():
-                #     labels[label] = 0
-                # labels[label] += 1
-        if len(labels) == 0:
-            for v in self.vertices:
-                label = UserLabels['vertices'][v]
-                labels.add(label)
+                if label not in labels['interior'].keys():
+                    labels['interior'][label] = 0
+                labels['interior'][label] += 1
+            else:
+                if label not in labels['boundary'].keys():
+                    labels['boundary'][label] = 0
+                labels['boundary'][label] += 1
         return labels
         
 class MorseCells:
@@ -774,12 +774,26 @@ class MorseCells:
                 #TODO: If both cells have the critical Label, make the weight infinitely LOW = highest priority, if they have different labels make the weigh infinitely HIGH = lowest priority
                 # use float(‘inf’) and float(‘-inf’)?
                 if conforming:
-                    ulabel_here = cell.getUserLabels(UserLabels)
-                    ulabel_there = self.Cells[nei_label].getUserLabels(UserLabels)
-                    if ulabel_here.isdisjoint(ulabel_there):
+                    c = UserLabels['crit']
+                    ulabels_here = cell.getUserLabels(UserLabels)
+                    ulabels_there = self.Cells[nei_label].getUserLabels(UserLabels)
+                    if ulabels_here['all'].isdisjoint(ulabels_there['all']):
                         weight = float('inf')
                     else:
-                        weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
+                        if ulabels_here['interior']:
+                            d_here = ulabels_here['interior']
+                        else:
+                            d_here = ulabels_here['boundary']
+
+                        if ulabels_there['interior']:
+                            d_there = ulabels_there['interior']
+                        else:
+                            d_there = ulabels_there['boundary']
+
+                        if max(d_here, key = d_here.get) == c and max(d_there, key = d_there.get) == c:
+                            weight = float('-inf')
+                        else:
+                            weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
                 else:
                     weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
                 # add weight to both cells
@@ -799,12 +813,28 @@ class MorseCells:
         
         #TODO: same as above
         if conforming:
-            ulabel1 = self.Cells[label1].getUserLabels(UserLabels)
-            ulabel2 = self.Cells[label2].getUserLabels(UserLabels)
-            if ulabel1.isdisjoint(ulabel2):
+            c = UserLabels['crit']
+            ulabels1 = self.Cells[label1].getUserLabels(UserLabels)
+            ulabels2 = self.Cells[label2].getUserLabels(UserLabels)
+            if ulabels1['all'].isdisjoint(ulabels2['all']):
                 weight = float('inf')
             else:
-                weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
+                if ulabels1['interior']:
+                    d_here = ulabels1['interior']
+                else:
+                    d_here = ulabels1['boundary']
+
+                if ulabels2['interior']:
+                    d_there = ulabels2['interior']
+                else:
+                    d_there = ulabels2['boundary']
+
+                if max(d_here, key = d_here.get) == c and max(d_there, key = d_there.get) == c:
+                    weight = float('-inf')
+                elif max(d_here, key = d_here.get) != max(d_there, key = d_there.get):
+                    weight = float('inf')
+                else:
+                    weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
         else:
             weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
         

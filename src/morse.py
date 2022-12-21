@@ -90,7 +90,8 @@ class Morse(Mesh):
         self.range = max_val - min_val
         
     def load_labels(self, filename):
-        vertexLabels = read_label_txt(filename)
+        info = read_label_txt(filename)
+        vertexLabels = info[0]
         edgeLabels = {}
         faceLabels = {}
 
@@ -104,7 +105,7 @@ class Morse(Mesh):
             for i in self.Faces[key].indices:
                 faceLabels[key].add(vertexLabels[i])
 
-        self.UserLabels = {'vertices': vertexLabels, 'edges': edgeLabels, 'faces': faceLabels}
+        self.UserLabels = {'vertices': vertexLabels, 'edges': edgeLabels, 'faces': faceLabels, 'crit': info[1]}
  
     ''' MORSE THEORY'''
 
