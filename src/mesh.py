@@ -69,8 +69,10 @@ class Mesh:
     # A dictionary of reduced Morse complexes. The keys are the persistences of the respective reduced Morse complex in value.
     ## @var maximalReducedComplex
     # The maximally reduced Morse complex
-    
     def __init__(self):
+        self.reset()
+    
+    def reset(self):
         """! @brief Constructor for the Mesh class. """
         self.filename = None
         

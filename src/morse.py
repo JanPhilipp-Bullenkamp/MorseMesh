@@ -76,6 +76,8 @@ class Morse(Mesh):
         @param quality_index The index position where the Morse function should be taken from in the vertices.
         @param inverted (Optional) Boolean, whether the Morse function should be inverted or not (multiplied with -1).
         """
+        # Reset previously loaded data if necessary
+        self.reset()
         min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
                                     self.Edges, self.Faces, inverted=inverted)
         self.filename = os.path.splitext(filename)[0]
