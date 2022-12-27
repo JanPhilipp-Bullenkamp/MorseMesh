@@ -15,8 +15,8 @@ class Gui:
         self.high_thresh = None
         self.low_thresh = None
 
-        self.high_percent = 80
-        self.low_percent = 70
+        self.high_percent = 15
+        self.low_percent = 10
 
         self.color_points = set()
 
@@ -50,9 +50,9 @@ class Gui:
         self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")
         self.compute_Morse_action.triggered.connect(lambda: self.compute_Morse())
 
-        # Create the update colors action and add it to the file menu
-        self.update_colors_action = self.visualization_menu.addAction("Update Colors")
-        self.update_colors_action.triggered.connect(lambda: self.update_mesh_color())
+        # Create the update colors action and add it to the file menu -> moved to be computed every time you move the sliders
+        #self.update_colors_action = self.visualization_menu.addAction("Update Colors")
+        #self.update_colors_action.triggered.connect(lambda: self.update_mesh_color())
 
         # Create the show sliders action and add it to the file menu
         self.show_sliders_action = self.visualization_menu.addAction("Show Sliders")
@@ -132,18 +132,21 @@ class Gui:
         self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
         self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
         self.color_points = self.data.get_salient_edges(self.high_thresh, self.low_thresh)
+        self.update_mesh_color()
 
     # Create a function to update the parameter based on the slider value
     def update_high_thresh(self, value, label1):
         self.high_percent = value
         self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
         label1.setText("High threshold: {}".format(value))
+        self.update_mesh_color()
 
     # Create a function to update the parameter based on the slider value
     def update_low_thresh(self, value, label2):
         self.low_percent = value
         self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
         label2.setText("Low threshold: {}".format(value))
+        self.update_mesh_color()
 
     # Create a function to show the slider when the button is clicked
     def show_slider(self):
