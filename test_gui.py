@@ -3,7 +3,7 @@ import numpy as np
 import vtk
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QSlider, QHBoxLayout
+from PyQt5.QtWidgets import QFileDialog, QSlider, QVBoxLayout, QHBoxLayout, QMenuBar, QMenu, QLabel
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from src.morse import Morse
@@ -52,25 +52,47 @@ def update_colors():
     data = 0
 
 # Create a function to update the parameter based on the slider value
-def update_parameter(value):
-    global parameter
-    parameter = value
+def update_parameter1(value, label1):
+    global parameter1
+    parameter1 = value
+    label1.setText("Parameter 1: {}".format(value))
+
+# Create a function to update the parameter based on the slider value
+def update_parameter2(value, label2):
+    global parameter2
+    parameter2 = value
+    label2.setText("Parameter 2: {}".format(value))
 
 # Create a function to show the slider when the button is clicked
-def show_slider():
+def show_slider(window, layout):
     # Create the slider and set its range and default value
-    slider = QSlider(Qt.Horizontal)
-    slider.setRange(0, 100)
-    slider.setValue(50)
+    slider1 = QSlider(Qt.Horizontal)
+    slider1.setRange(0, 100)
+    slider1.setValue(50)
+    # Create a label to display above the first slider
+    label1 = QLabel("Parameter 1: 50")
+    
     # Connect the valueChanged signal of the slider to the update_parameter function
-    slider.valueChanged.connect(update_parameter)
-    # Create a horizontal layout to hold the slider
-    layout = QHBoxLayout()
-    layout.addWidget(slider)
-    # Show the layout in a new window
-    window = QtWidgets.QDialog()
+    slider1.valueChanged.connect(lambda value: update_parameter1(value, label1))
+    
+
+    # Create the slider and set its range and default value
+    slider2 = QSlider(Qt.Horizontal)
+    slider2.setRange(0, 100)
+    slider2.setValue(50)
+    # Create a label to display above the first slider
+    label2 = QLabel("Parameter 2: 50")
+    
+    # Connect the valueChanged signal of the slider to the update_parameter function
+    slider2.valueChanged.connect(lambda value: update_parameter2(value, label2))
+    
+
+    layout.addWidget(label1)
+    layout.addWidget(slider1)
+    layout.addWidget(label2)
+    layout.addWidget(slider2)
+    # Add the layout to the main window
     window.setLayout(layout)
-    window.show()
 
 def main():
     data = Morse()
@@ -84,8 +106,6 @@ def main():
 
 
     vtkWidget = QVTKRenderWindowInteractor(frame)
-
-    layout.addWidget(vtkWidget)
 
     ren = vtk.vtkRenderer()
     vtkWidget.GetRenderWindow().AddRenderer(ren)
@@ -121,21 +141,37 @@ def main():
     # Add the mesh actor to the vtk renderer and show the window
     ren.AddActor(actor)
 
-    # Create a button to trigger the file browsing dialog
-    browse_button = QtWidgets.QPushButton("Browse")
-    browse_button.clicked.connect(lambda: browse_file(vtkWidget, data))
-    layout.addWidget(browse_button)
+    
 
-    # Create a button to perform Morse Computations
-    morse_button = QtWidgets.QPushButton("Morse Computations")
-    morse_button.clicked.connect(lambda: compute_Morse(data))
-    layout.addWidget(morse_button)
+    # Create a menu bar
+    menu_bar = QMenuBar(window)
 
+    # Create a file menu and add the browse button to it
+    file_menu = QMenu("File")
+    browse_action = file_menu.addAction("Browse")
+    browse_action.triggered.connect(lambda: browse_file(vtkWidget, data))
 
-    # Create a button to show the slider when clicked
-    slider_button = QtWidgets.QPushButton("Set Edge Threshold")
-    slider_button.clicked.connect(show_slider)
-    layout.addWidget(slider_button)
+    # Create a file menu and add the browse button to it
+    processing_menu = QMenu("Processing")
+    morse_action = processing_menu.addAction("Morse Computations")
+    morse_action.triggered.connect(lambda: compute_Morse(data))
+
+    # Create a settings menu and add the slider button to it
+    visualization_menu = QMenu("Edge threshold slider")
+    slider_action = visualization_menu.addAction("Show Slider")
+    slider_action.triggered.connect(lambda: show_slider(window, layout))
+
+    # Add the file and settings menus to the menu bar
+    menu_bar.addMenu(file_menu)
+    menu_bar.addMenu(processing_menu)
+    menu_bar.addMenu(visualization_menu)
+
+    # Create a vertical layout to hold the menu bar and the vtk widget
+    layout.addWidget(menu_bar)
+    layout.addWidget(vtkWidget)
+
+    # Set the layout of the main window
+    window.setLayout(layout)
 
     frame.setLayout(layout)
     window.setCentralWidget(frame)

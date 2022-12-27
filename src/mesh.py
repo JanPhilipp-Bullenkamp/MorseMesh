@@ -80,6 +80,9 @@ class Mesh:
         self.max = None
         self.range = None
 
+        self.min_separatrix_persistence = None
+        self.max_separatrix_persistence = None
+
         self.Vertices = {}
         self.Edges = {}
         self.Faces = {}
