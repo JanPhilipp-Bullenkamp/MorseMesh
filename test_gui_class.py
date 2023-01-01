@@ -211,7 +211,14 @@ class Gui:
         self.update_edge_color()
 
     def compute_Segmentation(self):
-        self.data.Segmentation(0.04, self.high_thresh, self.low_thresh, 0.3)
+        if 0.04 not in self.data.reducedMorseComplexes.keys():
+            self.data.ReduceMorseComplex(0.04)
+        if (self.high_thresh, self.low_thresh) not in self.data.reducedMorseComplexes[0.04].Segmentations.keys():
+            self.data.Segmentation(0.04, self.high_thresh, self.low_thresh, 0.3)    
+        else:
+            if 0.3 not in self.data.reducedMorseComplexes[0.04].Segmentations[(self.high_thresh, self.low_thresh)].keys():
+                self.data.Segmentation(0.04, self.high_thresh, self.low_thresh, 0.3)
+                
         self.current_segmentation_params = np.array([0.04, self.high_thresh, self.low_thresh, 0.3])
 
         self.update_segmentation_color()
