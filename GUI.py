@@ -88,6 +88,9 @@ class Gui:
         self.high_percent = 15
         self.low_percent = 10
 
+        self.persistence = 0.04
+        self.merge_threshold = 0.3
+
         self.color_points = set()
 
         self.current_segmentation_params = None
@@ -200,6 +203,7 @@ class Gui:
         self.data.ProcessLowerStars()
         self.data.ExtractMorseComplex()
         self.data.ReduceMorseComplex(self.data.range)
+        self.data.ReduceMorseComplex(self.persistence)
 
         self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
         self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
@@ -211,15 +215,15 @@ class Gui:
         self.update_edge_color()
 
     def compute_Segmentation(self):
-        if 0.04 not in self.data.reducedMorseComplexes.keys():
-            self.data.ReduceMorseComplex(0.04)
-        if (self.high_thresh, self.low_thresh) not in self.data.reducedMorseComplexes[0.04].Segmentations.keys():
-            self.data.Segmentation(0.04, self.high_thresh, self.low_thresh, 0.3)    
+        if self.persistence not in self.data.reducedMorseComplexes.keys():
+            self.data.ReduceMorseComplex(self.persistence)
+        if (self.high_thresh, self.low_thresh) not in self.data.reducedMorseComplexes[self.persistence].Segmentations.keys():
+            self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold)    
         else:
-            if 0.3 not in self.data.reducedMorseComplexes[0.04].Segmentations[(self.high_thresh, self.low_thresh)].keys():
-                self.data.Segmentation(0.04, self.high_thresh, self.low_thresh, 0.3)
+            if self.merge_threshold not in self.data.reducedMorseComplexes[self.persistence].Segmentations[(self.high_thresh, self.low_thresh)].keys():
+                self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold)
                 
-        self.current_segmentation_params = np.array([0.04, self.high_thresh, self.low_thresh, 0.3])
+        self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
 
         self.update_segmentation_color()
 
