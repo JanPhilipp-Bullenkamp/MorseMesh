@@ -36,6 +36,8 @@ class Gui:
         # Create the VTK widget and add it to the layout
         self.vtkWidget = QVTKRenderWindowInteractor(self.window)
         self.layout.addWidget(self.vtkWidget)
+        ren = vtk.vtkRenderer()
+        self.vtkWidget.GetRenderWindow().AddRenderer(ren)
         
         # Create the menu bar and add it to the layout
         self.menu_bar = QMenuBar()
@@ -85,15 +87,24 @@ class Gui:
         self.high_thresh = None
         self.low_thresh = None
 
-        self.high_percent = 15
-        self.low_percent = 10
+        self.high_percent = 50
+        self.low_percent = 45
 
         self.persistence = 0.04
         self.merge_threshold = 0.3
 
         self.color_points = set()
-
         self.current_segmentation_params = None
+        self.center = [0,0,0]
+
+    def reset_camera_position(self):
+        renderer = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
+        camera = renderer.GetActiveCamera()
+        camera.SetFocalPoint(self.center)
+        camera.SetPosition(self.center)
+
+        # Update the rendering
+        self.vtkWidget.GetRenderWindow().Render()
 
     def update_buttons(self):
         self.show_sliders_action.setEnabled(True if self.flag_morse_computations and not self.flag_sliders_shown else False)
@@ -107,12 +118,14 @@ class Gui:
         options |= QFileDialog.ReadOnly
         file_name, _ = QFileDialog.getOpenFileName(None, "Select Ply File", "", "Ply Files (*.ply)", options=options)
         if file_name:
+            self.reset_data()
             self.data.load_mesh_ply(file_name, quality_index=3, inverted=True)
             self.update_mesh()
 
             self.flag_loaded_data = True
             self.flag_morse_computations = False
             self.update_buttons()
+            #self.reset_camera_position()
 
     def save_edges_ply_file(self):
         options = QFileDialog.Options()
@@ -124,8 +137,11 @@ class Gui:
             self.data.plot_SalientEdges_ply(filename, self.high_thresh, self.low_thresh, only_strong=True)
 
     def update_mesh(self):
-        ren = vtk.vtkRenderer()
-        self.vtkWidget.GetRenderWindow().AddRenderer(ren)
+        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
+        if ren != None:
+            ren.RemoveAllViewProps()
+        #ren = vtk.vtkRenderer()
+        #self.vtkWidget.GetRenderWindow().AddRenderer(ren)
 
         mesh = vtk.vtkPolyData()
         points = vtk.vtkPoints()
@@ -146,6 +162,9 @@ class Gui:
 
         # Add the mesh actor to the vtk renderer and show the window
         ren.AddActor(actor)
+
+        bounds = mesh.GetBounds()
+        self.center = [0.5 * (bounds[0] + bounds[1]), 0.5 * (bounds[2] + bounds[3]), 0.5 * (bounds[4] + bounds[5])]
 
         self.vtkWidget.GetRenderWindow().Render()
 

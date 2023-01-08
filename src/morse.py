@@ -257,7 +257,7 @@ class Morse(Mesh):
             
         salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
         
-        self.reducedMorseComplexes[persistence].create_segmentation_old(salient_edge_points, thresh_large, thresh_small, 
+        self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, thresh_large, thresh_small, 
                                                                     merge_threshold, minimum_labels=minimum_labels)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]

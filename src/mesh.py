@@ -106,7 +106,18 @@ class Mesh:
         self.salientreducedMorseComplexes = {}
         
         self.maximalReducedComplex = None
+
+    def get_center(self):
+        """! @brief Calculates the center of mass of the Vertices stored.
         
+        @return center An array with x,y and z coordinate of the center of mass.
+        """
+        sum_x, sum_y, sum_z = 0, 0, 0
+        for v in self.Vertices.values():
+            sum_x, sum_y, sum_z += v.x, v.y, v.z
+        center = [sum_x, sum_y, sum_z] / len(self.Vertices)
+        return center
+
     def __repr__(self):
         """! @brief Prints out Mesh information.
         @return A string that gives information on the loaded mesh.
