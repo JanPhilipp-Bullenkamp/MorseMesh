@@ -165,7 +165,7 @@ class Morse(Mesh):
         return self.reducedMorseComplexes[persistence]
 
     @timed
-    def ReduceMorseComplex_SalientEdge(self, thresh_high: float, thresh_low: float = None, salient_edge_pts: set = None):
+    def ReduceMorseComplex_SalientEdge(self, thresh_high: float, thresh_low: float = None, salient_edge_pts: set = None, pers: float = None):
         if not self._flag_MorseComplex:
             print("Need to call ExtractMorseComplex first...")
             self.ExtractMorseComplex() 
@@ -175,12 +175,17 @@ class Morse(Mesh):
         if salient_edge_pts == None:
             salient_edge_pts = self.get_salient_edges(thresh_high, thresh_low)
 
-        self.salientreducedMorseComplexes[(thresh_high, thresh_low)] = CancelCriticalPairs(self.MorseComplex, self.range, 
-                                                                        self.Vertices, self.Edges, self.Faces, salient_edge_pts=salient_edge_pts)
-        return self.salientreducedMorseComplexes[(thresh_high, thresh_low)]
+        if pers == None:
+            self.salientreducedMorseComplexes[(thresh_high, thresh_low)] = CancelCriticalPairs(self.MorseComplex, self.range, 
+                                                                            self.Vertices, self.Edges, self.Faces, salient_edge_pts=salient_edge_pts)
+            return self.salientreducedMorseComplexes[(thresh_high, thresh_low)]
+        else:
+            self.salientreducedMorseComplexes[(pers, thresh_high, thresh_low)] = CancelCriticalPairs(self.MorseComplex, pers,
+                                                                                    self.Vertices, self.Edges, self.Faces, salient_edge_pts)
+            return self.salientreducedMorseComplexes[(pers, thresh_high, thresh_low)]
 
     @timed
-    def ExtractCellsSalientComplex(self, thresh_high: float, thresh_low: float = None):
+    def ExtractCellsSalientComplex(self, thresh_high: float, thresh_low: float = None, pers: float = None):
         """! @brief Extracts the Morse Cells of the salient reduced Morse complex.
         
         @details The ExtractCellsSalientComplex method extracts cells from a salient reduced Morse complex. It takes 
@@ -193,11 +198,18 @@ class Morse(Mesh):
 
         @return Morse Cells object containing the cells of the salient reduced Morse Complex.
         """
-        if (thresh_high, thresh_low) not in self.salientreducedMorseComplexes.keys():
-            print("Need to reduce with these edge thresholds first...")
-            self.ReduceMorseComplex_SalientEdge(thresh_high, thresh_low)
-        get_MorseCells(self.salientreducedMorseComplexes[(thresh_high,thresh_low)], self.Vertices, self.Edges, self.Faces)
-        return self.salientreducedMorseComplexes[(thresh_high,thresh_low)].MorseCells
+        if pers == None:
+            if (thresh_high, thresh_low) not in self.salientreducedMorseComplexes.keys():
+                print("Need to reduce with these edge thresholds first...")
+                self.ReduceMorseComplex_SalientEdge(thresh_high, thresh_low)
+            get_MorseCells(self.salientreducedMorseComplexes[(thresh_high,thresh_low)], self.Vertices, self.Edges, self.Faces)
+            return self.salientreducedMorseComplexes[(thresh_high,thresh_low)].MorseCells
+        else:
+            if (pers, thresh_high, thresh_low) not in self.salientreducedMorseComplexes.keys():
+                print("Need to reduce with these edge thresholds and persistence first...")
+                self.ReduceMorseComplex_SalientEdge(thresh_high, thresh_low, pers=pers)
+            get_MorseCells(self.salientreducedMorseComplexes[(pers, thresh_high, thresh_low)], self.Vertices, self.Edges, self.Faces)
+            return self.salientreducedMorseComplexes[(pers, thresh_high, thresh_low)].MorseCells
     
     @timed
     def ExtractMorseCells(self, persistence: float):
@@ -263,16 +275,21 @@ class Morse(Mesh):
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
     @timed
-    def Segmentation_SalientReduction(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3):
+    def Segmentation_SalientReduction(self, thresh_large: float, thresh_small: float, merge_threshold: float, persistence: float = None, minimum_labels: int = 3):
         salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
 
-        self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small, salient_edge_points)
-        self.ExtractCellsSalientComplex(thresh_large, thresh_small)
-
-
-        self.salientreducedMorseComplexes[(thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
-                                                                                           merge_threshold, minimum_labels)
-        return self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
+        if persistence == None:
+            self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small, salient_edge_points)
+            self.ExtractCellsSalientComplex(thresh_large, thresh_small)
+            self.salientreducedMorseComplexes[(thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
+                                                                                            merge_threshold, minimum_labels)
+            return self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
+        else:
+            self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small, salient_edge_points, pers=persistence)
+            self.ExtractCellsSalientComplex(thresh_large, thresh_small, persistence)
+            self.salientreducedMorseComplexes[(persistence,thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
+                                                                                            merge_threshold, minimum_labels)
+            return self.salientreducedMorseComplexes[(persistence,thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
     def Segmentation_no_Pers(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3):

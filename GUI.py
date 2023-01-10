@@ -70,6 +70,9 @@ class Gui:
         self.segment_action = self.visualization_menu.addAction("Segmentation")
         self.segment_action.triggered.connect(lambda: self.compute_Segmentation())
 
+        self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
+        self.segment_new_action.triggered.connect(lambda: self.compute_Segmentation_new())
+
         self.update_buttons()
 
         self.window.setLayout(self.layout)
@@ -96,15 +99,6 @@ class Gui:
         self.color_points = set()
         self.current_segmentation_params = None
         self.center = [0,0,0]
-
-    def reset_camera_position(self):
-        renderer = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
-        camera = renderer.GetActiveCamera()
-        camera.SetFocalPoint(self.center)
-        camera.SetPosition(self.center)
-
-        # Update the rendering
-        self.vtkWidget.GetRenderWindow().Render()
 
     def update_buttons(self):
         self.show_sliders_action.setEnabled(True if self.flag_morse_computations and not self.flag_sliders_shown else False)
@@ -162,9 +156,7 @@ class Gui:
 
         # Add the mesh actor to the vtk renderer and show the window
         ren.AddActor(actor)
-
-        bounds = mesh.GetBounds()
-        self.center = [0.5 * (bounds[0] + bounds[1]), 0.5 * (bounds[2] + bounds[3]), 0.5 * (bounds[4] + bounds[5])]
+        ren.ResetCamera()
 
         self.vtkWidget.GetRenderWindow().Render()
 
@@ -194,7 +186,7 @@ class Gui:
         mapper.Update()
         self.vtkWidget.GetRenderWindow().Render()
 
-    def update_segmentation_color(self):
+    def update_segmentation_color(self, saledge=False):
         # Get the renderer and mesh actor
         ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
         actor = ren.GetActors().GetLastActor()
@@ -208,10 +200,17 @@ class Gui:
         color_array = vtk.vtkUnsignedCharArray()
         color_array.SetNumberOfComponents(3)
         color_array.SetName("Colors")
-        for label, cell in self.data.reducedMorseComplexes[self.current_segmentation_params[0]].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells.items():
-            cell_color = color_list[label%len(color_list)]
-            for ind in cell.vertices:
-                color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
+        if not saledge:
+            for label, cell in self.data.reducedMorseComplexes[self.current_segmentation_params[0]].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells.items():
+                cell_color = color_list[label%len(color_list)]
+                for ind in cell.vertices:
+                    color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
+        elif saledge:
+            for label, cell in self.data.salientreducedMorseComplexes[(self.current_segmentation_params[0],self.current_segmentation_params[1],self.current_segmentation_params[2])].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells.items():
+                cell_color = color_list[label%len(color_list)]
+                for ind in cell.vertices:
+                    color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
+            
         point_data.SetScalars(color_array)
 
         # Update the mapper and render the window
@@ -245,6 +244,13 @@ class Gui:
         self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
 
         self.update_segmentation_color()
+
+    def compute_Segmentation_new(self): 
+        self.data.Segmentation_SalientReduction(self.high_thresh, self.low_thresh, self.merge_threshold, self.persistence)
+                
+        self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
+
+        self.update_segmentation_color(saledge=True)
 
     # Create a function to update the parameter based on the slider value
     def update_high_thresh(self, value, label1):

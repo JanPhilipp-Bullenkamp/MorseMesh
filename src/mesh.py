@@ -114,7 +114,9 @@ class Mesh:
         """
         sum_x, sum_y, sum_z = 0, 0, 0
         for v in self.Vertices.values():
-            sum_x, sum_y, sum_z += v.x, v.y, v.z
+            sum_x += v.x
+            sum_y += v.y
+            sum_z += v.z
         center = [sum_x, sum_y, sum_z] / len(self.Vertices)
         return center
 

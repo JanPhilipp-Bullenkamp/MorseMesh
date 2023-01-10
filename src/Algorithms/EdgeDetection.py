@@ -60,7 +60,7 @@ https://www.researchgate.net/publication/227511709_Separatrix_Persistence_Extrac
     strong_edge = set()
     weak_edge = set()
     for pers, sepa in MorseComplex.Separatrices:
-        if len(sepa.path) > 6:
+        if len(sepa.path) > 1:
             # add high persistence edge points
             if pers > thresh_high:
                 if sepa.dimension == 1:
