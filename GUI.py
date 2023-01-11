@@ -30,7 +30,8 @@ class Gui:
         self.app = QtWidgets.QApplication([])
 
         self.window = QtWidgets.QWidget()
-        self.window.setWindowTitle("Morse GUI Test")
+        self.window.setGeometry(100,100,800,800)
+        self.window.setWindowTitle("Mesh GUI")
         self.layout = QVBoxLayout()
 
         # Create the VTK widget and add it to the layout
@@ -62,6 +63,9 @@ class Gui:
         self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")
         self.compute_Morse_action.triggered.connect(lambda: self.compute_Morse())
 
+        self.compute_perona_malik_action = self.processing_menu.addAction("Compute Perona Malik")
+        self.compute_perona_malik_action.triggered.connect(lambda: self.compute_perona_malik())
+
         # Create the show sliders action and add it to the file menu
         self.show_sliders_action = self.visualization_menu.addAction("Show Sliders")
         self.show_sliders_action.triggered.connect(lambda: self.show_slider())
@@ -72,6 +76,9 @@ class Gui:
 
         self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
         self.segment_new_action.triggered.connect(lambda: self.compute_Segmentation_new())
+
+        self.show_funvals_action = self.visualization_menu.addAction("Show funvals")
+        self.show_funvals_action.triggered.connect(lambda: self.color_funvals())
 
         self.update_buttons()
 
@@ -217,6 +224,31 @@ class Gui:
         mapper.Update()
         self.vtkWidget.GetRenderWindow().Render()
 
+    def color_funvals(self):
+        # Get the renderer and mesh actor
+        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
+        actor = ren.GetActors().GetLastActor()
+
+        # Get the mapper and the mesh data
+        mapper = actor.GetMapper()
+        mesh = mapper.GetInput()
+
+        # Set the color of the points in the mesh
+        point_data = mesh.GetPointData()
+        color_array = vtk.vtkUnsignedCharArray()
+        color_array.SetNumberOfComponents(3)
+        color_array.SetName("Colors")
+        for ind, vert in self.data.Vertices.items():
+            lamb = (vert.fun_val-self.data.min)/self.data.range
+            color = int(lamb*255) 
+            color_array.InsertTypedTuple(ind, (color,color,color))
+            
+        point_data.SetScalars(color_array)
+
+        # Update the mapper and render the window
+        mapper.Update()
+        self.vtkWidget.GetRenderWindow().Render()
+
     def compute_Morse(self):
         self.data.ProcessLowerStars()
         self.data.ExtractMorseComplex()
@@ -231,6 +263,10 @@ class Gui:
         self.update_buttons()
 
         self.update_edge_color()
+
+    def compute_perona_malik(self):
+        self.data.apply_Perona_Malik(4,0.1,0.1)
+        self.color_funvals()
 
     def compute_Segmentation(self):
         if self.persistence not in self.data.reducedMorseComplexes.keys():

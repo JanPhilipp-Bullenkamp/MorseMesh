@@ -22,6 +22,7 @@
 
 # imports
 from copy import deepcopy
+import numpy as np
 
 from .weight_metrics import compute_weight_saledge
 from ..CancellationQueue import CancellationQueue
@@ -100,6 +101,13 @@ class Vertex:
                 neighbor_indices.append([elt, vert_dict[elt].label])
                 neighbor_labels.add(vert_dict[elt].label)
         return neighbor_labels, neighbor_indices
+
+    def compute_gradient(self, vert_dict: dict) -> float:
+        grad = 0
+        for vert_ind in self.neighbors:
+            dist = np.linalg.norm(np.array((self.x, self.y, self.z)) - np.array((vert_dict[vert_ind].x, vert_dict[vert_ind].y, vert_dict[vert_ind].z)))
+            grad += (self.fun_val - vert_dict[vert_ind].fun_val)/dist
+        return grad/len(self.neighbors)
 
     def get_n_neighborhood(self, vert_dict: dict, n: int) -> set:
         n_rings = {}

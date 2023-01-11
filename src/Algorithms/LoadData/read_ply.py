@@ -50,10 +50,10 @@ def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inv
         vertices_dict[vindex] = vert
         
     counts = Counter(vals)
-    for value in vertices_dict.values():
-        if counts[value.fun_val] > 1:
-            tmp = value.fun_val
-            value.fun_val = value.fun_val + (counts[value.fun_val] - 1) * 0.0000001
+    for vert in vertices_dict.values():
+        if counts[vert.fun_val] > 1:
+            tmp = vert.fun_val
+            vert.fun_val = vert.fun_val + (counts[vert.fun_val] - 1) * 0.0000001
             counts[tmp] = counts[tmp] - 1
             
     

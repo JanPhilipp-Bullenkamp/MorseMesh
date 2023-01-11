@@ -74,19 +74,24 @@ class Mesh:
     
     def reset(self):
         """! @brief Constructor for the Mesh class. """
+        self.reset_morse()
+
         self.filename = None
         
         self.min = None
         self.max = None
         self.range = None
 
-        self.min_separatrix_persistence = None
-        self.max_separatrix_persistence = None
-
         self.Vertices = {}
         self.Edges = {}
         self.Faces = {}
         
+
+    def reset_morse(self):
+        """! @brief Resets all the Morse related things. """
+        self.min_separatrix_persistence = None
+        self.max_separatrix_persistence = None
+
         self._flag_ProcessLowerStars = False
         self._flag_MorseComplex = False
         self._flag_SalientEdge = False

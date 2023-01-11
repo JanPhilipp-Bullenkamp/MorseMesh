@@ -32,28 +32,28 @@
 
 
 # import stuff
-from src.Algorithms.LoadData.read_ply import read_ply
-from src.Algorithms.LoadData.read_funvals import read_funvals
-from src.Algorithms.ProcessLowerStars import ProcessLowerStars
-from src.Algorithms.ExtractMorseComplex import ExtractMorseComplex
-from src.Algorithms.ReduceMorseComplex import CancelCriticalPairs
-from src.Algorithms.BettiNumbers import BettiViaPairCells
+from ..src.Algorithms.LoadData.read_ply import read_ply
+from ..src.Algorithms.LoadData.read_or_process_funvals import read_funvals, apply_Perona_Malik_diffusion
+from ..src.Algorithms.ProcessLowerStars import ProcessLowerStars
+from ..src.Algorithms.ExtractMorseComplex import ExtractMorseComplex
+from ..src.Algorithms.ReduceMorseComplex import CancelCriticalPairs
+from ..src.Algorithms.BettiNumbers import BettiViaPairCells
 
-from src.Algorithms.MorseCells import get_MorseCells
-from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
+from ..src.Algorithms.MorseCells import get_MorseCells
+from ..src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
 
-from src.Algorithms.Roughness_test import variance_heat_map, extremal_points_ratio
+from ..src.Algorithms.Roughness_test import variance_heat_map, extremal_points_ratio
 
-from src.PlotData.PersistenceDiagram import PersistenceDiagram
-from src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_MSComplex_detailed_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
-from src.PlotData.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file, write_variance_heat_map_labels_txt_file
-from src.PlotData.statistics import fun_val_statistics, critical_fun_val_statistics, salient_edge_statistics
+#from ..src.PlotData.PersistenceDiagram import PersistenceDiagram
+from ..src.PlotData.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_MSComplex_detailed_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
+from ..src.PlotData.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file, write_variance_heat_map_labels_txt_file
+#from ..src.PlotData.statistics import fun_val_statistics, critical_fun_val_statistics, salient_edge_statistics
 
-from src.PlotData.plot_points_for_debugging import write_overlay_points
+from ..src.PlotData.plot_points_for_debugging import write_overlay_points
 
-from src.mesh import Mesh
+from ..src.mesh import Mesh
 
-from src.timer import timed
+from ..src.timer import timed
 
 # import libraries
 import timeit
@@ -94,6 +94,15 @@ class Morse(Mesh):
         self.min = min_val
         self.max = max_val
         self.range = max_val - min_val
+        self.reset_morse()
+
+    @timed
+    def apply_Perona_Malik(self, iterations: int, lamb: float, k: float):
+        min_val, max_val = apply_Perona_Malik_diffusion(self.Vertices, self.Edges, self.Faces, iterations, lamb, k)
+        self.min = min_val
+        self.max = max_val
+        self.range = max_val - min_val
+        self.reset_morse()
         
     ''' MORSE THEORY'''
     
@@ -105,13 +114,7 @@ class Morse(Mesh):
         """
         # reset if has been computed already
         if self._flag_ProcessLowerStars:
-            self.V12 = {}
-            self.V23 = {}
-
-            self.C = {}
-            self.C[0] = set()
-            self.C[1] = set()
-            self.C[2] = set()
+            self.reset_morse()
             
         ProcessLowerStars(self.Vertices, self.Edges, self.Faces, self.C, self.V12, self.V23)
         self._flag_ProcessLowerStars = True
