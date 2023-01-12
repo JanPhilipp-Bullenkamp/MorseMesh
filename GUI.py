@@ -74,6 +74,9 @@ class Gui:
         self.segment_action = self.visualization_menu.addAction("Segmentation")
         self.segment_action.triggered.connect(lambda: self.compute_Segmentation())
 
+        self.cluster_action = self.visualization_menu.addAction("Cluster")
+        self.cluster_action.triggered.connect(lambda: self.cluster())
+
         self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
         self.segment_new_action.triggered.connect(lambda: self.compute_Segmentation_new())
 
@@ -217,6 +220,32 @@ class Gui:
                 cell_color = color_list[label%len(color_list)]
                 for ind in cell.vertices:
                     color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
+            
+        point_data.SetScalars(color_array)
+
+        # Update the mapper and render the window
+        mapper.Update()
+        self.vtkWidget.GetRenderWindow().Render()
+    
+    def cluster(self):
+        clust = self.data.seed_cluster_mesh(self.color_points, 150)
+        # Get the renderer and mesh actor
+        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
+        actor = ren.GetActors().GetLastActor()
+
+        # Get the mapper and the mesh data
+        mapper = actor.GetMapper()
+        mesh = mapper.GetInput()
+
+        # Set the color of the points in the mesh
+        point_data = mesh.GetPointData()
+        color_array = vtk.vtkUnsignedCharArray()
+        color_array.SetNumberOfComponents(3)
+        color_array.SetName("Colors")
+        for label, comp in clust.items():
+            cell_color = color_list[label%len(color_list)]
+            for ind in comp.vertices:
+                color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
             
         point_data.SetScalars(color_array)
 

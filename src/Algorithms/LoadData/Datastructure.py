@@ -276,6 +276,9 @@ class CritVertex:
         self.fun_val = vert.fun_val #float
         
         self.connected_saddles = []
+
+    def __eq__(self, other):
+        return self.index == other.index and self.fun_val == other.fun_val and self.connected_saddles == other.connected_saddles
         
     def __str__(self) -> str:
         """! Retrieves the index of the critical vertex.
@@ -323,6 +326,22 @@ class CritEdge:
         self.connected_maxima = []
         
         self.paths = {}
+
+    def __eq__(self, other):
+        equal = True
+        if not self.indices == other.indices:
+            equal = False
+        if not self.fun_val == other.fun_val:
+            equal = False 
+        if not self.index == other.index:
+            equal = False 
+        if not self.connected_minima == other.connected_minima:
+            equal = False
+        if not self.connected_maxima == other.connected_maxima:
+            equal = False
+        if not self.paths == other.paths:
+            equal == False
+        return equal
         
     def __str__(self) -> str:
         """! Retrieves the index of the critical edge.
@@ -365,6 +384,20 @@ class CritFace:
         self.connected_saddles = []
         
         self.paths = {}
+
+    def __eq__(self, other):
+        equal = True
+        if not self.indices == other.indices:
+            equal = False
+        if not self.fun_val == other.fun_val:
+            equal = False 
+        if not self.index == other.index:
+            equal = False 
+        if not self.connected_saddles == other.connected_saddles:
+            equal = False
+        if not self.paths == other.paths:
+            equal == False
+        return equal
         
     def __str__(self) -> str:
         """! Retrieves the index of the critical face.

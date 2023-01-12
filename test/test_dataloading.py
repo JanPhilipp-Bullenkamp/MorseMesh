@@ -33,7 +33,6 @@ def test_changed_vertex_order():
 
 def check_equal_PLS_outcome(orig_data: Morse, shuff_data: Morse, trafo_dict: dict):
     # need to check C, V12 and V23
-    print(shuff_data.V12.keys())
     for orig_v_ind, orig_e_ind in orig_data.V12.items():
         assert trafo_dict[orig_v_ind] in shuff_data.V12.keys()
         assert shuff_data.V12[trafo_dict[orig_v_ind]] == orig_e_ind
@@ -47,8 +46,10 @@ def check_equal_PLS_outcome(orig_data: Morse, shuff_data: Morse, trafo_dict: dic
 
 
 def check_equal_EMC_outcome(orig_data: Morse, shuff_data: Morse, trafo_dict: dict):
-    do=0
-    
+    assert set(orig_data.MorseComplex.CritEdges.keys()) == set(shuff_data.MorseComplex.CritEdges.keys())
+    assert set(orig_data.MorseComplex.CritFaces.keys()) == set(shuff_data.MorseComplex.CritFaces.keys())
+    for v_ind, vert in orig_data.MorseComplex.CritVertices.items():
+        assert vert == shuff_data.MorseComplex.CritVertices[trafo_dict[v_ind]]
 
 def alternate_vertex_order(vert_dict: dict, edge_dict: dict, face_dict: dict):
     new_vert_dict = {}
