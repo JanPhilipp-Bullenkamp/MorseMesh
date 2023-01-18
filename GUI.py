@@ -59,23 +59,26 @@ class Gui:
         self.save_edges_ply_action = self.file_menu.addAction("Save Edges ply")
         self.save_edges_ply_action.triggered.connect(lambda: self.save_edges_ply_file())
 
-        # Create the compute Morse action and add it to the file menu
+        # Create the compute Morse action and add it to the processing menu
         self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")
         self.compute_Morse_action.triggered.connect(lambda: self.compute_Morse())
 
         self.compute_perona_malik_action = self.processing_menu.addAction("Compute Perona Malik")
         self.compute_perona_malik_action.triggered.connect(lambda: self.compute_perona_malik())
 
-        # Create the show sliders action and add it to the file menu
+        # Create the show sliders action and add it to the visualization menu
         self.show_sliders_action = self.visualization_menu.addAction("Show Sliders")
         self.show_sliders_action.triggered.connect(lambda: self.show_slider())
 
-        # Create the segment action and add it to the file menu
+        # Create the segment action and add it to the visualization menu
         self.segment_action = self.visualization_menu.addAction("Segmentation")
         self.segment_action.triggered.connect(lambda: self.compute_Segmentation())
 
         self.cluster_action = self.visualization_menu.addAction("Cluster")
         self.cluster_action.triggered.connect(lambda: self.cluster())
+
+        self.merge_cluster_action = self.visualization_menu.addAction("Merge Cluster")
+        self.merge_cluster_action.triggered.connect(lambda: self.merge_cluster())
 
         self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
         self.segment_new_action.triggered.connect(lambda: self.compute_Segmentation_new())
@@ -107,6 +110,7 @@ class Gui:
         self.merge_threshold = 0.3
 
         self.color_points = set()
+        self.current_segmentation = {}
         self.current_segmentation_params = None
         self.center = [0,0,0]
 
@@ -139,6 +143,15 @@ class Gui:
         if filename:
             # Save the edge ply file:
             self.data.plot_SalientEdges_ply(filename, self.high_thresh, self.low_thresh, only_strong=True)
+
+    def save_segmentation_result(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        filename, _ = QFileDialog.getSaveFilename(None, "Save current Segmentation as .txt file.",
+                                                  "", "Txt Files (*.txt)", options=options)
+
+        if filename:
+            self.data.plot_labels_txt(self.current_segmentation, filename)
 
     def update_mesh(self):
         ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
@@ -196,7 +209,7 @@ class Gui:
         mapper.Update()
         self.vtkWidget.GetRenderWindow().Render()
 
-    def update_segmentation_color(self, saledge=False):
+    def update_mesh_color_segmentation(self, label_dict: dict):
         # Get the renderer and mesh actor
         ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
         actor = ren.GetActors().GetLastActor()
@@ -210,48 +223,32 @@ class Gui:
         color_array = vtk.vtkUnsignedCharArray()
         color_array.SetNumberOfComponents(3)
         color_array.SetName("Colors")
-        if not saledge:
-            for label, cell in self.data.reducedMorseComplexes[self.current_segmentation_params[0]].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells.items():
-                cell_color = color_list[label%len(color_list)]
-                for ind in cell.vertices:
-                    color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
-        elif saledge:
-            for label, cell in self.data.salientreducedMorseComplexes[(self.current_segmentation_params[0],self.current_segmentation_params[1],self.current_segmentation_params[2])].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells.items():
-                cell_color = color_list[label%len(color_list)]
-                for ind in cell.vertices:
-                    color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
-            
+        for label, cell in label_dict.items():
+            cell_color = color_list[label%len(color_list)]
+            for ind in cell.vertices:
+                color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
         point_data.SetScalars(color_array)
 
         # Update the mapper and render the window
         mapper.Update()
         self.vtkWidget.GetRenderWindow().Render()
+
+    def color_segmentation(self, saledge=False):
+        if not saledge:
+            self.update_mesh_color_segmentation(self.data.reducedMorseComplexes[self.current_segmentation_params[0]].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells)
+        elif saledge:
+            self.update_mesh_color_segmentation(self.data.salientreducedMorseComplexes[(self.current_segmentation_params[0],self.current_segmentation_params[1],self.current_segmentation_params[2])].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells)
     
     def cluster(self):
         clust = self.data.seed_cluster_mesh(self.color_points, 150)
-        # Get the renderer and mesh actor
-        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
-        actor = ren.GetActors().GetLastActor()
+        
+        self.update_mesh_color_segmentation(clust)
 
-        # Get the mapper and the mesh data
-        mapper = actor.GetMapper()
-        mesh = mapper.GetInput()
-
-        # Set the color of the points in the mesh
-        point_data = mesh.GetPointData()
-        color_array = vtk.vtkUnsignedCharArray()
-        color_array.SetNumberOfComponents(3)
-        color_array.SetName("Colors")
-        for label, comp in clust.items():
-            cell_color = color_list[label%len(color_list)]
-            for ind in comp.vertices:
-                color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
-            
-        point_data.SetScalars(color_array)
-
-        # Update the mapper and render the window
-        mapper.Update()
-        self.vtkWidget.GetRenderWindow().Render()
+    def merge_cluster(self):
+        clust  = self.data.seed_cluster_mesh(self.color_points, 150)
+        merged_clust = self.data.cluster_segmentation(clust, self.color_points, 0.3)
+        
+        self.update_mesh_color_segmentation(merged_clust)
 
     def color_funvals(self):
         # Get the renderer and mesh actor
@@ -308,14 +305,14 @@ class Gui:
                 
         self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
 
-        self.update_segmentation_color()
+        self.color_segmentation()
 
     def compute_Segmentation_new(self): 
         self.data.Segmentation_SalientReduction(self.high_thresh, self.low_thresh, self.merge_threshold, self.persistence)
                 
         self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
 
-        self.update_segmentation_color(saledge=True)
+        self.color_segmentation(saledge=True)
 
     # Create a function to update the parameter based on the slider value
     def update_high_thresh(self, value, label1):

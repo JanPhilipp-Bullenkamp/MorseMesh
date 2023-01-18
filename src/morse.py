@@ -42,7 +42,7 @@ from src.Algorithms.BettiNumbers import BettiViaPairCells
 from src.Algorithms.MorseCells import get_MorseCells
 from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
 
-from src.Algorithms.cluster import cluster_mesh
+from src.Algorithms.cluster import cluster_mesh, merge_cluster
 
 from src.Algorithms.Roughness_test import variance_heat_map, extremal_points_ratio
 
@@ -71,6 +71,10 @@ class Morse(Mesh):
     @timed
     def seed_cluster_mesh(self, bd_pts: set, num_seeds: int) -> dict:
         return cluster_mesh(self.Vertices, bd_pts, num_seeds)
+
+    @timed
+    def cluster_segmentation(self, cluster: dict, bd_points: set, threshold: float):
+        return merge_cluster(cluster, bd_points, threshold)
     
     ''' DATALOADING'''
     
@@ -559,6 +563,10 @@ class Morse(Mesh):
     @timed
     def plot_Segmentation_SalientEdge_label_txt(self, thresh_large: float, thresh_small: float, merge_threshold: float, filename: str):
         write_Cell_labels_txt_file(self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells, filename, params=[None, thresh_large, thresh_small, merge_threshold])
+
+    @timed
+    def plot_labels_txt(self, label_dict: dict, filename: str):
+        write_Cell_labels_txt_file(label_dict, filename)
     
     @timed
     def plot_SalientEdges_ply(self, filename: str, thresh_high: float, thresh_low: float = None, only_strong: bool = False):
