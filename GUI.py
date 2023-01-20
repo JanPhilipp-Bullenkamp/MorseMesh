@@ -3,7 +3,7 @@ import numpy as np
 import vtk
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QSlider, QVBoxLayout, QMenuBar, QMenu, QLabel
+from PyQt5.QtWidgets import QFileDialog, QSlider, QVBoxLayout, QMenuBar, QMenu, QLabel, QPushButton, QGroupBox, QLineEdit, QHBoxLayout, QGridLayout
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from src.morse import Morse
@@ -32,11 +32,11 @@ class Gui:
         self.window = QtWidgets.QWidget()
         self.window.setGeometry(100,100,800,800)
         self.window.setWindowTitle("Mesh GUI")
-        self.layout = QVBoxLayout()
+        self.layout = QGridLayout()
 
         # Create the VTK widget and add it to the layout
         self.vtkWidget = QVTKRenderWindowInteractor(self.window)
-        self.layout.addWidget(self.vtkWidget)
+        self.layout.addWidget(self.vtkWidget, 0,0)
         ren = vtk.vtkRenderer()
         self.vtkWidget.GetRenderWindow().AddRenderer(ren)
         
@@ -58,6 +58,9 @@ class Gui:
 
         self.save_edges_ply_action = self.file_menu.addAction("Save Edges ply")
         self.save_edges_ply_action.triggered.connect(lambda: self.save_edges_ply_file())
+
+        self.save_edges_ply_action = self.file_menu.addAction("Save current Segmentation ply")
+        self.save_edges_ply_action.triggered.connect(lambda: self.save_segmentation_result())
 
         # Create the compute Morse action and add it to the processing menu
         self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")
@@ -87,6 +90,7 @@ class Gui:
         self.show_funvals_action.triggered.connect(lambda: self.color_funvals())
 
         self.update_buttons()
+        self.add_param_sidebar()
 
         self.window.setLayout(self.layout)
         self.window.show()
@@ -95,6 +99,13 @@ class Gui:
 
     def reset_data(self):
         self.data = Morse()
+
+        try:
+            if self.flag_sliders_shown:
+                self.remove_sliders()
+        except AttributeError:
+            self.flag_sliders_shown = False
+
 
         self.flag_morse_computations = False
         self.flag_loaded_data = False
@@ -108,11 +119,13 @@ class Gui:
 
         self.persistence = 0.04
         self.merge_threshold = 0.3
+        self.cluster_seed_number = 150
 
         self.color_points = set()
         self.current_segmentation = {}
         self.current_segmentation_params = None
         self.center = [0,0,0]
+
 
     def update_buttons(self):
         self.show_sliders_action.setEnabled(True if self.flag_morse_computations and not self.flag_sliders_shown else False)
@@ -233,22 +246,17 @@ class Gui:
         mapper.Update()
         self.vtkWidget.GetRenderWindow().Render()
 
-    def color_segmentation(self, saledge=False):
-        if not saledge:
-            self.update_mesh_color_segmentation(self.data.reducedMorseComplexes[self.current_segmentation_params[0]].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells)
-        elif saledge:
-            self.update_mesh_color_segmentation(self.data.salientreducedMorseComplexes[(self.current_segmentation_params[0],self.current_segmentation_params[1],self.current_segmentation_params[2])].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells)
-    
-    def cluster(self):
-        clust = self.data.seed_cluster_mesh(self.color_points, 150)
+    def color_segmentation(self):
+        self.update_mesh_color_segmentation(self.current_segmentation)
         
-        self.update_mesh_color_segmentation(clust)
+    def cluster(self):
+        self.current_segmentation = self.data.seed_cluster_mesh(self.color_points, self.cluster_seed_number)
+        self.color_segmentation()
 
     def merge_cluster(self):
-        clust  = self.data.seed_cluster_mesh(self.color_points, 150)
-        merged_clust = self.data.cluster_segmentation(clust, self.color_points, 0.3)
-        
-        self.update_mesh_color_segmentation(merged_clust)
+        clust  = self.data.seed_cluster_mesh(self.color_points, self.cluster_seed_number)
+        self.current_segmentation = self.data.cluster_segmentation(clust, self.color_points, self.merge_threshold)
+        self.color_segmentation()
 
     def color_funvals(self):
         # Get the renderer and mesh actor
@@ -279,7 +287,7 @@ class Gui:
         self.data.ProcessLowerStars()
         self.data.ExtractMorseComplex()
         self.data.ReduceMorseComplex(self.data.range)
-        self.data.ReduceMorseComplex(self.persistence)
+        #self.data.ReduceMorseComplex(self.persistence)
 
         self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
         self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
@@ -304,6 +312,7 @@ class Gui:
                 self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold)
                 
         self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
+        self.current_segmentation = self.data.reducedMorseComplexes[self.current_segmentation_params[0]].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells
 
         self.color_segmentation()
 
@@ -311,8 +320,9 @@ class Gui:
         self.data.Segmentation_SalientReduction(self.high_thresh, self.low_thresh, self.merge_threshold, self.persistence)
                 
         self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
+        self.current_segmentation = self.data.salientreducedMorseComplexes[(self.current_segmentation_params[0],self.current_segmentation_params[1],self.current_segmentation_params[2])].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells
 
-        self.color_segmentation(saledge=True)
+        self.color_segmentation()
 
     # Create a function to update the parameter based on the slider value
     def update_high_thresh(self, value, label1):
@@ -320,6 +330,7 @@ class Gui:
         self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
         label1.setText("High threshold: {} % -> {}".format(value, self.high_thresh))
         self.update_edge_color()
+        self.param4_input.setText("{:.5f}".format(self.high_thresh))
 
     # Create a function to update the parameter based on the slider value
     def update_low_thresh(self, value, label2):
@@ -327,39 +338,133 @@ class Gui:
         self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
         label2.setText("Low threshold: {} % -> {}".format(value, self.low_thresh))
         self.update_edge_color()
+        self.param5_input.setText("{:.5f}".format(self.low_thresh))
 
     # Create a function to show the slider when the button is clicked
     def show_slider(self):
         # Create the slider and set its range and default value
-        slider1 = QSlider(Qt.Horizontal)
-        slider1.setRange(0,100)
-        slider1.setValue(self.high_percent)
+        self.slider1 = QSlider(Qt.Horizontal)
+        self.slider1.setRange(0,100)
+        self.slider1.setValue(self.high_percent)
         # Create a label to display above the first slider
-        label1 = QLabel("High threshold: {} % -> {}".format(self.high_percent, self.high_thresh))
+        self.label1 = QLabel("High edge threshold: {} % -> {}".format(self.high_percent, self.high_thresh))
         
         # Connect the valueChanged signal of the slider to the update_parameter function
-        slider1.valueChanged.connect(lambda value: self.update_high_thresh(value, label1))
+        self.slider1.valueChanged.connect(lambda value: self.update_high_thresh(value, self.label1))
         
 
         # Create the slider and set its range and default value
-        slider2 = QSlider(Qt.Horizontal)
-        slider2.setRange(0,100)
-        slider2.setValue(self.low_percent)
+        self.slider2 = QSlider(Qt.Horizontal)
+        self.slider2.setRange(0,100)
+        self.slider2.setValue(self.low_percent)
         # Create a label to display above the second slider
-        label2 = QLabel("Low threshold: {} % -> {}".format(self.low_percent, self.low_thresh))
+        self.label2 = QLabel("Low edge threshold: {} % -> {}".format(self.low_percent, self.low_thresh))
         
         # Connect the valueChanged signal of the slider to the update_parameter function
-        slider2.valueChanged.connect(lambda value: self.update_low_thresh(value, label2))
+        self.slider2.valueChanged.connect(lambda value: self.update_low_thresh(value, self.label2))
 
-        self.layout.addWidget(label1)
-        self.layout.addWidget(slider1)
-        self.layout.addWidget(label2)
-        self.layout.addWidget(slider2)
+        self.layout.addWidget(self.label1,1,0)
+        self.layout.addWidget(self.slider1,2,0)
+        self.layout.addWidget(self.label2,3,0)
+        self.layout.addWidget(self.slider2,4,0)
+
+        # Create the exit button
+        self.exit_button = QPushButton("Close Sliders")
+        # Connect the clicked signal to the remove_sliders function
+        self.exit_button.clicked.connect(self.remove_sliders)
+        self.layout.addWidget(self.exit_button)
+
         # Add the layout to the main window
         self.window.setLayout(self.layout)
 
         self.flag_sliders_shown = True
         self.update_buttons()
+
+    def remove_sliders(self):
+        # Remove the first slider and its label from the layout
+        self.layout.removeWidget(self.slider1)
+        self.slider1.setParent(None)
+        self.layout.removeWidget(self.label1)
+        self.label1.setParent(None)
+
+        # Remove the second slider and its label from the layout
+        self.layout.removeWidget(self.slider2)
+        self.slider2.setParent(None)
+        self.layout.removeWidget(self.label2)
+        self.label2.setParent(None)
+
+        # remove exit button
+        self.layout.removeWidget(self.exit_button)
+        self.exit_button.setParent(None)
+
+        #delete the object from memory
+        del self.slider1
+        del self.label1
+        del self.slider2
+        del self.label2
+        del self.exit_button
+
+        self.flag_sliders_shown = False
+
+    def add_param_sidebar(self):
+        # Create the sidebar group box
+        self.sidebar = QGroupBox("Further Parameters:")
+        self.sidebar_layout = QVBoxLayout()
+        self.sidebar.setLayout(self.sidebar_layout)
+        self.sidebar.setMaximumSize(175, 400)
+
+        # Create the input widgets and their default values
+        self.param1_input = QLineEdit()
+        self.param1_input.setText(str(self.persistence))
+        self.param1_input.setMaximumSize(75, 25)
+        self.param2_input = QLineEdit()
+        self.param2_input.setText(str(self.merge_threshold))
+        self.param2_input.setMaximumSize(75, 25)
+        self.param3_input = QLineEdit()
+        self.param3_input.setText(str(self.cluster_seed_number))
+        self.param3_input.setMaximumSize(75, 25)
+        self.param4_input = QLineEdit()
+        self.param4_input.setText(str(self.high_thresh))
+        self.param4_input.setMaximumSize(75, 25)
+        self.param5_input = QLineEdit()
+        self.param5_input.setText(str(self.low_thresh))
+        self.param5_input.setMaximumSize(75, 25)
+
+        # Add the input widgets to the sidebar layout
+        self.sidebar_layout.addWidget(QLabel("Persistence"))
+        self.sidebar_layout.addWidget(self.param1_input)
+        self.sidebar_layout.addWidget(QLabel("Merge threshold"))
+        self.sidebar_layout.addWidget(self.param2_input)
+        self.sidebar_layout.addWidget(QLabel("Cluster Seed number"))
+        self.sidebar_layout.addWidget(self.param3_input)
+        self.sidebar_layout.addWidget(QLabel("High edge Thr"))
+        self.sidebar_layout.addWidget(self.param4_input)
+        self.sidebar_layout.addWidget(QLabel("Low edge Thr"))
+        self.sidebar_layout.addWidget(self.param5_input)
+
+        self.param1_input.editingFinished.connect(self.update_pers)
+        self.param2_input.editingFinished.connect(self.update_merge_thr)
+        self.param3_input.editingFinished.connect(self.update_seed_number)
+        self.param1_input.editingFinished.connect(self.update_high_edge_thr)
+        self.param1_input.editingFinished.connect(self.update_low_edge_thr)
+
+        # Add the sidebar to the main layout
+        self.layout.addWidget(self.sidebar,0,1)
+
+    def update_pers(self):
+        self.persistence = float(self.param1_input.text())
+
+    def update_merge_thr(self):
+        self.merge_threshold = float(self.param2_input.text())
+
+    def update_seed_number(self):
+        self.cluster_seed_number = int(self.param3_input.text())
+
+    def update_high_edge_thr(self):
+        self.persistence = float(self.param4_input.text())
+
+    def update_low_edge_thr(self):
+        self.persistence = float(self.param5_input.text())
 
 if __name__ == '__main__':
     Gui()

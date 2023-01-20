@@ -21,6 +21,32 @@ class Component:
                     open_neighbors.append(ind)
         return open_neighbors
 
+def clean_cluster(cluster: dict, size_threshold: int = 15) -> dict:
+    remove = set()
+    for label, comp in cluster.items():
+        if len(comp.vertices) < size_threshold:
+            lowest_weight_neighbor = [nei_label for nei_label, weight in sorted(comp.neighbors_weights.items(), key=lambda item: abs(item[1]))][0]
+            
+            if lowest_weight_neighbor not in remove:
+                cluster = merge_components(cluster, lowest_weight_neighbor, label)
+                remove.add(label)
+            
+    for label in remove:
+        cluster.pop(label)
+    return cluster
+
+def merge_components(cluster: dict, label1: int, label2: int) -> dict:
+    for vert in cluster[label2].vertices:
+        cluster[label1].vertices.add(vert)
+    for bd in cluster[label2].boundary:
+        cluster[label1].boundary.add(bd)
+
+    for nei_label, nei_points in cluster[label2].neighbors.items():
+        if nei_label not in cluster[label1].neighbors.keys():
+            cluster[label1].neighbors[nei_label] = nei_points
+            cluster[label1].neighbors_weights[nei_label] = cluster[label2].neighbors_weights[nei_label]
+    do=0
+
 def merge_cluster(cluster: dict, bd_points: set, threshold: float):
     # 1. calculate weights between cells
     compute_all_weights(cluster, bd_points)
@@ -142,6 +168,7 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
     seeds = random.sample(unoccupied_vertices, num_seeds)
     for seed in seeds:
         cluster[seed] = Component(seed)
+        vert_dict[seed].label = seed
 
     unoccupied_vertices = set(unoccupied_vertices) - set(seeds)
 
@@ -156,7 +183,9 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
                 if ind in unoccupied_vertices:
                     if ind in bd_pts:
                         component.vertices.add(ind)
+                        vert_dict[ind].label = component.seed
                     else:
+                        vert_dict[ind].label = component.seed
                         component.vertices.add(ind)
                         component.open.append(ind)
                     unoccupied_vertices.remove(ind)
@@ -165,10 +194,14 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
         if len(unoccupied_vertices) == len_before and len(unoccupied_vertices - bd_pts) != 0:
             new_seed = (unoccupied_vertices - bd_pts).pop()
             cluster[new_seed] = Component(new_seed)
+            vert_dict[new_seed].label = new_seed
             unoccupied_vertices.remove(new_seed)
 
-    if len(unoccupied_vertices - bd_pts) != 0:
-        raise AssertionError("Only boundary points should be left in the unclustered points!")
+    if len(unoccupied_vertices) != 0:
+        raise AssertionError("Only boundary points should be left so unoccupied vertices hsould be empty!")
+
+    # now add boundary points to unoccupied vertices
+    #unoccupied_vertices.update(bd_pts)
 
     # treat boundary points if necessary (should be only bd points with only bd_points as neighbors)
     while len(unoccupied_vertices) != 0:
@@ -176,6 +209,7 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
         for comp in cluster.values():
             if vert_dict[remaining_pt].neighbors.intersection(comp.vertices):
                 comp.vertices.add(remaining_pt)
+                vert_dict[remaining_pt].label = comp.seed
                 break
 
     # fill boundary points
