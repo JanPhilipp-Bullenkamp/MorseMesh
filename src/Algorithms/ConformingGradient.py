@@ -52,7 +52,7 @@ def ConformingGradient(vertices_dict, edges_dict, faces_dict, labels, C, V12, V2
                 PQzero.insert(tuple((edge, Eindex)))
             
             for Findex, face in lowerStar['faces'].items():
-                if (num_unpaired_conforming_faces(Findex, face, PQzero, labels) == 1):
+                if (num_unpaired_conforming_faces(Findex, face, PQzero, labels) == 1 and face.has_face(delta_edge)):
                     PQone.insert(tuple((face, Findex)))
                     VisitedFaces.append(Findex)
 
