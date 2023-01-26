@@ -774,7 +774,6 @@ class MorseCells:
                 #TODO: If both cells have the critical Label, make the weight infinitely LOW = highest priority, if they have different labels make the weigh infinitely HIGH = lowest priority
                 # use float(‘inf’) and float(‘-inf’)?
                 if conforming:
-                    c = UserLabels['crit']
                     ulabels_here = cell.getUserLabels(UserLabels)
                     ulabels_there = self.Cells[nei_label].getUserLabels(UserLabels)
                     if ulabels_here['all'].isdisjoint(ulabels_there['all']):
@@ -790,8 +789,10 @@ class MorseCells:
                         else:
                             d_there = ulabels_there['boundary']
 
-                        if max(d_here, key = d_here.get) == c and max(d_there, key = d_there.get) == c:
+                        if max(d_here, key = d_here.get) == max(d_there, key = d_there.get) and max(d_here, key = d_here.get) in UserLabels['crit']:
                             weight = float('-inf')
+                        elif max(d_here, key = d_here.get) != max(d_there, key = d_there.get):
+                            weight = float('inf')
                         else:
                             weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
                 else:
