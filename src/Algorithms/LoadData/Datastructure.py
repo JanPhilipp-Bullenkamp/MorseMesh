@@ -814,7 +814,6 @@ class MorseCells:
         
         #TODO: same as above
         if conforming:
-            c = UserLabels['crit']
             ulabels1 = self.Cells[label1].getUserLabels(UserLabels)
             ulabels2 = self.Cells[label2].getUserLabels(UserLabels)
             if ulabels1['all'].isdisjoint(ulabels2['all']):
@@ -830,7 +829,7 @@ class MorseCells:
                 else:
                     d_there = ulabels2['boundary']
 
-                if max(d_here, key = d_here.get) == c and max(d_there, key = d_there.get) == c:
+                if max(d_here, key = d_here.get) == max(d_there, key = d_there.get) and max(d_here, key = d_here.get) in UserLabels['crit']:
                     weight = float('-inf')
                 elif max(d_here, key = d_here.get) != max(d_there, key = d_there.get):
                     weight = float('inf')
