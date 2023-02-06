@@ -321,7 +321,7 @@ class Morse(Mesh):
         return self.MorseComplex.Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
-    def get_salient_ridges(self, thresh_high: float, thresh_low: float = None):
+    def get_salient_ridges(self, thresh_high: float, thresh_low: float = None, min_length: int = 1, max_length: int = None):
         # if only one threshold given: use same strong and weak edge threshold
         if thresh_low == None:
             thresh_low = thresh_high
@@ -330,11 +330,11 @@ class Morse(Mesh):
             print("Need to maximally reduce MorseComplex first...")
             self.ReduceMorseComplex(self.range)
         ridges = ridge_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
-                               self.Vertices, self.Edges, self.Faces)
+                               self.Vertices, self.Edges, self.Faces, min_length=min_length, max_length=max_length)
         return ridges
 
     @timed
-    def get_salient_valleys(self, thresh_high: float, thresh_low: float = None):
+    def get_salient_valleys(self, thresh_high: float, thresh_low: float = None, min_length: int = 1, max_length: int = None):
         # if only one threshold given: use same strong and weak edge threshold
         if thresh_low == None:
             thresh_low = thresh_high
@@ -343,7 +343,7 @@ class Morse(Mesh):
             print("Need to maximally reduce MorseComplex first...")
             self.ReduceMorseComplex(self.range)
         valleys = valley_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
-                               self.Vertices, self.Edges, self.Faces)
+                               self.Vertices, self.Edges, self.Faces, min_length=min_length, max_length=max_length)
         return valleys
 
     @timed

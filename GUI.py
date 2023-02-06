@@ -116,6 +116,9 @@ class Gui:
 
         self.high_thresh = None
         self.low_thresh = None
+        self.mode = "ridge"
+        self.min_length = 1
+        self.max_length = None
 
         self.high_percent = 50
         self.low_percent = 45
@@ -202,7 +205,10 @@ class Gui:
         self.vtkWidget.GetRenderWindow().Render()
 
     def update_edge_color(self):
-        self.color_points = self.data.get_salient_ridges(self.high_thresh, self.low_thresh)
+        if self.mode == "ridge":
+            self.color_points = self.data.get_salient_ridges(self.high_thresh, self.low_thresh, self.min_length, self.max_length)
+        elif self.mode == "valley":
+            self.color_points = self.data.get_salient_valleys(self.high_thresh, self.low_thresh, self.min_length, self.max_length)
         # Get the renderer and mesh actor
         ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
         actor = ren.GetActors().GetLastActor()
@@ -446,6 +452,16 @@ class Gui:
         self.param6_input.setText(str(self.size_threshold))
         self.param6_input.setMaximumSize(75, 25)
 
+        self.param7_input = QLineEdit()
+        self.param7_input.setText(str(self.mode))
+        self.param7_input.setMaximumSize(75, 25)
+        self.param8_input = QLineEdit()
+        self.param8_input.setText(str(self.min_length))
+        self.param8_input.setMaximumSize(75, 25)
+        self.param9_input = QLineEdit()
+        self.param9_input.setText(str(self.max_length))
+        self.param9_input.setMaximumSize(75, 25)
+
         # Add the input widgets to the sidebar layout
         self.sidebar_layout.addWidget(QLabel("Persistence"))
         self.sidebar_layout.addWidget(self.param1_input)
@@ -460,12 +476,22 @@ class Gui:
         self.sidebar_layout.addWidget(QLabel("Size threshold segmentation (per label)"))
         self.sidebar_layout.addWidget(self.param6_input)
 
+        self.sidebar_layout.addWidget(QLabel("Edge mode"))
+        self.sidebar_layout.addWidget(self.param7_input)
+        self.sidebar_layout.addWidget(QLabel("Min sepa length"))
+        self.sidebar_layout.addWidget(self.param8_input)
+        self.sidebar_layout.addWidget(QLabel("Max sepa length"))
+        self.sidebar_layout.addWidget(self.param9_input)
+
         self.param1_input.editingFinished.connect(self.update_pers)
         self.param2_input.editingFinished.connect(self.update_merge_thr)
         self.param3_input.editingFinished.connect(self.update_seed_number)
         self.param4_input.editingFinished.connect(self.update_high_edge_thr)
         self.param5_input.editingFinished.connect(self.update_low_edge_thr)
         self.param6_input.editingFinished.connect(self.update_size_threshold)
+        self.param7_input.editingFinished.connect(self.update_edge_mode)
+        self.param8_input.editingFinished.connect(self.update_min_sepa_length)
+        self.param9_input.editingFinished.connect(self.update_max_sepa_length)
 
         # Add the sidebar to the main layout
         self.layout.addWidget(self.sidebar,0,1)
@@ -487,6 +513,15 @@ class Gui:
 
     def update_size_threshold(self):
         self.size_threshold = float(self.param6_input.text())
+
+    def update_edge_mode(self):
+        self.mode = str(self.param7_input.text())
+
+    def update_min_sepa_length(self):
+        self.size_threshold = float(self.param8_input.text())
+
+    def update_max_sepa_length(self):
+        self.size_threshold = float(self.param9_input.text())
 
 if __name__ == '__main__':
     Gui()
