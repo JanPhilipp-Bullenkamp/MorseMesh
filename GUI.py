@@ -59,7 +59,7 @@ class Gui:
         self.save_edges_ply_action = self.file_menu.addAction("Save Edges ply")
         self.save_edges_ply_action.triggered.connect(lambda: self.save_edges_ply_file())
 
-        self.save_edges_ply_action = self.file_menu.addAction("Save current Segmentation ply")
+        self.save_edges_ply_action = self.file_menu.addAction("Save current Segmentation txt")
         self.save_edges_ply_action.triggered.connect(lambda: self.save_segmentation_result())
 
         # Create the compute Morse action and add it to the processing menu
@@ -74,6 +74,9 @@ class Gui:
         self.show_sliders_action.triggered.connect(lambda: self.show_slider())
 
         # Create the segment action and add it to the visualization menu
+        self.morsecells_action = self.visualization_menu.addAction("MorseCells persistence")
+        self.morsecells_action.triggered.connect(lambda: self.compute_persistent_MorseCells())
+
         self.segment_action = self.visualization_menu.addAction("Segmentation")
         self.segment_action.triggered.connect(lambda: self.compute_Segmentation())
 
@@ -121,6 +124,8 @@ class Gui:
         self.merge_threshold = 0.3
         self.cluster_seed_number = 150
 
+        self.size_threshold = 500
+
         self.color_points = set()
         self.current_segmentation = {}
         self.current_segmentation_params = None
@@ -160,7 +165,7 @@ class Gui:
     def save_segmentation_result(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
-        filename, _ = QFileDialog.getSaveFilename(None, "Save current Segmentation as .txt file.",
+        filename, _ = QFileDialog.getSaveFileName(None, "Save current Segmentation as .txt file.",
                                                   "", "Txt Files (*.txt)", options=options)
 
         if filename:
@@ -197,7 +202,7 @@ class Gui:
         self.vtkWidget.GetRenderWindow().Render()
 
     def update_edge_color(self):
-        self.color_points = self.data.get_salient_edges(self.high_thresh, self.low_thresh)
+        self.color_points = self.data.get_salient_ridges(self.high_thresh, self.low_thresh)
         # Get the renderer and mesh actor
         ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
         actor = ren.GetActors().GetLastActor()
@@ -291,25 +296,33 @@ class Gui:
 
         self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
         self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
-        self.color_points = self.data.get_salient_edges(self.high_thresh, self.low_thresh)
+        self.color_points = self.data.get_salient_ridges(self.high_thresh, self.low_thresh)
 
         self.flag_morse_computations = True
         self.update_buttons()
 
         self.update_edge_color()
 
+        self.show_slider()
+
     def compute_perona_malik(self):
-        self.data.apply_Perona_Malik(4,0.1,0.1)
+        self.data.apply_Perona_Malik(15,0.3,0.3)
         self.color_funvals()
+
+    def compute_persistent_MorseCells(self):
+        self.data.ReduceMorseComplex(self.persistence)
+        self.data.ExtractMorseCells(self.persistence)
+        self.current_segmentation = self.data.reducedMorseComplexes[self.persistence].MorseCells.Cells
+        self.color_segmentation()
 
     def compute_Segmentation(self):
         if self.persistence not in self.data.reducedMorseComplexes.keys():
             self.data.ReduceMorseComplex(self.persistence)
         if (self.high_thresh, self.low_thresh) not in self.data.reducedMorseComplexes[self.persistence].Segmentations.keys():
-            self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold)    
+            self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold, size_threshold=self.size_threshold)    
         else:
             if self.merge_threshold not in self.data.reducedMorseComplexes[self.persistence].Segmentations[(self.high_thresh, self.low_thresh)].keys():
-                self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold)
+                self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold, size_threshold=self.size_threshold)
                 
         self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
         self.current_segmentation = self.data.reducedMorseComplexes[self.current_segmentation_params[0]].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells
@@ -429,6 +442,9 @@ class Gui:
         self.param5_input = QLineEdit()
         self.param5_input.setText(str(self.low_thresh))
         self.param5_input.setMaximumSize(75, 25)
+        self.param6_input = QLineEdit()
+        self.param6_input.setText(str(self.size_threshold))
+        self.param6_input.setMaximumSize(75, 25)
 
         # Add the input widgets to the sidebar layout
         self.sidebar_layout.addWidget(QLabel("Persistence"))
@@ -441,12 +457,15 @@ class Gui:
         self.sidebar_layout.addWidget(self.param4_input)
         self.sidebar_layout.addWidget(QLabel("Low edge Thr"))
         self.sidebar_layout.addWidget(self.param5_input)
+        self.sidebar_layout.addWidget(QLabel("Size threshold segmentation (per label)"))
+        self.sidebar_layout.addWidget(self.param6_input)
 
         self.param1_input.editingFinished.connect(self.update_pers)
         self.param2_input.editingFinished.connect(self.update_merge_thr)
         self.param3_input.editingFinished.connect(self.update_seed_number)
-        self.param1_input.editingFinished.connect(self.update_high_edge_thr)
-        self.param1_input.editingFinished.connect(self.update_low_edge_thr)
+        self.param4_input.editingFinished.connect(self.update_high_edge_thr)
+        self.param5_input.editingFinished.connect(self.update_low_edge_thr)
+        self.param6_input.editingFinished.connect(self.update_size_threshold)
 
         # Add the sidebar to the main layout
         self.layout.addWidget(self.sidebar,0,1)
@@ -465,6 +484,9 @@ class Gui:
 
     def update_low_edge_thr(self):
         self.persistence = float(self.param5_input.text())
+
+    def update_size_threshold(self):
+        self.size_threshold = float(self.param6_input.text())
 
 if __name__ == '__main__':
     Gui()

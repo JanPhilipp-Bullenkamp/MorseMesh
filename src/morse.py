@@ -40,7 +40,7 @@ from src.Algorithms.ReduceMorseComplex import CancelCriticalPairs
 from src.Algorithms.BettiNumbers import BettiViaPairCells
 
 from src.Algorithms.MorseCells import get_MorseCells
-from src.Algorithms.EdgeDetection import get_salient_edge_indices, edge_detection
+from src.Algorithms.EdgeDetection import ridge_detection, valley_detection
 
 from src.Algorithms.cluster import cluster_mesh, merge_cluster
 
@@ -186,7 +186,7 @@ class Morse(Mesh):
             print("Need to reduce maximally first...")
             self.ReduceMorseComplex(self.range)
         if salient_edge_pts == None:
-            salient_edge_pts = self.get_salient_edges(thresh_high, thresh_low)
+            salient_edge_pts = self.get_salient_ridges(thresh_high, thresh_low)
 
         if pers == None:
             self.salientreducedMorseComplexes[(thresh_high, thresh_low)] = CancelCriticalPairs(self.MorseComplex, self.range, 
@@ -269,7 +269,7 @@ class Morse(Mesh):
     ''' SEGMENTATION'''
     
     @timed
-    def Segmentation(self, persistence: float, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3):
+    def Segmentation(self, persistence: float, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3, size_threshold: int = 500):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
             self.ReduceMorseComplex(persistence)
@@ -280,16 +280,16 @@ class Morse(Mesh):
             print("Need maximally reduced complex for salient edges...")
             self.ReduceMorseComplex(self.range)
             
-        salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
+        salient_edge_points = self.get_salient_ridges(thresh_large, thresh_small)
         
         self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, thresh_large, thresh_small, 
-                                                                    merge_threshold, minimum_labels=minimum_labels)
+                                                                    merge_threshold, minimum_labels=minimum_labels, size_threshold=size_threshold)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
     @timed
     def Segmentation_SalientReduction(self, thresh_large: float, thresh_small: float, merge_threshold: float, persistence: float = None, minimum_labels: int = 3):
-        salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
+        salient_edge_points = self.get_salient_ridges(thresh_large, thresh_small)
 
         if persistence == None:
             self.ReduceMorseComplex_SalientEdge(thresh_large, thresh_small, salient_edge_points)
@@ -313,7 +313,7 @@ class Morse(Mesh):
             print("Need maximally reduced complex for salient edges...")
             self.ReduceMorseComplex(self.range)
             
-        salient_edge_points = self.get_salient_edges(thresh_large, thresh_small)
+        salient_edge_points = self.get_salient_ridges(thresh_large, thresh_small)
         
         self.MorseComplex.create_segmentation(salient_edge_points, thresh_large, thresh_small, 
                                               merge_threshold, minimum_labels=minimum_labels)
@@ -321,7 +321,7 @@ class Morse(Mesh):
         return self.MorseComplex.Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
-    def get_salient_edges(self, thresh_high: float, thresh_low: float = None):
+    def get_salient_ridges(self, thresh_high: float, thresh_low: float = None):
         # if only one threshold given: use same strong and weak edge threshold
         if thresh_low == None:
             thresh_low = thresh_high
@@ -329,9 +329,22 @@ class Morse(Mesh):
         if not self._flag_SalientEdge:
             print("Need to maximally reduce MorseComplex first...")
             self.ReduceMorseComplex(self.range)
-        edges = edge_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
+        ridges = ridge_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
                                self.Vertices, self.Edges, self.Faces)
-        return edges
+        return ridges
+
+    @timed
+    def get_salient_valleys(self, thresh_high: float, thresh_low: float = None):
+        # if only one threshold given: use same strong and weak edge threshold
+        if thresh_low == None:
+            thresh_low = thresh_high
+        # if no maximally reduced MorseComplex has been calculated: do that now
+        if not self._flag_SalientEdge:
+            print("Need to maximally reduce MorseComplex first...")
+            self.ReduceMorseComplex(self.range)
+        valleys = valley_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
+                               self.Vertices, self.Edges, self.Faces)
+        return valleys
 
     @timed
     def Pipeline_SalientSegmentation(self, infilename: str, outfilename: str, quality_index: int, inverted: bool, 
@@ -586,7 +599,7 @@ class Morse(Mesh):
             self.ReduceMorseComplex(self.range)
             
         if only_strong:
-            edge_pts = self.get_salient_edges(thresh_high, thresh_low)
+            edge_pts = self.get_salient_ridges(thresh_high, thresh_low)
             write_overlay_points(edge_pts, self.Vertices,filename)
         else:
             write_SalientEdge_overlay_ply_file(self.maximalReducedComplex, 

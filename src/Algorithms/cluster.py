@@ -217,7 +217,10 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
 
     # fill neighborhoods
     fill_neighborhood(cluster, vert_dict)
-    
+
+    # reset labels
+    for vertex in vert_dict.values():
+        vertex.label = -1
     return cluster 
 
 def get_boundary_points(cluster: dict, vert_dict: dict):

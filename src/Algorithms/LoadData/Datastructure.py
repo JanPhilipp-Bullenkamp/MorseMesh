@@ -559,7 +559,7 @@ class MorseComplex:
         self.CritVertices[vert.index] = critvert
         
     def create_segmentation(self, salient_edge_points: set, thresh_large: float, thresh_small: float, 
-                                merge_threshold: float, minimum_labels: int = 3):
+                                merge_threshold: float, minimum_labels: int = 3, size_threshold: int = 500):
         """! @brief Creates a segmentation from this MorseComplex with the given double edge threshold 
         and the merging threshold.
         
@@ -581,7 +581,7 @@ class MorseComplex:
         
         SegmentationCells.add_salient_edge_points(salient_edge_points, (thresh_large, thresh_small))
         
-        SegmentationCells.segment(merge_threshold, minimum_labels=minimum_labels)
+        SegmentationCells.segment(merge_threshold, minimum_labels=minimum_labels, size_threshold=size_threshold)
         
         if (thresh_large, thresh_small) not in self.Segmentations.keys():
             self.Segmentations[(thresh_large, thresh_small)] = {}
@@ -905,7 +905,7 @@ class MorseCells:
         for label in remove:
             self.Cells.pop(label)
 
-    def segment(self, merge_threshold: float, minimum_labels: int):
+    def segment(self, merge_threshold: float, minimum_labels: int, size_threshold: int = 500):
         """! @brief Makes this MorseCells object a Segmentation, based on the salient edge points stored 
         in this MorseCells object and a given merge_threshold and minim_labels number.
         
@@ -960,6 +960,6 @@ class MorseCells:
                 still_changing = False
                         
         # remove small patches
-        self.remove_small_patches(size_threshold=500)    
+        self.remove_small_patches(size_threshold=size_threshold)    
         # remove small enclosures
-        self.remove_small_enclosures(size_threshold=500)   
+        self.remove_small_enclosures(size_threshold=size_threshold)   
