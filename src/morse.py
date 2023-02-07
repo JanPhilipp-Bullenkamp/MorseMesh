@@ -174,6 +174,8 @@ class Morse(Mesh):
                 separatrix_persistences = [pers for pers,_ in self.maximalReducedComplex.Separatrices]
                 self.min_separatrix_persistence = min(separatrix_persistences)
                 self.max_separatrix_persistence = max(separatrix_persistences)
+                self.maximalReducedComplex.min_separatrix_persistence = min(separatrix_persistences)
+                self.maximalReducedComplex.max_separatrix_persistence = max(separatrix_persistences)
                 print("Persistence was high enough that this complex is maximally reduced.")
         return self.reducedMorseComplexes[persistence]
 

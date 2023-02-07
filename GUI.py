@@ -346,7 +346,7 @@ class Gui:
     # Create a function to update the parameter based on the slider value
     def update_high_thresh(self, value, label1):
         self.high_percent = value
-        self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
+        self.high_thresh = (self.data.max_separatrix_persistence-self.data.min_separatrix_persistence)*self.high_percent/100
         label1.setText("High threshold: {} % -> {}".format(value, self.high_thresh))
         self.update_edge_color()
         self.param4_input.setText("{:.5f}".format(self.high_thresh))
@@ -354,7 +354,7 @@ class Gui:
     # Create a function to update the parameter based on the slider value
     def update_low_thresh(self, value, label2):
         self.low_percent = value
-        self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
+        self.low_thresh = (self.data.max_separatrix_persistence-self.data.min_separatrix_persistence)*self.low_percent/100
         label2.setText("Low threshold: {} % -> {}".format(value, self.low_thresh))
         self.update_edge_color()
         self.param5_input.setText("{:.5f}".format(self.low_thresh))
@@ -518,10 +518,10 @@ class Gui:
         self.mode = str(self.param7_input.text())
 
     def update_min_sepa_length(self):
-        self.size_threshold = float(self.param8_input.text())
+        self.min_length = float(self.param8_input.text())
 
     def update_max_sepa_length(self):
-        self.size_threshold = float(self.param9_input.text())
+        self.max_length = float(self.param9_input.text())
 
 if __name__ == '__main__':
     Gui()

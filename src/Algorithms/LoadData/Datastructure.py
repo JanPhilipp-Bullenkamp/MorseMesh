@@ -525,7 +525,7 @@ class MorseComplex:
     ## @var filename
     # The filenmae of the underlying mesh.
     
-    __slots__ = ("CritVertices", "CritEdges", "CritFaces", "Separatrices", "_flag_MorseCells", "MorseCells", "Segmentations", "_flag_BettiNumbers", "BettiNumbers", "partners", "maximalReduced", "persistence", "filename")
+    __slots__ = ("CritVertices", "CritEdges", "CritFaces", "Separatrices", "_flag_MorseCells", "MorseCells", "Segmentations", "_flag_BettiNumbers", "BettiNumbers", "partners", "maximalReduced", "max_separatrix_persistence", "min_separatrix_persistence", "persistence", "filename")
         
     def __init__(self, persistence: float = 0, filename: str = None):
         """! The Constructor of a MorseComplex.
@@ -548,6 +548,8 @@ class MorseComplex:
         self.partners = None # gives betti numbers and needed for persistence diagram
         
         self.maximalReduced = False
+        self.max_separatrix_persistence = None
+        self.min_separatrix_persistence = None
         self.persistence = persistence
         self.filename = filename
         

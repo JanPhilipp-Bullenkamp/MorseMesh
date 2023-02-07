@@ -198,19 +198,27 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
             unoccupied_vertices.remove(new_seed)
 
     if len(unoccupied_vertices) != 0:
-        raise AssertionError("Only boundary points should be left so unoccupied vertices hsould be empty!")
+        raise AssertionError("Only boundary points should be left so unoccupied vertices should be empty!")
 
     # now add boundary points to unoccupied vertices
-    #unoccupied_vertices.update(bd_pts)
+    unoccupied_vertices.update(bd_pts)
 
     # treat boundary points if necessary (should be only bd points with only bd_points as neighbors)
     while len(unoccupied_vertices) != 0:
         remaining_pt = unoccupied_vertices.pop()
-        for comp in cluster.values():
-            if vert_dict[remaining_pt].neighbors.intersection(comp.vertices):
-                comp.vertices.add(remaining_pt)
-                vert_dict[remaining_pt].label = comp.seed
-                break
+        nei_labels, nei_indices = vert_dict[remaining_pt].has_neighbor_label(vert_dict)
+        if -1 in nei_labels:
+            nei_labels.remove(-1)
+        if len(nei_labels) == 1:
+            label = nei_labels.pop()
+            cluster[label].vertices.add(remaining_pt)
+            vert_dict[remaining_pt].label = label
+
+        #for comp in cluster.values():
+        #    if vert_dict[remaining_pt].neighbors.intersection(comp.vertices):
+        #        comp.vertices.add(remaining_pt)
+        #        vert_dict[remaining_pt].label = comp.seed
+        #        break
 
     # fill boundary points
     get_boundary_points(cluster, vert_dict)

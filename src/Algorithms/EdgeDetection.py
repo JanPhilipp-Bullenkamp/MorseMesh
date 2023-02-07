@@ -19,7 +19,7 @@ def ridge_detection(maxRedComp, thresh_high: float, thresh_low: float, vert_dict
     @return strong_edge The double thresholded edges stored as a single set of vertex indices.
     """
     strong_ridge, weak_ridge = get_salient_sepa_indices(maxRedComp, thresh_high, thresh_low, 
-                                                      edge_dict, face_dict, mode= "ridge",
+                                                      edge_dict, face_dict, mode=1,
                                                       min_length=min_length, max_length=max_length)
 
     if len(weak_ridge) != 0:
@@ -58,7 +58,7 @@ def valley_detection(maxRedComp, thresh_high: float, thresh_low: float, vert_dic
     @return strong_valley The double thresholded valleys stored as a single set of vertex indices.
     """
     strong_valley, weak_valley = get_salient_sepa_indices(maxRedComp, thresh_high, thresh_low, 
-                                                          vert_dict, edge_dict, face_dict, mode="valley",
+                                                          edge_dict, face_dict, mode=2,
                                                           min_length=min_length, max_length=max_length)
 
     if len(weak_valley) != 0:
@@ -82,7 +82,7 @@ def valley_detection(maxRedComp, thresh_high: float, thresh_low: float, vert_dic
     return strong_valley
 
 def get_salient_sepa_indices(MorseComplex, thresh_high: float, thresh_low: float, edge_dict: dict, 
-                             face_dict: dict, mode: str = "ridge", min_length: int=1, max_length: int=None):
+                             face_dict: dict, mode: int = 1, min_length: int=1, max_length: int=None):
     """! @brief Gets strong and weak edges based on Separatrix persistence.
     
     @details Separatrix persistence similar to Weinkauf and Günther (DOI: 10.1111/j.1467-8659.2009.01528.x)
@@ -93,7 +93,7 @@ https://www.researchgate.net/publication/227511709_Separatrix_Persistence_Extrac
     @param thresh_low  The weak threshold for edges.
     @param edge_dict Dictionary containing all edges.
     @param face_dict Dictionary containing all faces.
-    @param mode String giving operation mode: only ridges, only valleys or both.
+    @param mode Int giving operation mode: 1 for only ridges, 2 for only valleys or 3 for both.
     @param min_length Minimum length each separatrix should have: Default 1
     @param max_length Maximum length each separatrix should have: Default None.
     
@@ -108,7 +108,7 @@ https://www.researchgate.net/publication/227511709_Separatrix_Persistence_Extrac
     for pers, sepa in MorseComplex.Separatrices:
         if len(sepa.path) > min_length and len(sepa.path) < max_length:
             # add high persistence edge points
-            if mode == "ridge":
+            if mode == 1: # ridge detection
                 if pers > thresh_high:
                     add_sepa_to_edge(sepa, strong_edge, edge_dict, face_dict)
                 
@@ -116,12 +116,12 @@ https://www.researchgate.net/publication/227511709_Separatrix_Persistence_Extrac
                 elif pers <= thresh_high and pers > thresh_low:
                     add_sepa_to_edge(sepa, weak_edge, edge_dict, face_dict)
 
-            elif mode == "valley":
-                if pers < thresh_high:
+            elif mode == 2: # valley detection
+                if pers < -thresh_high:
                     add_sepa_to_edge(sepa, strong_edge, edge_dict, face_dict)
                 
                 # add weak edge points (btw low and high threshold
-                elif pers >= thresh_high and pers < thresh_low:
+                elif pers >= -thresh_high and pers < -thresh_low:
                     add_sepa_to_edge(sepa, weak_edge, edge_dict, face_dict)
     return strong_edge, weak_edge
 
