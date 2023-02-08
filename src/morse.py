@@ -63,6 +63,8 @@ import os
 import numpy as np
 import itertools
 
+from src.Algorithms.LoadData.read_ply_test import load_ply
+
 
 class Morse(Mesh):
     def __init__(self):
@@ -77,6 +79,10 @@ class Morse(Mesh):
         return merge_cluster(cluster, bd_points, threshold)
     
     ''' DATALOADING'''
+    @timed
+    def load_mesh_new(self, filename: str):
+        file_obj = open(filename, 'rb')
+        load_ply(file_obj, self.Vertices, self.Edges, self.Faces, inverted=True)
     
     @timed
     def load_mesh_ply(self, filename: str, quality_index: int, inverted: bool = False):
