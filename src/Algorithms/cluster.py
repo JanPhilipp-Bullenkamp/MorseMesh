@@ -1,5 +1,6 @@
 import random
 from .CancellationQueue import CancellationQueue
+from collections import Counter
 
 # Input: Mesh, bd_pts
 # Output: dictionary of clusters that do not cross boundaries (connected components)
@@ -203,7 +204,9 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
     # now add boundary points to unoccupied vertices
     unoccupied_vertices.update(bd_pts)
 
-    # treat boundary points if necessary (should be only bd points with only bd_points as neighbors)
+    in_between_points = set()
+    c=0
+    # treat boundary points if necessary
     while len(unoccupied_vertices) != 0:
         remaining_pt = unoccupied_vertices.pop()
         nei_labels, nei_indices = vert_dict[remaining_pt].has_neighbor_label(vert_dict)
@@ -213,12 +216,25 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
             label = nei_labels.pop()
             cluster[label].vertices.add(remaining_pt)
             vert_dict[remaining_pt].label = label
+        elif len(nei_labels) == 0:
+            unoccupied_vertices.add(remaining_pt)
+            c+=1
+        elif len(nei_labels) > 1:
+            in_between_points.add(remaining_pt)
 
-        #for comp in cluster.values():
-        #    if vert_dict[remaining_pt].neighbors.intersection(comp.vertices):
-        #        comp.vertices.add(remaining_pt)
-        #        vert_dict[remaining_pt].label = comp.seed
-        #        break
+    print("in between pts ",len(in_between_points))
+    print("had 0 labels: ",c)
+
+    while len(in_between_points) != 0:
+        remaining_pt = in_between_points.pop()
+        nei_labels, nei_indices = vert_dict[remaining_pt].has_neighbor_label(vert_dict)
+        if -1 in nei_labels:
+            nei_labels.remove(-1)
+        counts = Counter(nei_indices[:][1])
+        if counts.most_common(1)[0][1] > 1:
+            print(counts.most_common(1))
+        #for nei, nei_lb in nei_indices:
+
 
     # fill boundary points
     get_boundary_points(cluster, vert_dict)

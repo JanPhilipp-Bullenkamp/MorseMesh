@@ -23,6 +23,21 @@ color_list = [[255,0,0],  #red
               [0,0,128] #navy
              ]
 
+class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
+    def __init__(self):
+        self.AddObserver("MouseWheelForwardEvent", self.zoomIn)
+        self.AddObserver("MouseWheelBackwardEvent", self.zoomOut)
+
+    def zoomIn(self, obj, event):
+        self.GetCurrentRenderer().ResetCameraClippingRange()
+        self.GetCurrentRenderer().GetActiveCamera().Zoom(1.1)
+        self.GetInteractor().GetRenderWindow().Render()
+    
+    def zoomOut(self, obj, event):
+        self.GetCurrentRenderer().ResetCameraClippingRange()
+        self.GetCurrentRenderer().GetActiveCamera().Zoom(0.9)
+        self.GetInteractor().GetRenderWindow().Render()
+
 class Gui:
     def __init__(self):
         self.reset_data()
@@ -38,7 +53,11 @@ class Gui:
         self.vtkWidget = QVTKRenderWindowInteractor(self.window)
         self.layout.addWidget(self.vtkWidget, 0,0)
         ren = vtk.vtkRenderer()
+        ren.SetBackground(0.1, 0.1, 0.1)
         self.vtkWidget.GetRenderWindow().AddRenderer(ren)
+        interactor = self.vtkWidget.GetRenderWindow().GetInteractor()
+        style = CustomInteractorStyle()
+        interactor.SetInteractorStyle(style)
         
         # Create the menu bar and add it to the layout
         self.menu_bar = QMenuBar()
@@ -148,7 +167,7 @@ class Gui:
         file_name, _ = QFileDialog.getOpenFileName(None, "Select Ply File", "", "Ply Files (*.ply)", options=options)
         if file_name:
             self.reset_data()
-            self.data.load_mesh_ply(file_name, quality_index=3, inverted=True)
+            self.data.load_mesh_new(file_name, morse_function="quality", inverted=True)
             self.update_mesh()
 
             self.flag_loaded_data = True
@@ -178,8 +197,6 @@ class Gui:
         ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
         if ren != None:
             ren.RemoveAllViewProps()
-        #ren = vtk.vtkRenderer()
-        #self.vtkWidget.GetRenderWindow().AddRenderer(ren)
 
         mesh = vtk.vtkPolyData()
         points = vtk.vtkPoints()

@@ -211,11 +211,16 @@ class Simplex:
         indices of the vertices.
         """
         self.fun_val = []
-        for ind in self.indices:
-            self.fun_val.append(vertices_dict[ind].fun_val)
-            if vertices_dict[ind].fun_val == max(self.fun_val):
-                self.max_fun_val_index = ind
-        self.fun_val.sort(reverse=True)
+
+        tmp = {ind: vertices_dict[ind].fun_val for ind in self.indices}
+        self.max_fun_val_index = max(tmp, key=tmp.get)
+        self.fun_val = sorted(list(tmp.values()), reverse=True)
+        
+        #for ind in self.indices:
+        #    self.fun_val.append(vertices_dict[ind].fun_val)
+        #    if vertices_dict[ind].fun_val == max(self.fun_val):
+        #        self.max_fun_val_index = ind
+        #self.fun_val.sort(reverse=True)
         
     def has_face(self, other_simplex) -> bool:
         """! @brief Checks if a given other simplex is a face of this simplex.

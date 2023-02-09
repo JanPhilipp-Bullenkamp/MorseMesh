@@ -80,9 +80,16 @@ class Morse(Mesh):
     
     ''' DATALOADING'''
     @timed
-    def load_mesh_new(self, filename: str):
+    def load_mesh_new(self, filename: str, morse_function: str = "quality", inverted: bool = False):
+        self.reset()
+
         file_obj = open(filename, 'rb')
-        load_ply(file_obj, self.Vertices, self.Edges, self.Faces, inverted=True)
+        min_val, max_val = load_ply(file_obj, self.Vertices, self.Edges, self.Faces, morse_function=morse_function, inverted=inverted)
+
+        self.filename = os.path.splitext(filename)[0]
+        self.min = min_val
+        self.max = max_val
+        self.range = max_val - min_val
     
     @timed
     def load_mesh_ply(self, filename: str, quality_index: int, inverted: bool = False):

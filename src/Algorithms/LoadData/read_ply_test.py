@@ -41,10 +41,11 @@ _inverse_dtypes = {
     'f8': 'double'}
   
 def load_ply(file_obj,
-             vert_dict,
-             edge_dict,
-             face_dict,
-             inverted):
+             vert_dict : dict,
+             edge_dict: dict,
+             face_dict: dict,
+             morse_function: str = "quality",
+             inverted: bool = False):
     """
     Load a PLY file from an open file object.
     Parameters
@@ -76,7 +77,7 @@ def load_ply(file_obj,
         _ply_binary(elements, file_obj)
 
     # translate loaded PLY elements to kwargs
-    min_val, max_val = _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, inverted)
+    min_val, max_val = _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function, inverted)
 
     return min_val, max_val
 
@@ -175,6 +176,9 @@ def _ply_ascii(elements, file_obj):
     for key, values in elements.items():
         # if the element is empty ignore it
         if 'length' not in values or values['length'] == 0:
+            continue
+        if key not in ['vertex', 'face']:
+            row_pos += values['length']
             continue
         data = array[row_pos:row_pos + values['length']]
         row_pos += values['length']
@@ -413,7 +417,7 @@ def distance_to_end(file_obj):
     distance = position_end - position_current
     return distance
 
-def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, inverted):
+def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function, inverted):
     """
     Given an elements data structure, extract the keyword
     arguments that a Trimesh object constructor will expect.
@@ -434,24 +438,18 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, inverted):
     kwargs : dict
       Keyword arguments for Trimesh constructor
     """
-    # store the raw ply structure as an internal key in metadata
-    kwargs = {'metadata': {'_ply_raw': elements}}
 
     if 'vertex' in elements and elements['vertex']['length']:
-        #vertices = np.column_stack(
-        #    [elements['vertex']['data'][i]
-        #     for i in 'xyz'])
         vert_dict.update({ind: Vertex(x=elements['vertex']['data']['x'][ind],
                                 y=elements['vertex']['data']['y'][ind],
                                 z=elements['vertex']['data']['z'][ind],
                                 quality=elements['vertex']['data']['quality'][ind],
                                 index=ind) for ind in range(elements['vertex']['length'])})
-        min_val, max_val = make_discrete_morse_function(vert_dict=vert_dict, function="quality", inverted=inverted)
+        min_val, max_val = make_discrete_morse_function(vert_dict=vert_dict, function=morse_function, inverted=inverted)
     else:
         raise ValueError('No vertices in the plyfile!')
 
     if 'face' in elements and elements['face']['length']:
-        face_data = elements['face']['data']
         face_dict.update({face_ind: Simplex(indices=set(elements['face']['data'][face_ind][0][1]),index=face_ind) 
                             for face_ind in range(elements['face']['length'])})
     else:
@@ -460,215 +458,42 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, inverted):
     eindex = 0
     unique_edges = set()
     for findex, face in face_dict.items():
-        
-        for i in range(3):
-            tmp = list(face.indices)
-            tmp_ind = tmp.pop(i)
-            vert_dict[tmp_ind].star["F"].append(findex)
+        for ind in face.indices:
+            subset = face.indices.copy()
+            subset.remove(ind)
+            vert_dict[ind].star["F"].append(findex)
             
-            vert_dict[tmp_ind].neighbors.add(tmp[0])
-            vert_dict[tmp_ind].neighbors.add(tmp[1])
+            vert_dict[ind].neighbors.update(subset)
             
-            if set(tmp) not in unique_edges:
-                edge = Simplex(indices=set(tmp), index=eindex)
+            if subset not in unique_edges:
+                edge = Simplex(indices=subset, index=eindex)
                 
                 edge_dict[eindex] = edge
-                for tmp_ed_ind in tmp:
+                for tmp_ed_ind in subset:
                     vert_dict[tmp_ed_ind].star["E"].append(eindex)
-                
                 eindex+=1
                 
-                unique_edges.add(frozenset(tmp))
+                unique_edges.add(frozenset(subset))
 
     set_edge_and_face_fun_vals(vert_dict, edge_dict, face_dict)
     
     return min_val, max_val
 
-def is_shape(obj, shape, allow_zeros=False):
-    """
-    Compare the shape of a numpy.ndarray to a target shape,
-    with any value less than zero being considered a wildcard
-    Note that if a list-like object is passed that is not a numpy
-    array, this function will not convert it and will return False.
-    Parameters
-    ------------
-    obj :   np.ndarray
-      Array to check the shape on
-    shape : list or tuple
-      Any negative term will be considered a wildcard
-      Any tuple term will be evaluated as an OR
-    allow_zeros: bool
-      if False, zeros do not match negatives in shape
-    Returns
-    ---------
-    shape_ok : bool
-      True if shape of obj matches query shape
-    Examples
-    ------------------------
-    In [1]: a = np.random.random((100, 3))
-    In [2]: a.shape
-    Out[2]: (100, 3)
-    In [3]: trimesh.util.is_shape(a, (-1, 3))
-    Out[3]: True
-    In [4]: trimesh.util.is_shape(a, (-1, 3, 5))
-    Out[4]: False
-    In [5]: trimesh.util.is_shape(a, (100, -1))
-    Out[5]: True
-    In [6]: trimesh.util.is_shape(a, (-1, (3, 4)))
-    Out[6]: True
-    In [7]: trimesh.util.is_shape(a, (-1, (4, 5)))
-    Out[7]: False
-    """
-
-    # if the obj.shape is different length than
-    # the goal shape it means they have different number
-    # of dimensions and thus the obj is not the query shape
-    if (not hasattr(obj, 'shape') or
-            len(obj.shape) != len(shape)):
-        return False
-
-    # empty lists with any flexible dimensions match
-    if len(obj) == 0 and -1 in shape:
-        return True
-
-    # loop through each integer of the two shapes
-    # multiple values are sequences
-    # wildcards are less than zero (i.e. -1)
-    for i, target in zip(obj.shape, shape):
-        # check if current field has multiple acceptable values
-        if is_sequence(target):
-            if i in target:
-                # obj shape is in the accepted values
-                continue
-            else:
-                return False
-
-        # check if current field is a wildcard
-        if target < 0:
-            if i == 0 and not allow_zeros:
-                # if a dimension is 0, we don't allow
-                # that to match to a wildcard
-                # it would have to be explicitly called out as 0
-                return False
-            else:
-                continue
-        # since we have a single target and a single value,
-        # if they are not equal we have an answer
-        if target != i:
-            return False
-
-    # since none of the checks failed the obj.shape
-    # matches the pattern
-    return True
-
-def is_sequence(obj):
-    """
-    Check if an object is a sequence or not.
-    Parameters
-    -------------
-    obj : object
-      Any object type to be checked
-    Returns
-    -------------
-    is_sequence : bool
-        True if object is sequence
-    """
-    seq = (not hasattr(obj, "strip") and
-           hasattr(obj, "__getitem__") or
-           hasattr(obj, "__iter__"))
-
-    # check to make sure it is not a set, string, or dictionary
-    seq = seq and all(not isinstance(obj, i) for i in (dict,
-                                                       set,
-                                                       str))
-
-    # PointCloud objects can look like an array but are not
-    seq = seq and type(obj).__name__ not in ['PointCloud']
-
-    # numpy sometimes returns objects that are single float64 values
-    # but sure look like sequences, so we check the shape
-    if hasattr(obj, 'shape'):
-        seq = seq and obj.shape != ()
-
-    return seq
-
-def triangulate_quads(quads, dtype=np.int64):
-    """
-    Given an array of quad faces return them as triangle faces,
-    also handles pure triangles and mixed triangles and quads.
-    Parameters
-    -----------
-    quads: (n, 4) int
-      Vertex indices of quad faces.
-    Returns
-    -----------
-    faces : (m, 3) int
-      Vertex indices of triangular faces.c
-    """
-
-    if len(quads) == 0:
-        return np.zeros(0, dtype=dtype)
-
-    tri = np.array([i for i in quads if len(i) == 3])
-
-    # combine triangulated quads with triangles
-    return np.vstack(tri).astype(dtype)
-
-def vstack_empty(tup):
-    """
-    A thin wrapper for numpy.vstack that ignores empty lists.
-    Parameters
-    ------------
-    tup : tuple or list of arrays
-      With the same number of columns
-    Returns
-    ------------
-    stacked : (n, d) array
-      With same number of columns as
-      constituent arrays.
-    """
-    # filter out empty arrays
-    stackable = [i for i in tup if len(i) > 0]
-    # if we only have one array just return it
-    if len(stackable) == 1:
-        return np.asanyarray(stackable[0])
-    # if we have nothing return an empty numpy array
-    elif len(stackable) == 0:
-        return np.array([])
-    # otherwise just use vstack as normal
-    return np.vstack(stackable)
-
 def make_discrete_morse_function(vert_dict: dict, function: str = "quality", inverted: bool = False):
     # load fun_vals:
+    attr_map = {
+        "quality": "quality",
+        "x": "x",
+        "y": "y",
+        "z": "z"
+    }
+    attr = attr_map[function]
     vals=[]
-    if function == "quality":
-        for vert in vert_dict.values():
-            if inverted:
-                vert.fun_val = -vert.quality
-            else:
-                vert.fun_val = vert.quality
-            vals.append(vert.fun_val)
-    if function == "x":
-        for vert in vert_dict.values():
-            if inverted:
-                vert.fun_val = -vert.x
-            else:
-                vert.fun_val = vert.x
-            vals.append(vert.fun_val)
-    if function == "y":
-        for vert in vert_dict.values():
-            if inverted:
-                vert.fun_val = -vert.y
-            else:
-                vert.fun_val = vert.y
-            vals.append(vert.fun_val)
-    if function == "z":
-        for vert in vert_dict.values():
-            if inverted:
-                vert.fun_val = -vert.z
-            else:
-                vert.fun_val = vert.z
-            vals.append(vert.fun_val)
+    for vert in vert_dict.values():
+        vert.fun_val = getattr(vert, attr)
+        if inverted:
+            vert.fun_val = -vert.fun_val
+        vals.append(vert.fun_val)
 
     # make unique function values
     counts = collections.Counter(vals)
