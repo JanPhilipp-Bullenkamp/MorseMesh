@@ -102,6 +102,12 @@ class Gui:
         self.cluster_action = self.visualization_menu.addAction("Cluster")
         self.cluster_action.triggered.connect(lambda: self.cluster())
 
+        self.cluster_boundary_action = self.visualization_menu.addAction("Cluster boundary")
+        self.cluster_boundary_action.triggered.connect(lambda: self.cluster_boundary())
+
+        self.cluster_boundary_ridge_intersection_action = self.visualization_menu.addAction("Cluster boundary ridge intersection")
+        self.cluster_boundary_ridge_intersection_action.triggered.connect(lambda: self.cluster_boundary_ridge_intersection())
+
         self.merge_cluster_action = self.visualization_menu.addAction("Merge Cluster")
         self.merge_cluster_action.triggered.connect(lambda: self.merge_cluster())
 
@@ -250,7 +256,7 @@ class Gui:
         mapper.Update()
         self.vtkWidget.GetRenderWindow().Render()
 
-    def update_mesh_color_segmentation(self, label_dict: dict):
+    def update_mesh_color_segmentation(self, label_dict: dict, partial: bool = False):
         # Get the renderer and mesh actor
         ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
         actor = ren.GetActors().GetLastActor()
@@ -264,6 +270,13 @@ class Gui:
         color_array = vtk.vtkUnsignedCharArray()
         color_array.SetNumberOfComponents(3)
         color_array.SetName("Colors")
+
+        if partial: # write all points in white and update color points afterwards
+            number_of_points = mesh.GetNumberOfPoints()
+            white = (255, 255, 255)
+            for i in range(number_of_points):
+                color_array.InsertTypedTuple(i, white)
+
         for label, cell in label_dict.items():
             cell_color = color_list[label%len(color_list)]
             for ind in cell.vertices:
@@ -274,12 +287,26 @@ class Gui:
         mapper.Update()
         self.vtkWidget.GetRenderWindow().Render()
 
-    def color_segmentation(self):
-        self.update_mesh_color_segmentation(self.current_segmentation)
+    def color_segmentation(self, partial: bool = False):
+        self.update_mesh_color_segmentation(self.current_segmentation, partial=partial)
         
     def cluster(self):
         self.current_segmentation = self.data.seed_cluster_mesh(self.color_points, self.cluster_seed_number)
         self.color_segmentation()
+
+    def cluster_boundary(self):
+        cluster_dict = self.data.seed_cluster_mesh(self.color_points, self.cluster_seed_number)
+        for comp in cluster_dict.values():
+            comp.vertices = comp.boundary
+        self.current_segmentation = cluster_dict
+        self.color_segmentation(partial=True)
+
+    def cluster_boundary_ridge_intersection(self):
+        cluster_dict = self.data.seed_cluster_mesh(self.color_points, self.cluster_seed_number)
+        for comp in cluster_dict.values():
+            comp.vertices = comp.boundary.intersection(self.color_points)
+        self.current_segmentation = cluster_dict
+        self.color_segmentation(partial=True)
 
     def merge_cluster(self):
         clust  = self.data.seed_cluster_mesh(self.color_points, self.cluster_seed_number)

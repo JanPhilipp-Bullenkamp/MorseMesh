@@ -1,6 +1,7 @@
 import random
 from .CancellationQueue import CancellationQueue
 from collections import Counter
+import numpy as np
 
 # Input: Mesh, bd_pts
 # Output: dictionary of clusters that do not cross boundaries (connected components)
@@ -230,11 +231,10 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
         nei_labels, nei_indices = vert_dict[remaining_pt].has_neighbor_label(vert_dict)
         if -1 in nei_labels:
             nei_labels.remove(-1)
-        counts = Counter(nei_indices[:][1])
-        if counts.most_common(1)[0][1] > 1:
-            print(counts.most_common(1))
-        #for nei, nei_lb in nei_indices:
-
+        counts = Counter(np.array(nei_indices)[:,1])
+        label = counts.most_common(1)[0][0]
+        cluster[label].vertices.add(remaining_pt)
+        vert_dict[remaining_pt].label = label
 
     # fill boundary points
     get_boundary_points(cluster, vert_dict)
