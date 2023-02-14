@@ -13,7 +13,7 @@
 from collections import Counter
 from .anisotropic_diffusion import compute_anisotropic_diffusion
 
-def read_funvals(filename: str, vertices_dict: dict, edges_dict: dict, faces_dict: dict):
+def read_funvals(filename: str, vertices_dict: dict, edges_dict: dict, faces_dict: dict, operation: str = "max"):
     """! @brief Reads a feature vector file and uses the max of each vector as new Morse function values.
     
     @details CURRENTLY JUST SUPPORTS THE MAX OF A FEATURE VECTOR...... might be updated in future to also
@@ -26,6 +26,33 @@ def read_funvals(filename: str, vertices_dict: dict, edges_dict: dict, faces_dic
     
     @return Despite updating the dictionaries, returns the minimum and maximum function value as min, max.
     """
+    def max_arr(arr):
+        return max(arr)
+    def min_arr(arr):
+        return min(arr)
+    def maxabs_arr(arr):
+        abs_arr = [abs(x) for x in arr]
+        index = abs_arr.index(max(abs_arr))
+        return (arr[index]/abs(arr[index]))*arr[index] # sign times value
+    def minabs_arr(arr):
+        abs_arr = [abs(x) for x in arr]
+        index = abs_arr.index(min(abs_arr))
+        return (arr[index]/abs(arr[index]))*arr[index] # sign times value
+
+    func_dict = {
+        "max": max_arr,
+        "min": min_arr,
+        "maxabs": maxabs_arr,
+        "minabs": minabs_arr
+    }
+
+    try:
+        function = func_dict[operation]
+    except KeyError:
+        import warnings
+        warnings.warn("Chosen operation is not defined! Gonna use max now instead...")
+        function = func_dict["max"]
+
     vals = []
     with open(filename, "r") as f:
         for line in f:
@@ -36,8 +63,8 @@ def read_funvals(filename: str, vertices_dict: dict, edges_dict: dict, faces_dic
                 feature_vec = [float(x) for x in line.split()[1:]]
                 
                 # possible change calculation here????
-                vertices_dict[ind].fun_val = max(feature_vec)
-                vals.append(max(feature_vec))
+                vertices_dict[ind].fun_val = function(feature_vec)
+                vals.append(function(feature_vec))
     
     min_funval, max_funval = make_vert_funvals_unique(vertices_dict, vals)        
     update_edges_and_faces_funvals(vertices_dict, edges_dict, faces_dict)

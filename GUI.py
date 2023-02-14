@@ -75,6 +75,9 @@ class Gui:
         self.open_file_action = self.file_menu.addAction("Open")
         self.open_file_action.triggered.connect(lambda: self.browse_file())
 
+        self.open_feature_vec_file_action = self.file_menu.addAction("Load feature vector file")
+        self.open_feature_vec_file_action.triggered.connect(lambda: self.browse_feature_vector_file())
+
         self.save_edges_ply_action = self.file_menu.addAction("Save Edges ply")
         self.save_edges_ply_action.triggered.connect(lambda: self.save_edges_ply_file())
 
@@ -179,7 +182,13 @@ class Gui:
             self.flag_loaded_data = True
             self.flag_morse_computations = False
             self.update_buttons()
-            #self.reset_camera_position()
+
+    def browse_feature_vector_file(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        file_name, _ = QFileDialog.getOpenFileName(None, "Select feature vector File", "", "Mat Files (*.mat)", options=options)
+        if file_name:
+            self.data.load_new_funvals(file_name, operation="maxabs")
 
     def save_edges_ply_file(self):
         options = QFileDialog.Options()
@@ -356,7 +365,7 @@ class Gui:
         self.show_slider()
 
     def compute_perona_malik(self):
-        self.data.apply_Perona_Malik(15,0.3,0.3)
+        self.data.apply_Perona_Malik(7,0.3,0.3)
         self.color_funvals()
 
     def compute_persistent_MorseCells(self):

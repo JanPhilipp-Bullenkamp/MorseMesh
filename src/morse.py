@@ -109,11 +109,12 @@ class Morse(Mesh):
         self.range = max_val - min_val
         
     @timed    
-    def load_new_funvals(self, filename: str):
+    def load_new_funvals(self, filename: str, operation: str = "max"):
         """! @brief Loads new function values into the Mesh. Currently expects a feature vector file from Gigamesh i think.
         @param filename The location and filename of the feature vector file that should give new Morse function values.
+        @param operation Optionally change the function on the feature vector: currently options are max, min, maxabs and minabs. Default is max.
         """
-        min_val, max_val = read_funvals(filename, self.Vertices, self.Edges, self.Faces)
+        min_val, max_val = read_funvals(filename, self.Vertices, self.Edges, self.Faces, operation=operation)
         self.min = min_val
         self.max = max_val
         self.range = max_val - min_val

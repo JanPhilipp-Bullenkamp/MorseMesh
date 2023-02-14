@@ -85,8 +85,6 @@ class Vertex:
         self.index = index #int
         
         self.star = {"F": [], "E": []}
-        #self.star["F"] = [] #list
-        #self.star["E"] = [] #list
         self.neighbors = set() #set
         
         # needed for Morse Cells
