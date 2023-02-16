@@ -107,6 +107,15 @@ class Vertex:
             grad += (self.fun_val - vert_dict[vert_ind].fun_val)/dist
         return grad/len(self.neighbors)
 
+    def average_gradient_on_star(self, vert_dict: dict, face_dict: dict):
+        """! @brief Average Gradient on Star method from paper Gradient Field Estimation
+                    on Triangle Meshes 2018 Mancinelli et al.
+        """
+        star_area = 0
+        for f_index in self.star["F"]:
+            f_area = face_dict[f_index].area(vert_dict)
+
+
     def get_n_neighborhood(self, vert_dict: dict, n: int) -> set:
         n_rings = {}
         n_rings[0] = self.neighbors
@@ -124,6 +133,9 @@ class Vertex:
             n_neighborhood.update(n_rings[i])
 
         return n_neighborhood
+
+    def coordinates(self):
+        return [self.x, self.y, self.z]
 
     def __str__(self) -> str:
         """! @brief Retrieves the index of the vertex.
@@ -234,6 +246,15 @@ class Simplex:
             return True
         else:
             return False
+
+    def area(self, vert_dict: dict):
+        if len(self.indices) != 3:
+            raise TypeError("This is not a Triangle-Simplex. Area only defined for triangles atm!")
+        vectors = np.diff([vert_dict[ind].coordinates() for ind in self.indices], axis = 0)
+        cross = np.cross(vectors[0], vectors[1])
+        area = (np.sum(cross**2)**.5) * .5
+        return area
+        
        
     def get_max_fun_val_index(self) -> int:
         return self.max_fun_val_index

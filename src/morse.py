@@ -33,6 +33,7 @@
 
 # import stuff
 from src.Algorithms.LoadData.read_ply import read_ply
+from src.Algorithms.LoadData.anisotropic_diffusion import smooth_function_values
 from src.Algorithms.LoadData.read_or_process_funvals import read_funvals, apply_Perona_Malik_diffusion
 from src.Algorithms.ProcessLowerStars import ProcessLowerStars
 from src.Algorithms.ExtractMorseComplex import ExtractMorseComplex
@@ -119,6 +120,10 @@ class Morse(Mesh):
         self.max = max_val
         self.range = max_val - min_val
         self.reset_morse()
+
+    @timed
+    def smooth_fun_vals(self, n_neighboorhood: int = 1):
+        smooth_function_values(self.Vertices, n_neighboorhood)
 
     @timed
     def apply_Perona_Malik(self, iterations: int, lamb: float, k: float):

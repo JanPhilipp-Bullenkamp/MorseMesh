@@ -9,21 +9,32 @@ def compute_gradient(vert_dict: dict) -> dict:
 def smooth_gradient(gradient: dict, vert_dict: dict, lamb: float):
     smoothed_gradient = {}
     for ind, grad in gradient.items():
-        nei_grad = 0
         neis = vert_dict[ind].get_n_neighborhood(vert_dict, 3)
-        for nei_ind in neis: #vert_dict[ind].neighbors:
-            nei_grad += gradient[nei_ind]
-        nei_grad = nei_grad/len(neis)
-        smoothed_gradient[ind] = grad + lamb * (nei_grad - grad)
+        nei_grad = np.mean([gradient[nei_ind] for nei_ind in neis])
+        smoothed_gradient[ind] = nei_grad #grad + lamb * (nei_grad - grad)
     return smoothed_gradient
 
+def smooth_function_values(vert_dict: dict, n_neighborhood: int = 1):
+    smoothed_fun_vals = {}
+    for ind, vert in vert_dict.items():
+        if n_neighborhood > 1:
+            neis = vert.get_n_neighborhood(vert_dict, n_neighborhood)
+        elif n_neighborhood == 1:
+            neis = vert.neighbors
+        else:
+            raise ValueError('n_neighborhood should be positive integer (1 or larger)')
+        mean_val = np.mean([vert_dict[nei].fun_val for nei in neis])
+        smoothed_fun_vals[ind] = mean_val
+    # update fun_vals
+    for ind, vert in vert_dict.items():
+        vert.fun_val = smoothed_fun_vals[ind]
 
 
 def diffusivity_coeff(grad, k, option="fraction"):
     if option == "fraction":
         c = 1/(1+(np.abs(grad)/k)**2)
     elif option == "exp":
-        c = np.exp(-np.abs(grad)**2 / (2*k**2))
+        c = np.exp(-(np.abs(grad)/k)**2)
     return c
 
 def compute_anisotropic_diffusion(vert_dict: dict, iterations: int, lamb: float, k: float):
@@ -40,15 +51,13 @@ def compute_anisotropic_diffusion(vert_dict: dict, iterations: int, lamb: float,
     for i in range(iterations):
         gradient = compute_gradient(vert_dict)
 
-        smoothed_gradient = smooth_gradient(gradient, vert_dict, 0.5)
+        #smoothed_gradient = smooth_gradient(gradient, vert_dict, 0.5)
 
         print("Iteration: ",i, " Funval: ",vert_dict[10].fun_val)
-        if len(smoothed_gradient) != len(vert_dict):
+        if len(gradient) != len(vert_dict):
             raise AssertionError("Gradient and Vertices dictionaries should have same length!")
         
         for v_ind, vert in vert_dict.items():
-            dt = lamb * (diffusivity_coeff(smoothed_gradient[v_ind], k, option="fraction") * smoothed_gradient[v_ind])
-
-            vert.fun_val += dt
+            vert.fun_val += lamb * (diffusivity_coeff(gradient[v_ind], k, option="exp") * gradient[v_ind])
 
     return vert_dict

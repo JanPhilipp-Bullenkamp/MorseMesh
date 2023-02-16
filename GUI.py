@@ -88,6 +88,9 @@ class Gui:
         self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")
         self.compute_Morse_action.triggered.connect(lambda: self.compute_Morse())
 
+        self.compute_smoothing_action = self.processing_menu.addAction("Compute smoothing")
+        self.compute_smoothing_action.triggered.connect(lambda: self.smoothing())
+
         self.compute_perona_malik_action = self.processing_menu.addAction("Compute Perona Malik")
         self.compute_perona_malik_action.triggered.connect(lambda: self.compute_perona_malik())
 
@@ -366,6 +369,10 @@ class Gui:
 
     def compute_perona_malik(self):
         self.data.apply_Perona_Malik(7,0.3,0.3)
+        self.color_funvals()
+
+    def smoothing(self):
+        self.data.smooth_fun_vals(3)
         self.color_funvals()
 
     def compute_persistent_MorseCells(self):
