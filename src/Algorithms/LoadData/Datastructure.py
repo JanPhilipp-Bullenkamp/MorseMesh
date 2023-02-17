@@ -112,9 +112,15 @@ class Vertex:
                     on Triangle Meshes 2018 Mancinelli et al.
         """
         star_area = 0
+        sum_grads = 0
         for f_index in self.star["F"]:
             f_area = face_dict[f_index].area(vert_dict)
+            star_area += f_area
+            sum_grads += f_area * face_dict[f_index].face_gradient(vert_dict, f_area)
+            print("face_grad: ",face_dict[f_index].face_gradient(vert_dict, f_area))
 
+        print("average_gradient_star: ",sum_grads/star_area)
+        return sum_grads/star_area
 
     def get_n_neighborhood(self, vert_dict: dict, n: int) -> set:
         n_rings = {}
@@ -199,7 +205,7 @@ class Simplex:
     ## @var index
     # The index of this simplex (edge-index or face-index)
     
-    __slots__ = ("indices", "fun_val", "index", "max_fun_val_index")
+    __slots__ = ("indices", "fun_val", "index", "max_fun_val_index", "area")
     
     def __init__(self, indices: set = None, index: int = None):
         """! The Constructor of a Simplex
@@ -211,6 +217,8 @@ class Simplex:
         self.max_fun_val_index = None
 
         self.index = index #int
+
+        self.area = None
     
     def set_fun_val(self, vertices_dict: dict):
         """! @brief Sets the function value of the simplex.
@@ -247,13 +255,34 @@ class Simplex:
         else:
             return False
 
-    def area(self, vert_dict: dict):
+    def compute_area(self, vert_dict: dict):
         if len(self.indices) != 3:
             raise TypeError("This is not a Triangle-Simplex. Area only defined for triangles atm!")
         vectors = np.diff([vert_dict[ind].coordinates() for ind in self.indices], axis = 0)
         cross = np.cross(vectors[0], vectors[1])
         area = (np.sum(cross**2)**.5) * .5
         return area
+
+    def face_gradient(self, vert_dict: dict, area: float = None):
+        """! @brief bla bla
+
+        @details If the face has vertices v_i, v_j, v_k with function values f_i, f_j, f_k and Area A_f, the gradient of th face
+        is computed as 
+            grad(face) = (f_j - f_i) x (v_i - v_k)^rot/2A_f + (f_k - f_i) x (v_j - v_i)^rot/2A_f 
+        where ^rot means the edge is rotated by 90 degrees 
+        \TODO which direction 90 deg??? currently not done...
+        """
+        if len(self.indices) != 3:
+            raise TypeError("This is not a Triangle-Simplex. face_gradient only defined for triangles atm!")
+        if area == None:
+            area = self.compute_area(vert_dict)
+
+        v_data = [[vert_dict[ind].coordinates(), ind, vert_dict[ind].fun_val] for ind in self.indices]
+
+        vectors = np.diff([v[0] for v in v_data], axis = 0)
+        fun_diffs = np.diff([v[2] for v in v_data], axis=0)
+        grad_face = fun_diffs[1]/(2 * area) * vectors[0] + (-1) * fun_diffs[0]/(2 * area) * vectors[1]
+        return grad_face
         
        
     def get_max_fun_val_index(self) -> int:

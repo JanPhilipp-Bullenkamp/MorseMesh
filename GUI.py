@@ -368,7 +368,7 @@ class Gui:
         self.show_slider()
 
     def compute_perona_malik(self):
-        self.data.apply_Perona_Malik(7,0.3,0.3)
+        self.data.apply_Perona_Malik(1,0.6,0.2)
         self.color_funvals()
 
     def smoothing(self):

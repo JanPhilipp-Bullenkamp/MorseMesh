@@ -1,9 +1,9 @@
 import numpy as np
 
-def compute_gradient(vert_dict: dict) -> dict:
+def compute_gradient(vert_dict: dict, face_dict: dict) -> dict:
     gradient = {}
     for ind, vert in vert_dict.items():
-        gradient[ind] = vert.compute_gradient(vert_dict)
+        gradient[ind] = vert.average_gradient_on_star(vert_dict, face_dict)
     return gradient
 
 def smooth_gradient(gradient: dict, vert_dict: dict, lamb: float):
@@ -37,7 +37,7 @@ def diffusivity_coeff(grad, k, option="fraction"):
         c = np.exp(-(np.abs(grad)/k)**2)
     return c
 
-def compute_anisotropic_diffusion(vert_dict: dict, iterations: int, lamb: float, k: float):
+def compute_anisotropic_diffusion(vert_dict: dict, face_dict: dict, iterations: int, lamb: float, k: float):
     """! @brief Calculates Perona-Malik anisostropic diffusion on the vertices given.
     @details Explain ....
 
@@ -49,7 +49,7 @@ def compute_anisotropic_diffusion(vert_dict: dict, iterations: int, lamb: float,
     @return vert_dict The smoothed vertices dictionary.
     """
     for i in range(iterations):
-        gradient = compute_gradient(vert_dict)
+        gradient = compute_gradient(vert_dict, face_dict)
 
         #smoothed_gradient = smooth_gradient(gradient, vert_dict, 0.5)
 
@@ -58,6 +58,6 @@ def compute_anisotropic_diffusion(vert_dict: dict, iterations: int, lamb: float,
             raise AssertionError("Gradient and Vertices dictionaries should have same length!")
         
         for v_ind, vert in vert_dict.items():
-            vert.fun_val += lamb * (diffusivity_coeff(gradient[v_ind], k, option="exp") * gradient[v_ind])
+            vert.fun_val += lamb * np.linalg.norm(diffusivity_coeff(gradient[v_ind], k, option="exp"))
 
     return vert_dict
