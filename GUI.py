@@ -3,7 +3,7 @@ import numpy as np
 import vtk
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QSlider, QVBoxLayout, QMenuBar, QMenu, QLabel, QPushButton, QGroupBox, QLineEdit, QHBoxLayout, QGridLayout
+from PyQt5.QtWidgets import QFileDialog, QSlider, QVBoxLayout, QMenuBar, QMenu, QLabel, QPushButton, QGroupBox, QLineEdit, QHBoxLayout, QGridLayout, QCheckBox
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from src.morse import Morse
@@ -38,6 +38,41 @@ class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
         self.GetCurrentRenderer().GetActiveCamera().Zoom(0.9)
         self.GetInteractor().GetRenderWindow().Render()
 
+class MenuBar:
+    def __init__(self, layout):
+        self.menu_bar = QMenuBar()
+        layout.setMenuBar(self.menu_bar)
+
+        # Create the file, processing and visualization menus and add to the menu bar
+        self.file_menu = QMenu("File")
+        self.menu_bar.addMenu(self.file_menu)
+        self.processing_menu = QMenu("Processing")
+        self.menu_bar.addMenu(self.processing_menu)
+        self.visualization_menu = QMenu("Visualization")
+        self.menu_bar.addMenu(self.visualization_menu)
+
+        # Create the open file action and add it to the file menu
+        self.open_file_action = self.file_menu.addAction("Open")
+        self.open_feature_vec_file_action = self.file_menu.addAction("Load feature vector file")
+        self.save_edges_ply_action = self.file_menu.addAction("Save Edges ply")
+        self.save_edges_ply_action = self.file_menu.addAction("Save current Segmentation txt")
+
+        # Create the compute Morse action and add it to the processing menu
+        self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")
+        self.compute_smoothing_action = self.processing_menu.addAction("Compute smoothing")
+        self.compute_perona_malik_action = self.processing_menu.addAction("Compute Perona Malik")
+
+        # Create the show sliders action and add it to the visualization menu
+        self.show_sliders_action = self.visualization_menu.addAction("Show Sliders")
+        self.morsecells_action = self.visualization_menu.addAction("MorseCells persistence")
+        self.segment_action = self.visualization_menu.addAction("Segmentation")
+        self.cluster_action = self.visualization_menu.addAction("Cluster")
+        self.cluster_boundary_action = self.visualization_menu.addAction("Cluster boundary")
+        self.cluster_boundary_ridge_intersection_action = self.visualization_menu.addAction("Cluster boundary ridge intersection")
+        self.merge_cluster_action = self.visualization_menu.addAction("Merge Cluster")
+        self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
+        self.show_funvals_action = self.visualization_menu.addAction("Show funvals")
+
 class Gui:
     def __init__(self):
         self.reset_data()
@@ -60,68 +95,8 @@ class Gui:
         interactor.SetInteractorStyle(style)
         
         # Create the menu bar and add it to the layout
-        self.menu_bar = QMenuBar()
-        self.layout.setMenuBar(self.menu_bar)
-
-        # Create the file, processing and visualization menus and add to the menu bar
-        self.file_menu = QMenu("File")
-        self.menu_bar.addMenu(self.file_menu)
-        self.processing_menu = QMenu("Processing")
-        self.menu_bar.addMenu(self.processing_menu)
-        self.visualization_menu = QMenu("Visualization")
-        self.menu_bar.addMenu(self.visualization_menu)
-
-        # Create the open file action and add it to the file menu
-        self.open_file_action = self.file_menu.addAction("Open")
-        self.open_file_action.triggered.connect(lambda: self.browse_file())
-
-        self.open_feature_vec_file_action = self.file_menu.addAction("Load feature vector file")
-        self.open_feature_vec_file_action.triggered.connect(lambda: self.browse_feature_vector_file())
-
-        self.save_edges_ply_action = self.file_menu.addAction("Save Edges ply")
-        self.save_edges_ply_action.triggered.connect(lambda: self.save_edges_ply_file())
-
-        self.save_edges_ply_action = self.file_menu.addAction("Save current Segmentation txt")
-        self.save_edges_ply_action.triggered.connect(lambda: self.save_segmentation_result())
-
-        # Create the compute Morse action and add it to the processing menu
-        self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")
-        self.compute_Morse_action.triggered.connect(lambda: self.compute_Morse())
-
-        self.compute_smoothing_action = self.processing_menu.addAction("Compute smoothing")
-        self.compute_smoothing_action.triggered.connect(lambda: self.smoothing())
-
-        self.compute_perona_malik_action = self.processing_menu.addAction("Compute Perona Malik")
-        self.compute_perona_malik_action.triggered.connect(lambda: self.compute_perona_malik())
-
-        # Create the show sliders action and add it to the visualization menu
-        self.show_sliders_action = self.visualization_menu.addAction("Show Sliders")
-        self.show_sliders_action.triggered.connect(lambda: self.show_slider())
-
-        # Create the segment action and add it to the visualization menu
-        self.morsecells_action = self.visualization_menu.addAction("MorseCells persistence")
-        self.morsecells_action.triggered.connect(lambda: self.compute_persistent_MorseCells())
-
-        self.segment_action = self.visualization_menu.addAction("Segmentation")
-        self.segment_action.triggered.connect(lambda: self.compute_Segmentation())
-
-        self.cluster_action = self.visualization_menu.addAction("Cluster")
-        self.cluster_action.triggered.connect(lambda: self.cluster())
-
-        self.cluster_boundary_action = self.visualization_menu.addAction("Cluster boundary")
-        self.cluster_boundary_action.triggered.connect(lambda: self.cluster_boundary())
-
-        self.cluster_boundary_ridge_intersection_action = self.visualization_menu.addAction("Cluster boundary ridge intersection")
-        self.cluster_boundary_ridge_intersection_action.triggered.connect(lambda: self.cluster_boundary_ridge_intersection())
-
-        self.merge_cluster_action = self.visualization_menu.addAction("Merge Cluster")
-        self.merge_cluster_action.triggered.connect(lambda: self.merge_cluster())
-
-        self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
-        self.segment_new_action.triggered.connect(lambda: self.compute_Segmentation_new())
-
-        self.show_funvals_action = self.visualization_menu.addAction("Show funvals")
-        self.show_funvals_action.triggered.connect(lambda: self.color_funvals())
+        self.menu_bar = MenuBar(self.layout)
+        self.connect_functions_to_menu_buttons()
 
         self.update_buttons()
         self.add_param_sidebar()
@@ -165,6 +140,27 @@ class Gui:
         self.current_segmentation_params = None
         self.center = [0,0,0]
 
+    def connect_functions_to_menu_buttons(self):
+        self.menu_bar.open_file_action.triggered.connect(self.browse_file)
+        self.menu_bar.open_feature_vec_file_action.triggered.connect(self.browse_feature_vector_file)
+        self.menu_bar.save_edges_ply_action.triggered.connect(self.save_edges_ply_file)
+        self.menu_bar.save_edges_ply_action.triggered.connect(self.save_segmentation_result)
+
+        # Create the compute Morse action and add it to the processing menu
+        self.menu_bar.compute_Morse_action.triggered.connect(self.compute_Morse)
+        self.menu_bar.compute_smoothing_action.triggered.connect(self.smoothing)
+        self.menu_bar.compute_perona_malik_action.triggered.connect(self.compute_perona_malik)
+
+        # Create the show sliders action and add it to the visualization menu
+        self.menu_bar.show_sliders_action.triggered.connect(self.show_slider)
+        self.menu_bar.morsecells_action.triggered.connect(self.compute_persistent_MorseCells)
+        self.menu_bar.segment_action.triggered.connect(self.compute_Segmentation)
+        self.menu_bar.cluster_action.triggered.connect(self.cluster)
+        self.menu_bar.cluster_boundary_action.triggered.connect(self.cluster_boundary)
+        self.menu_bar.cluster_boundary_ridge_intersection_action.triggered.connect(self.cluster_boundary_ridge_intersection)
+        self.menu_bar.merge_cluster_action.triggered.connect(self.merge_cluster)
+        self.menu_bar.segment_new_action.triggered.connect(self.compute_Segmentation_new)
+        self.menu_bar.show_funvals_action.triggered.connect(self.color_funvals)
 
     def update_buttons(self):
         self.show_sliders_action.setEnabled(True if self.flag_morse_computations and not self.flag_sliders_shown else False)
@@ -522,6 +518,16 @@ class Gui:
         self.param9_input.setText(str(self.max_length))
         self.param9_input.setMaximumSize(75, 25)
 
+        # create three checkable boxes
+        self.box1 = QCheckBox("Ridges")
+        self.box2 = QCheckBox("Valleys")
+        self.box3 = QCheckBox("Both")
+
+        # connect the stateChanged signal of the boxes to a slot
+        self.box1.stateChanged.connect(self.check_boxes)
+        self.box2.stateChanged.connect(self.check_boxes)
+        self.box3.stateChanged.connect(self.check_boxes)
+
         # Add the input widgets to the sidebar layout
         self.sidebar_layout.addWidget(QLabel("Persistence"))
         self.sidebar_layout.addWidget(self.param1_input)
@@ -543,6 +549,11 @@ class Gui:
         self.sidebar_layout.addWidget(QLabel("Max sepa length"))
         self.sidebar_layout.addWidget(self.param9_input)
 
+        # add the boxes to the layout
+        self.sidebar_layout.addWidget(self.box1)
+        self.sidebar_layout.addWidget(self.box2)
+        self.sidebar_layout.addWidget(self.box3)
+
         self.param1_input.editingFinished.connect(self.update_pers)
         self.param2_input.editingFinished.connect(self.update_merge_thr)
         self.param3_input.editingFinished.connect(self.update_seed_number)
@@ -555,6 +566,27 @@ class Gui:
 
         # Add the sidebar to the main layout
         self.layout.addWidget(self.sidebar,0,1)
+
+    def check_boxes(self, state):
+        boxes = [self.box1, self.box2, self.box3]
+        checked_boxes = [box for box in boxes if box.isChecked()]
+
+        # make sure exactly one box is checked
+        if len(checked_boxes) == 0:
+            self.box1.setChecked(True)
+        elif len(checked_boxes) > 1:
+            for box in boxes:
+                if box != self.sender():
+                    box.setChecked(False)
+
+        if self.box1.isChecked():
+            self.mode = "ridge"
+        elif self.box2.isChecked():
+            self.mode = "valley"
+        elif self.box3.isChecked():
+            self.mode = "both"
+        else:
+            raise ValueError("One of the ridge/valley/both boxes should be checked at all times!")
 
     def update_pers(self):
         self.persistence = float(self.param1_input.text())
@@ -582,6 +614,96 @@ class Gui:
 
     def update_max_sepa_length(self):
         self.max_length = float(self.param9_input.text())
+
+class SideBar:
+    def __init__(self, layout):
+        # Create the sidebar group box
+        self.sidebar = QGroupBox("Further Parameters:")
+        self.sidebar_layout = QVBoxLayout()
+        self.sidebar.setLayout(self.sidebar_layout)
+        self.sidebar.setMaximumSize(175, 400)
+
+        self.create_boxes()
+        
+        # connect the stateChanged signal of the boxes to a slot
+        self.box1.stateChanged.connect(self.check_boxes)
+        self.box2.stateChanged.connect(self.check_boxes)
+        self.box3.stateChanged.connect(self.check_boxes)
+
+        self.add_boxes_to_sidebar_layout()
+        self.connect_update_functions_to_boxes()
+        
+        # Add the sidebar to the main layout
+        layout.addWidget(self.sidebar,0,1)
+
+    def create_boxes(self):
+        # Create the input widgets and their default values
+        self.param1_input = QLineEdit()
+        self.param1_input.setText(str(self.persistence))
+        self.param1_input.setMaximumSize(75, 25)
+        self.param2_input = QLineEdit()
+        self.param2_input.setText(str(self.merge_threshold))
+        self.param2_input.setMaximumSize(75, 25)
+        self.param3_input = QLineEdit()
+        self.param3_input.setText(str(self.cluster_seed_number))
+        self.param3_input.setMaximumSize(75, 25)
+        self.param4_input = QLineEdit()
+        self.param4_input.setText(str(self.high_thresh))
+        self.param4_input.setMaximumSize(75, 25)
+        self.param5_input = QLineEdit()
+        self.param5_input.setText(str(self.low_thresh))
+        self.param5_input.setMaximumSize(75, 25)
+        self.param6_input = QLineEdit()
+        self.param6_input.setText(str(self.size_threshold))
+        self.param6_input.setMaximumSize(75, 25)
+
+        self.param8_input = QLineEdit()
+        self.param8_input.setText(str(self.min_length))
+        self.param8_input.setMaximumSize(75, 25)
+        self.param9_input = QLineEdit()
+        self.param9_input.setText(str(self.max_length))
+        self.param9_input.setMaximumSize(75, 25)
+
+        # create three checkable boxes
+        self.box1 = QCheckBox("Ridges")
+        self.box2 = QCheckBox("Valleys")
+        self.box3 = QCheckBox("Both")
+
+    def add_boxes_to_sidebar_layout(self):
+        # Add the input widgets to the sidebar layout
+        self.sidebar_layout.addWidget(QLabel("Persistence"))
+        self.sidebar_layout.addWidget(self.param1_input)
+        self.sidebar_layout.addWidget(QLabel("Merge threshold"))
+        self.sidebar_layout.addWidget(self.param2_input)
+        self.sidebar_layout.addWidget(QLabel("Cluster Seed number"))
+        self.sidebar_layout.addWidget(self.param3_input)
+        self.sidebar_layout.addWidget(QLabel("High edge Thr"))
+        self.sidebar_layout.addWidget(self.param4_input)
+        self.sidebar_layout.addWidget(QLabel("Low edge Thr"))
+        self.sidebar_layout.addWidget(self.param5_input)
+        self.sidebar_layout.addWidget(QLabel("Size threshold segmentation (per label)"))
+        self.sidebar_layout.addWidget(self.param6_input)
+        self.sidebar_layout.addWidget(QLabel("Min sepa length"))
+        self.sidebar_layout.addWidget(self.param8_input)
+        self.sidebar_layout.addWidget(QLabel("Max sepa length"))
+        self.sidebar_layout.addWidget(self.param9_input)
+
+        # add the boxes to the layout
+        self.sidebar_layout.addWidget(self.box1)
+        self.sidebar_layout.addWidget(self.box2)
+        self.sidebar_layout.addWidget(self.box3)
+
+    def connect_update_functions_to_boxes(self):
+        self.param1_input.editingFinished.connect(self.update_pers)
+        self.param2_input.editingFinished.connect(self.update_merge_thr)
+        self.param3_input.editingFinished.connect(self.update_seed_number)
+        self.param4_input.editingFinished.connect(self.update_high_edge_thr)
+        self.param5_input.editingFinished.connect(self.update_low_edge_thr)
+        self.param6_input.editingFinished.connect(self.update_size_threshold)
+        self.param8_input.editingFinished.connect(self.update_min_sepa_length)
+        self.param9_input.editingFinished.connect(self.update_max_sepa_length)
+
+
 
 if __name__ == '__main__':
     Gui()
