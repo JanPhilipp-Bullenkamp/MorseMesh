@@ -3,7 +3,7 @@ import numpy as np
 from copy import deepcopy
 
 from .CancellationQueue import CancellationQueue
-from .LoadData.Datastructure import Separatrix, MorseCells
+from .load_data.Datastructure import Separatrix, MorseCells
 
 def get_closest_extremum(crit_edge, crit_faces_dict, vert_dict, edge_dict, face_dict, salient_edge_pts=None):
     distances = []
@@ -304,7 +304,7 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, vert_dict, edge_
     
     return MorseComplex
             
-def CancelCriticalPairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict, salient_edge_pts=None):
+def cancel_critical_pairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict, salient_edge_pts=None):
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     

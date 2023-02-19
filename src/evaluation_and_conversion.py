@@ -14,7 +14,7 @@ from .Evaluation.evaluate_metrics import compute_IoU, compute_F1_Score, get_corr
 from .Evaluation.read_labels_txt import read_labels_txt
 from .Evaluation.read_labels_from_color_ply import read_labels_from_color_ply
 from .Evaluation.write_correctness_mask_txt import write_correctness_mask_txt
-from .PlotData.write_labels_txt import write_Cell_labels_txt_file
+from .plot_data.write_labels_txt import write_Cell_labels_txt_file
 from .Evaluation.clean_and_read_labels_from_color_ply import clean_and_read_labels_from_color_ply
 from .Evaluation.artifact3D_conversions import artifact3D_to_labels, artifact3D_get_trafo
 

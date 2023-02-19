@@ -1,7 +1,7 @@
 ##
 # @file BettiNumbers.py
 #
-# @brief Contains the BettiViaPairCells function described in Zomorodian: “Computational Topology”. 
+# @brief Contains the betti_via_pair_cells function described in Zomorodian: “Computational Topology”. 
 # In: Algorithms and Theory of Computation Handbook: Special Topics and Techniques.
 # (https://doc.lagout.org/science/0_Computer%20Science/2_Algorithms/Algorithms%20and%20Theory%20of%20Computation%20Handbook_%20Special%20Topics%20and%20Techniques%20%282nd%20ed.%29%20%5BAtallah%20%26%20Blanton%202009-11-20%5D.pdf)
 #
@@ -15,7 +15,7 @@ import numpy as np
 from collections import Counter
 
 
-def BettiViaPairCells(MorseComplex):
+def betti_via_pair_cells(MorseComplex):
     """! @brief The wrapper for the PairCells algorithm described by Zomorodian.
     
     @details Calculates Betti numbers by pairing up all critical simplices of the Morse Complex; 

@@ -1,7 +1,7 @@
 from collections import Counter
-from ..PlotData.plot_points_for_debugging import write_overlay_points
+from ..plot_data.plot_points_for_debugging import write_overlay_points
 
-from .LoadData.Datastructure import Cell, MorseCells
+from .load_data.Datastructure import Cell, MorseCells
 
 def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
     bd_points = set()
@@ -53,7 +53,7 @@ def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
                         
     return bd_points                
 
-def get_MorseCells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborhood=True):
+def get_morse_cells(MorseComplex, vert_dict, edge_dict, face_dict, fill_neighborhood=True):
     if MorseComplex._flag_MorseCells == True:
         print("Morse cells have been computed for this persistence already, but will be overwritten now")
         MorseComplex.MorseCells = MorseCells()

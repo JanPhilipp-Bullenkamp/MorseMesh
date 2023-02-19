@@ -1,9 +1,9 @@
 ##
-# @file PersistenceDiagram.py
+# @file persistence_diagram.py
 #
 # @brief Contains function to plot persistence diagrams.
 #
-# @section libraries_PersistenceDiagram Libraries/Modules
+# @section libraries_persistence_diagram Libraries/Modules
 # - numpy standard library
 # - matplotlib.pyplot standard library
 
@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def PersistenceDiagram(MorseComplex, partner, maxval, minval, pointsize = 4, save = False, filepath = 'persistenceDiagram'):
+def persistence_diagram(MorseComplex, partner, maxval, minval, pointsize = 4, save = False, filepath = 'persistence_diagram'):
     """! @brief Plots a persistence diagram of the given Morse Complex and optionally saves the figure.
     
     @param MorseComplex The Morse Complex we want to take the persistence diagram of.
@@ -21,7 +21,7 @@ def PersistenceDiagram(MorseComplex, partner, maxval, minval, pointsize = 4, sav
     @param minval The minimum possible function value in the mesh.
     @param pointsize (Optional) The pointsize in the diagram. Default is 4. 
     @param save Optional) Bool. Whether to save the diagram or not. Default is False.
-    @param filepath (Optional) The filename under which the diagram should be stored. Default is 'persistenceDiagram'.
+    @param filepath (Optional) The filename under which the diagram should be stored. Default is 'persistence_diagram'.
     """
     points = {}
     M = {}

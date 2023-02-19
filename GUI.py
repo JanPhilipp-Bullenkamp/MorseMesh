@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QFileDialog, QSlider, QVBoxLayout, QMenuBar, QMenu, 
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from src.morse import Morse
+from gui_menubar import MenuBar
 
 color_list = [[255,0,0],  #red
               [0,255,0], #lime
@@ -37,41 +38,6 @@ class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
         self.GetCurrentRenderer().ResetCameraClippingRange()
         self.GetCurrentRenderer().GetActiveCamera().Zoom(0.9)
         self.GetInteractor().GetRenderWindow().Render()
-
-class MenuBar:
-    def __init__(self, layout):
-        self.menu_bar = QMenuBar()
-        layout.setMenuBar(self.menu_bar)
-
-        # Create the file, processing and visualization menus and add to the menu bar
-        self.file_menu = QMenu("File")
-        self.menu_bar.addMenu(self.file_menu)
-        self.processing_menu = QMenu("Processing")
-        self.menu_bar.addMenu(self.processing_menu)
-        self.visualization_menu = QMenu("Visualization")
-        self.menu_bar.addMenu(self.visualization_menu)
-
-        # Create the open file action and add it to the file menu
-        self.open_file_action = self.file_menu.addAction("Open")
-        self.open_feature_vec_file_action = self.file_menu.addAction("Load feature vector file")
-        self.save_edges_ply_action = self.file_menu.addAction("Save Edges ply")
-        self.save_edges_ply_action = self.file_menu.addAction("Save current Segmentation txt")
-
-        # Create the compute Morse action and add it to the processing menu
-        self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")
-        self.compute_smoothing_action = self.processing_menu.addAction("Compute smoothing")
-        self.compute_perona_malik_action = self.processing_menu.addAction("Compute Perona Malik")
-
-        # Create the show sliders action and add it to the visualization menu
-        self.show_sliders_action = self.visualization_menu.addAction("Show Sliders")
-        self.morsecells_action = self.visualization_menu.addAction("MorseCells persistence")
-        self.segment_action = self.visualization_menu.addAction("Segmentation")
-        self.cluster_action = self.visualization_menu.addAction("Cluster")
-        self.cluster_boundary_action = self.visualization_menu.addAction("Cluster boundary")
-        self.cluster_boundary_ridge_intersection_action = self.visualization_menu.addAction("Cluster boundary ridge intersection")
-        self.merge_cluster_action = self.visualization_menu.addAction("Merge Cluster")
-        self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
-        self.show_funvals_action = self.visualization_menu.addAction("Show funvals")
 
 class Gui:
     def __init__(self):
@@ -196,7 +162,7 @@ class Gui:
                                                   "", "Ply Files (*.ply)", options=options)
         if filename:
             # Save the edge ply file:
-            self.data.plot_SalientEdges_ply(filename, self.high_thresh, self.low_thresh, only_strong=True)
+            self.data.plot_salient_edges_ply(filename, self.high_thresh, self.low_thresh, only_strong=True)
 
     def save_segmentation_result(self):
         options = QFileDialog.Options()
@@ -347,10 +313,10 @@ class Gui:
         self.vtkWidget.GetRenderWindow().Render()
 
     def compute_Morse(self):
-        self.data.ProcessLowerStars()
-        self.data.ExtractMorseComplex()
-        self.data.ReduceMorseComplex(self.data.range)
-        #self.data.ReduceMorseComplex(self.persistence)
+        self.data.process_lower_stars()
+        self.data.extract_morse_complex()
+        self.data.reduce_morse_complex(self.data.range)
+        #self.data.reduce_morse_complex(self.persistence)
 
         self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
         self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
@@ -364,7 +330,7 @@ class Gui:
         self.show_slider()
 
     def compute_perona_malik(self):
-        self.data.apply_Perona_Malik(1,0.6,0.2)
+        self.data.apply_perona_malik(1,0.6,0.2)
         self.color_funvals()
 
     def smoothing(self):
@@ -372,14 +338,14 @@ class Gui:
         self.color_funvals()
 
     def compute_persistent_MorseCells(self):
-        self.data.ReduceMorseComplex(self.persistence)
-        self.data.ExtractMorseCells(self.persistence)
+        self.data.reduce_morse_complex(self.persistence)
+        self.data.extract_morse_cells(self.persistence)
         self.current_segmentation = self.data.reducedMorseComplexes[self.persistence].MorseCells.Cells
         self.color_segmentation()
 
     def compute_Segmentation(self):
         if self.persistence not in self.data.reducedMorseComplexes.keys():
-            self.data.ReduceMorseComplex(self.persistence)
+            self.data.reduce_morse_complex(self.persistence)
         if (self.high_thresh, self.low_thresh) not in self.data.reducedMorseComplexes[self.persistence].Segmentations.keys():
             self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold, size_threshold=self.size_threshold)    
         else:

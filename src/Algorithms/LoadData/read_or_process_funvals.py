@@ -71,7 +71,7 @@ def read_funvals(filename: str, vertices_dict: dict, edges_dict: dict, faces_dic
 
     return min_funval, max_funval 
 
-def apply_Perona_Malik_diffusion(vert_dict: dict, edge_dict: dict, face_dict: dict, iterations: int, lamb: float, k: float):
+def apply_perona_malik_diffusion(vert_dict: dict, edge_dict: dict, face_dict: dict, iterations: int, lamb: float, k: float):
     # compute diffusion (vert dict changed in place)
     compute_anisotropic_diffusion(vert_dict, face_dict, iterations, lamb, k)
     # make sure vert fun_vals are unique and update edges and faces accordingly

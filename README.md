@@ -78,20 +78,20 @@ data.load_new_funvals(filename)
 Now we can calculate the Morse-Smale complex and reduce it to a persistence level we want:
 
 ```python
-data.ProcessLowerStars()
-data.ExtractMorseComplex()
+data.process_lower_stars()
+data.extract_morse_complex()
 ```
 calculates the discrete gradient field and extracts the initial Morse-Smale complex from it
 
 ```python
-data.ReduceMorseComplex(persistence)
+data.reduce_morse_complex(persistence)
 ```
 then removes spurious critical points up to a *persistence*.
 
 ### 3. Morse Cell Computation
 We can get the Morse cells, so the enclosed areas of a Morse Complex at any persistence level:
 ```python
-data.ExtractMorseCells(persistence)
+data.extract_morse_cells(persistence)
 ```
 
 ### 4. Segmentation
@@ -127,13 +127,13 @@ The third option can be opened by any image viewer.
 For the initial Morse Cells or the Morse cells of a reduced Morse Complex visualization can be done with overlay .ply files or label .txt files using one of the following functions: 
 ```python
 data.plot_MorseCells_ply(persistence, filename)
-data.plot_MorseCells_label_txt(persistence, filename)
+data.plot_morse_cells_label_txt(persistence, filename)
 ```
 where *filename* does not need to contain the file extension.
 
 For segmentation results currently only the labels .txt option is available and a calculated parameter combination can be visulaized by:
 ```python
-data.plot_Segmentation_label_txt(persistence, thresh_large, 
+data.plot_segmentation_label_txt(persistence, thresh_large, 
                                  thresh_small, merge_threshold, 
                                  filename)
 ```
@@ -177,7 +177,7 @@ This will give you a visualization as here:
 
 Salient edges can only be visualized as overlay .ply files as well. Using
 ```python
-data.plot_SalientEdges_ply(filename, thresh_high, thresh_low = None)
+data.plot_salient_edges_ply(filename, thresh_high, thresh_low = None)
 ```
 gives a .ply file of optionally double thresholded salient edges. If only *thresh_high* is given, it works as if there only is one threshold. All vertices contained in strong edges will be marked as red points, weak edges as blue.
 </details>
@@ -191,14 +191,14 @@ There are several options to show and/or save images of histograms, persistence 
 
 A persistence diagram can be obtained as follows
 ```python
-data.plot_PersistenceDiagram(persistence=0, pointsize=4, 
-                             save=False, filepath='persistenceDiagram')
+data.plot_persistence_diagram(persistence=0, pointsize=4, 
+                             save=False, filepath='persistence_diagram')
 ```
 All parameters are optional, the *persistence* parameter should make all points disappear that are closer than its value to the birth-death line of the persistence diagram.
 
 Persistence Diagram             |  Persistence Diagram with persistence
 :-------------------------:|:-------------------------:
-<img src="./pictures/persistenceDiagram_original.png"  width="300"> |  <img src="./pictures/persistenceDiagram_0_04P.png"  width="300">
+<img src="./pictures/persistence_diagram_original.png"  width="300"> |  <img src="./pictures/persistence_diagram_0_04P.png"  width="300">
 
 We can get the statistics of the separatrix persistences (includes mean, standard deviation and all values) as well as plot and/or show a histogram of their distribution
 ```python

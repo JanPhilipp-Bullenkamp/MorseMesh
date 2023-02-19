@@ -13,7 +13,7 @@
 # - Faces
 #
 # @section morse_theoretic_structures Morse-Theoretic Structures
-# - _flag_ProcessLowerStars
+# - _flag_process_lower_stars
 # - _flag_MorseComplex
 # - _flag_SalientEdge
 # - _flag_BettiNumbers
@@ -44,7 +44,7 @@ class Mesh:
     ## @var Faces
     # A dictionary to store the faces. Stored as key-value with key: face index and value: Simplex class object
     
-    ## @var _flag_ProcessLowerStars
+    ## @var _flag_process_lower_stars
     # Boolean whether the discrete vector field V has been calculated.
     ## @var _flag_MorseComplex
     # Boolean whether the initial Morse complex has been calculated.
@@ -92,7 +92,7 @@ class Mesh:
         self.min_separatrix_persistence = None
         self.max_separatrix_persistence = None
 
-        self._flag_ProcessLowerStars = False
+        self._flag_process_lower_stars = False
         self._flag_MorseComplex = False
         self._flag_SalientEdge = False
         self._flag_BettiNumbers = False

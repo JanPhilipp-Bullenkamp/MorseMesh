@@ -1,7 +1,7 @@
 import pytest
 import random
 from copy import deepcopy
-from ..src.Algorithms.LoadData.Datastructure import Simplex
+from ..src.Algorithms.load_data.Datastructure import Simplex
 from ..src.morse import Morse
 
 def test_changed_vertex_order():
@@ -21,13 +21,13 @@ def test_changed_vertex_order():
     shuffled_data.max = original_data.max
     shuffled_data.range = original_data.range
 
-    original_data.ProcessLowerStars()
-    shuffled_data.ProcessLowerStars()
+    original_data.process_lower_stars()
+    shuffled_data.process_lower_stars()
 
     check_equal_PLS_outcome(original_data, shuffled_data, transformation_dict)
 
-    original_data.ExtractMorseComplex()
-    shuffled_data.ExtractMorseComplex()
+    original_data.extract_morse_complex()
+    shuffled_data.extract_morse_complex()
 
     check_equal_EMC_outcome(original_data, shuffled_data, transformation_dict)
 

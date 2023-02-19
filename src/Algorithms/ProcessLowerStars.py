@@ -1,10 +1,10 @@
 ##
-# @file ProcessLowerStars.py
+# @file process_lower_stars.py
 #
-# @brief Contains the ProcessLowerStars function described in Robins et al. (DOI: 10.1109/TPAMI.2011.95)
+# @brief Contains the process_lower_stars function described in Robins et al. (DOI: 10.1109/TPAMI.2011.95)
 # https://www.researchgate.net/publication/51131057_Theory_and_Algorithms_for_Constructing_Discrete_Morse_Complexes_from_Grayscale_Digital_Images
 #
-# @section libraries_ProcessLowerStars Libraries/Modules
+# @section libraries_process_lower_stars Libraries/Modules
 # - numpy standard library
 # - collections standard library
 #   - need Counter and deque
@@ -81,7 +81,7 @@ def pair(face, PQzero):
             PQzero.pop(tuple((simplex,index)))
             return index, simplex
 
-def ProcessLowerStars(vertices_dict, edges_dict, faces_dict, C, V12, V23):
+def process_lower_stars(vertices_dict, edges_dict, faces_dict, C, V12, V23):
     """! @brief The function described in Robins et al. 2011, that returns a discrete gradient vector field.
     
     @details Loops over all vertices, calculates their lower stars and pairs up as many edge-vertex (V12) or 

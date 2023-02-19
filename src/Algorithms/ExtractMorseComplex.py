@@ -1,10 +1,10 @@
 ##
-# @file ExtractMorseComplex.py
+# @file extract_morse_complex.py
 #
-# @brief Contains the ExtractMorseComplex function described in Robins et al. (DOI: 10.1109/TPAMI.2011.95)
+# @brief Contains the extract_morse_complex function described in Robins et al. (DOI: 10.1109/TPAMI.2011.95)
 # https://www.researchgate.net/publication/51131057_Theory_and_Algorithms_for_Constructing_Discrete_Morse_Complexes_from_Grayscale_Digital_Images
 #
-# @section libraries_ExtractMorseComplex Libraries/Modules
+# @section libraries_extract_morse_complex Libraries/Modules
 # - numpy standard library
 # - Datastructure module (local)
 #   - need CritVertex, CritEdge, CritFace, MorseComplex structures
@@ -14,7 +14,7 @@
 import numpy as np
 from .Tree import Tree, Node
 
-from .LoadData.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex
+from .load_data.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex
 
 def potential_cells(p, cell, vert_dict, edge_dict):
     """! @brief Gives the faces(vert/edges) of a cell needed for finding a path from critical cell to critical cell.
@@ -38,7 +38,7 @@ def potential_cells(p, cell, vert_dict, edge_dict):
                     
     return pot_alphas
 
-def ExtractMorseComplex(vert_dict, edge_dict, face_dict, V12, V23, C):
+def extract_morse_complex(vert_dict, edge_dict, face_dict, V12, V23, C):
     """! @brief The function described in Robins et al. 2011, that returns a Morse Complex.
     
     @details Loops over all critical edges and faces and follows the paths indicated by the gradient field 
