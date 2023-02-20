@@ -1,7 +1,7 @@
 import pytest
 import random
 from copy import deepcopy
-from ..src.Algorithms.load_data.Datastructure import Simplex
+from ..src.Algorithms.load_data.datastructures import Simplex
 from ..src.morse import Morse
 
 def test_changed_vertex_order():

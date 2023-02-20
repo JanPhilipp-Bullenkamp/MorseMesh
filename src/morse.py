@@ -45,7 +45,7 @@ from src.Algorithms.edge_detection import ridge_detection, valley_detection
 
 from src.Algorithms.cluster import cluster_mesh, merge_cluster
 
-from src.Algorithms.Roughness_test import variance_heat_map, extremal_points_ratio
+from src.Algorithms.roughness_test import variance_heat_map, extremal_points_ratio
 
 from src.plot_data.persistence_diagram import persistence_diagram
 from src.plot_data.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_MSComplex_detailed_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file

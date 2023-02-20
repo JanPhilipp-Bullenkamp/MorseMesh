@@ -1,7 +1,7 @@
 from collections import Counter
 from ..plot_data.plot_points_for_debugging import write_overlay_points
 
-from .load_data.Datastructure import Cell, MorseCells
+from .load_data.datastructures import Cell, MorseCells
 
 def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
     bd_points = set()

@@ -2,7 +2,7 @@
 import collections
 import numpy as np
 
-from .Datastructure import Vertex, Simplex
+from .datastructures import Vertex, Simplex
 
 # from ply specification, and additional dtypes found in the wild
 _dtypes = {

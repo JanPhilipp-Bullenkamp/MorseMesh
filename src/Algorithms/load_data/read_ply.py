@@ -16,7 +16,7 @@
 from plyfile import PlyData
 from collections import Counter
 
-from .Datastructure import Vertex, Simplex
+from .datastructures import Vertex, Simplex
 
 def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inverted=False):
     """! @brief Reads a ply file and writes the simplicial complex into vertices, edges and faces dictionaries.

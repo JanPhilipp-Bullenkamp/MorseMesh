@@ -12,9 +12,9 @@
 #   - need Tree for path finding to get adjacency between critical cells in the MS complex
 
 import numpy as np
-from .Tree import Tree, Node
+from .tree import Tree, Node
 
-from .load_data.Datastructure import CritVertex, CritEdge, CritFace, MorseComplex
+from .load_data.datastructures import CritVertex, CritEdge, CritFace, MorseComplex
 
 def potential_cells(p, cell, vert_dict, edge_dict):
     """! @brief Gives the faces(vert/edges) of a cell needed for finding a path from critical cell to critical cell.
