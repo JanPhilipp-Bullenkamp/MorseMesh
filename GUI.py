@@ -1,13 +1,14 @@
 import numpy as np
 
 import vtk
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QSlider, QVBoxLayout, QMenuBar, QMenu, QLabel, QPushButton, QGroupBox, QLineEdit, QHBoxLayout, QGridLayout, QCheckBox
+from PyQt5.QtWidgets import QFileDialog, QSlider, QLabel, QPushButton, QGridLayout
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from src.morse import Morse
 from gui_menubar import MenuBar
+from gui_sidebar import SideBar
 
 color_list = [[255,0,0],  #red
               [0,255,0], #lime
@@ -48,7 +49,7 @@ class Parameters:
         self.low_thresh = None
         self.mode = "ridge"
         self.min_length = 1
-        self.max_length = None
+        self.max_length = float('inf')
 
         self.high_percent = 50
         self.low_percent = 45
@@ -58,6 +59,9 @@ class Parameters:
         self.cluster_seed_number = 150
 
         self.size_threshold = 500
+
+    def update(self, value, attr: str):
+        setattr(self, attr, value)
 
 class Flags:
     def __init__(self):
@@ -107,7 +111,7 @@ class Gui:
         self.connect_functions_to_menu_buttons()
 
         self.update_buttons()
-        self.add_param_sidebar()
+        self.parameters_sidebar = SideBar(self.layout, self.parameters)
 
         self.window.setLayout(self.layout)
         self.window.show()
@@ -391,7 +395,7 @@ class Gui:
         self.parameters.high_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.high_percent/100
         label1.setText("High threshold: {} % -> {}".format(value, self.parameters.high_thresh))
         self.update_edge_color()
-        self.param4_input.setText("{:.5f}".format(self.parameters.high_thresh))
+        self.parameters_sidebar.param4_input.setText("{:.5f}".format(self.parameters.high_thresh))
 
     # Create a function to update the parameter based on the slider value
     def update_low_thresh(self, value, label2):
@@ -399,7 +403,7 @@ class Gui:
         self.parameters.low_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.low_percent/100
         label2.setText("Low threshold: {} % -> {}".format(value, self.parameters.low_thresh))
         self.update_edge_color()
-        self.param5_input.setText("{:.5f}".format(self.parameters.low_thresh))
+        self.parameters_sidebar.param5_input.setText("{:.5f}".format(self.parameters.low_thresh))
 
     # Create a function to show the slider when the button is clicked
     def show_slider(self):
@@ -466,243 +470,6 @@ class Gui:
         del self.exit_button
 
         self.flags.flag_sliders_shown = False
-
-    def add_param_sidebar(self):
-        # Create the sidebar group box
-        self.sidebar = QGroupBox("Further Parameters:")
-        self.sidebar_layout = QVBoxLayout()
-        self.sidebar.setLayout(self.sidebar_layout)
-        self.sidebar.setMaximumSize(175, 400)
-
-        # Create the input widgets and their default values
-        self.param1_input = QLineEdit()
-        self.param1_input.setText(str(self.persistence))
-        self.param1_input.setMaximumSize(75, 25)
-        self.param2_input = QLineEdit()
-        self.param2_input.setText(str(self.merge_threshold))
-        self.param2_input.setMaximumSize(75, 25)
-        self.param3_input = QLineEdit()
-        self.param3_input.setText(str(self.cluster_seed_number))
-        self.param3_input.setMaximumSize(75, 25)
-        self.param4_input = QLineEdit()
-        self.param4_input.setText(str(self.high_thresh))
-        self.param4_input.setMaximumSize(75, 25)
-        self.param5_input = QLineEdit()
-        self.param5_input.setText(str(self.low_thresh))
-        self.param5_input.setMaximumSize(75, 25)
-        self.param6_input = QLineEdit()
-        self.param6_input.setText(str(self.size_threshold))
-        self.param6_input.setMaximumSize(75, 25)
-
-        self.param8_input = QLineEdit()
-        self.param8_input.setText(str(self.min_length))
-        self.param8_input.setMaximumSize(75, 25)
-        self.param9_input = QLineEdit()
-        self.param9_input.setText(str(self.max_length))
-        self.param9_input.setMaximumSize(75, 25)
-
-        # create three checkable boxes
-        self.box1 = QCheckBox("Ridges", checked=True)
-        self.mode = "ridge"
-        self.box2 = QCheckBox("Valleys", checked=False)
-        self.box3 = QCheckBox("Both", checked=False)
-
-        # connect the stateChanged signal of the boxes to a slot
-        self.box1.stateChanged.connect(lambda state, checkbox=self.box1: self.check_boxes(state, checkbox))
-        self.box2.stateChanged.connect(lambda state, checkbox=self.box2: self.check_boxes(state, checkbox))
-        self.box3.stateChanged.connect(lambda state, checkbox=self.box3: self.check_boxes(state, checkbox))
-
-        # Add the input widgets to the sidebar layout
-        self.sidebar_layout.addWidget(QLabel("Persistence"))
-        self.sidebar_layout.addWidget(self.param1_input)
-        self.sidebar_layout.addWidget(QLabel("Merge threshold"))
-        self.sidebar_layout.addWidget(self.param2_input)
-        self.sidebar_layout.addWidget(QLabel("Cluster Seed number"))
-        self.sidebar_layout.addWidget(self.param3_input)
-        self.sidebar_layout.addWidget(QLabel("High edge Thr"))
-        self.sidebar_layout.addWidget(self.param4_input)
-        self.sidebar_layout.addWidget(QLabel("Low edge Thr"))
-        self.sidebar_layout.addWidget(self.param5_input)
-        self.sidebar_layout.addWidget(QLabel("Size threshold segmentation (per label)"))
-        self.sidebar_layout.addWidget(self.param6_input)
-        self.sidebar_layout.addWidget(QLabel("Min sepa length"))
-        self.sidebar_layout.addWidget(self.param8_input)
-        self.sidebar_layout.addWidget(QLabel("Max sepa length"))
-        self.sidebar_layout.addWidget(self.param9_input)
-
-        # add the boxes to the layout
-        self.sidebar_layout.addWidget(self.box1)
-        self.sidebar_layout.addWidget(self.box2)
-        self.sidebar_layout.addWidget(self.box3)
-
-        self.param1_input.editingFinished.connect(self.update_pers)
-        self.param2_input.editingFinished.connect(self.update_merge_thr)
-        self.param3_input.editingFinished.connect(self.update_seed_number)
-        self.param4_input.editingFinished.connect(self.update_high_edge_thr)
-        self.param5_input.editingFinished.connect(self.update_low_edge_thr)
-        self.param6_input.editingFinished.connect(self.update_size_threshold)
-        self.param8_input.editingFinished.connect(self.update_min_sepa_length)
-        self.param9_input.editingFinished.connect(self.update_max_sepa_length)
-
-        # Add the sidebar to the main layout
-        self.layout.addWidget(self.sidebar,0,1)
-
-    def check_boxes(self, state, checkbox):
-        boxes = [self.box1, self.box2, self.box3]
-        checked_boxes = [box for box in boxes if box.isChecked()]
-
-        # make sure exactly one box is checked
-        if len(checked_boxes) == 0:
-            checkbox.setChecked(True)
-        elif len(checked_boxes) > 1:
-            for box in boxes:
-                if box != checkbox:
-                    box.setChecked(False)
-
-        if self.box1.isChecked():
-            self.mode = "ridge"
-        elif self.box2.isChecked():
-            self.mode = "valley"
-        elif self.box3.isChecked():
-            self.mode = "both"
-        else:
-            raise ValueError("One of the ridge/valley/both boxes should be checked at all times!")
-
-    def update_pers(self):
-        self.persistence = float(self.param1_input.text())
-
-    def update_merge_thr(self):
-        self.merge_threshold = float(self.param2_input.text())
-
-    def update_seed_number(self):
-        self.cluster_seed_number = int(self.param3_input.text())
-
-    def update_high_edge_thr(self):
-        self.persistence = float(self.param4_input.text())
-
-    def update_low_edge_thr(self):
-        self.persistence = float(self.param5_input.text())
-
-    def update_size_threshold(self):
-        self.size_threshold = float(self.param6_input.text())
-
-    def update_min_sepa_length(self):
-        self.min_length = float(self.param8_input.text())
-
-    def update_max_sepa_length(self):
-        self.max_length = float(self.param9_input.text())
-
-class SideBar:
-    def __init__(self, layout):
-        # Create the sidebar group box
-        self.sidebar = QGroupBox("Further Parameters:")
-        self.sidebar_layout = QVBoxLayout()
-        self.sidebar.setLayout(self.sidebar_layout)
-        self.sidebar.setMaximumSize(175, 400)
-
-        self.create_boxes()
-        
-        # connect the stateChanged signal of the boxes to a slot
-        self.box_ridge.stateChanged.connect(lambda state, checkbox=self.box_ridge: self.check_boxes(state, checkbox))
-        self.box_valley.stateChanged.connect(lambda state, checkbox=self.box_valley: self.check_boxes(state, checkbox))
-        self.box_both.stateChanged.connect(lambda state, checkbox=self.box_both: self.check_boxes(state, checkbox))
-
-        self.add_boxes_to_sidebar_layout()
-        self.connect_update_functions_to_boxes()
-        
-        # Add the sidebar to the main layout
-        layout.addWidget(self.sidebar,0,1)
-
-    def create_boxes(self):
-        # Create the input widgets and their default values
-        self.param1_input = QLineEdit()
-        self.param1_input.setText(str(self.persistence))
-        self.param1_input.setMaximumSize(75, 25)
-        self.param2_input = QLineEdit()
-        self.param2_input.setText(str(self.merge_threshold))
-        self.param2_input.setMaximumSize(75, 25)
-        self.param3_input = QLineEdit()
-        self.param3_input.setText(str(self.cluster_seed_number))
-        self.param3_input.setMaximumSize(75, 25)
-        self.param4_input = QLineEdit()
-        self.param4_input.setText(str(self.high_thresh))
-        self.param4_input.setMaximumSize(75, 25)
-        self.param5_input = QLineEdit()
-        self.param5_input.setText(str(self.low_thresh))
-        self.param5_input.setMaximumSize(75, 25)
-        self.param6_input = QLineEdit()
-        self.param6_input.setText(str(self.size_threshold))
-        self.param6_input.setMaximumSize(75, 25)
-
-        self.param8_input = QLineEdit()
-        self.param8_input.setText(str(self.min_length))
-        self.param8_input.setMaximumSize(75, 25)
-        self.param9_input = QLineEdit()
-        self.param9_input.setText(str(self.max_length))
-        self.param9_input.setMaximumSize(75, 25)
-
-        # create three checkable boxes
-        self.box_ridge = QCheckBox("Ridges", checked=True)
-        self.box_valley = QCheckBox("Valleys", checked=False)
-        self.box_both = QCheckBox("Both", checked=False)
-        self.mode = "ridge"
-
-    def add_boxes_to_sidebar_layout(self):
-        # Add the input widgets to the sidebar layout
-        self.sidebar_layout.addWidget(QLabel("Persistence"))
-        self.sidebar_layout.addWidget(self.param1_input)
-        self.sidebar_layout.addWidget(QLabel("Merge threshold"))
-        self.sidebar_layout.addWidget(self.param2_input)
-        self.sidebar_layout.addWidget(QLabel("Cluster Seed number"))
-        self.sidebar_layout.addWidget(self.param3_input)
-        self.sidebar_layout.addWidget(QLabel("High edge Thr"))
-        self.sidebar_layout.addWidget(self.param4_input)
-        self.sidebar_layout.addWidget(QLabel("Low edge Thr"))
-        self.sidebar_layout.addWidget(self.param5_input)
-        self.sidebar_layout.addWidget(QLabel("Size threshold segmentation (per label)"))
-        self.sidebar_layout.addWidget(self.param6_input)
-        self.sidebar_layout.addWidget(QLabel("Min sepa length"))
-        self.sidebar_layout.addWidget(self.param8_input)
-        self.sidebar_layout.addWidget(QLabel("Max sepa length"))
-        self.sidebar_layout.addWidget(self.param9_input)
-
-        # add the boxes to the layout
-        self.sidebar_layout.addWidget(self.box_ridge)
-        self.sidebar_layout.addWidget(self.box_valley)
-        self.sidebar_layout.addWidget(self.box_both)
-
-    
-    def check_boxes(self, state, checkbox):
-        boxes = [self.box_ridge, self.box_valley, self.box_both]
-        checked_boxes = [box for box in boxes if box.isChecked()]
-
-        # make sure exactly one box is checked
-        if len(checked_boxes) == 0:
-            checkbox.setChecked(True)
-        elif len(checked_boxes) > 1:
-            for box in boxes:
-                if box != checkbox:
-                    box.setChecked(False)
-
-        if self.box_ridge.isChecked():
-            self.mode = "ridge"
-        elif self.box_valley.isChecked():
-            self.mode = "valley"
-        elif self.box_both.isChecked():
-            self.mode = "both"
-        else:
-            raise ValueError("One of the ridge/valley/both boxes should be checked at all times!")
-
-    def connect_update_functions_to_boxes(self):
-        self.param1_input.editingFinished.connect(self.update_pers)
-        self.param2_input.editingFinished.connect(self.update_merge_thr)
-        self.param3_input.editingFinished.connect(self.update_seed_number)
-        self.param4_input.editingFinished.connect(self.update_high_edge_thr)
-        self.param5_input.editingFinished.connect(self.update_low_edge_thr)
-        self.param6_input.editingFinished.connect(self.update_size_threshold)
-        self.param8_input.editingFinished.connect(self.update_min_sepa_length)
-        self.param9_input.editingFinished.connect(self.update_max_sepa_length)
-
 
 
 if __name__ == '__main__':

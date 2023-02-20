@@ -8,7 +8,7 @@ def compute_gradient(vert_dict: dict, face_dict: dict) -> dict:
 
 def smooth_gradient(gradient: dict, vert_dict: dict, lamb: float):
     smoothed_gradient = {}
-    for ind, grad in gradient.items():
+    for ind in gradient.keys():
         neis = vert_dict[ind].get_n_neighborhood(vert_dict, 3)
         nei_grad = np.mean([gradient[nei_ind] for nei_ind in neis])
         smoothed_gradient[ind] = nei_grad #grad + lamb * (nei_grad - grad)

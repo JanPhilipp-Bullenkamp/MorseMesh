@@ -210,13 +210,13 @@ class Morse(Mesh):
             salient_edge_pts = self.get_salient_ridges(thresh_high, thresh_low)
 
         if pers == None:
-            self.salientreducedMorseComplexes[(thresh_high, thresh_low)] = cancel_critical_pairs(self.MorseComplex, self.range, 
+            self.salient_reduced_morse_complexes[(thresh_high, thresh_low)] = cancel_critical_pairs(self.MorseComplex, self.range, 
                                                                             self.Vertices, self.Edges, self.Faces, salient_edge_pts=salient_edge_pts)
-            return self.salientreducedMorseComplexes[(thresh_high, thresh_low)]
+            return self.salient_reduced_morse_complexes[(thresh_high, thresh_low)]
         else:
-            self.salientreducedMorseComplexes[(pers, thresh_high, thresh_low)] = cancel_critical_pairs(self.MorseComplex, pers,
+            self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)] = cancel_critical_pairs(self.MorseComplex, pers,
                                                                                     self.Vertices, self.Edges, self.Faces, salient_edge_pts)
-            return self.salientreducedMorseComplexes[(pers, thresh_high, thresh_low)]
+            return self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)]
 
     @timed
     def extract_cells_salient_complex(self, thresh_high: float, thresh_low: float = None, pers: float = None):
@@ -233,17 +233,17 @@ class Morse(Mesh):
         @return Morse Cells object containing the cells of the salient reduced Morse Complex.
         """
         if pers == None:
-            if (thresh_high, thresh_low) not in self.salientreducedMorseComplexes.keys():
+            if (thresh_high, thresh_low) not in self.salient_reduced_morse_complexes.keys():
                 print("Need to reduce with these edge thresholds first...")
                 self.reduce_morse_complex_salient_edge(thresh_high, thresh_low)
-            get_morse_cells(self.salientreducedMorseComplexes[(thresh_high,thresh_low)], self.Vertices, self.Edges, self.Faces)
-            return self.salientreducedMorseComplexes[(thresh_high,thresh_low)].MorseCells
+            get_morse_cells(self.salient_reduced_morse_complexes[(thresh_high,thresh_low)], self.Vertices, self.Edges, self.Faces)
+            return self.salient_reduced_morse_complexes[(thresh_high,thresh_low)].MorseCells
         else:
-            if (pers, thresh_high, thresh_low) not in self.salientreducedMorseComplexes.keys():
+            if (pers, thresh_high, thresh_low) not in self.salient_reduced_morse_complexes.keys():
                 print("Need to reduce with these edge thresholds and persistence first...")
                 self.reduce_morse_complex_salient_edge(thresh_high, thresh_low, pers=pers)
-            get_morse_cells(self.salientreducedMorseComplexes[(pers, thresh_high, thresh_low)], self.Vertices, self.Edges, self.Faces)
-            return self.salientreducedMorseComplexes[(pers, thresh_high, thresh_low)].MorseCells
+            get_morse_cells(self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)], self.Vertices, self.Edges, self.Faces)
+            return self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)].MorseCells
     
     @timed
     def extract_morse_cells(self, persistence: float):
@@ -315,15 +315,15 @@ class Morse(Mesh):
         if persistence == None:
             self.reduce_morse_complex_salient_edge(thresh_large, thresh_small, salient_edge_points)
             self.extract_cells_salient_complex(thresh_large, thresh_small)
-            self.salientreducedMorseComplexes[(thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
+            self.salient_reduced_morse_complexes[(thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
                                                                                             merge_threshold, minimum_labels)
-            return self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
+            return self.salient_reduced_morse_complexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
         else:
             self.reduce_morse_complex_salient_edge(thresh_large, thresh_small, salient_edge_points, pers=persistence)
             self.extract_cells_salient_complex(thresh_large, thresh_small, persistence)
-            self.salientreducedMorseComplexes[(persistence,thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
+            self.salient_reduced_morse_complexes[(persistence,thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
                                                                                             merge_threshold, minimum_labels)
-            return self.salientreducedMorseComplexes[(persistence,thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
+            return self.salient_reduced_morse_complexes[(persistence,thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
     @timed
     def segmentation_no_pers(self, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3):
@@ -596,7 +596,7 @@ class Morse(Mesh):
     
     @timed
     def plot_segmentation_salient_edge_label_txt(self, thresh_large: float, thresh_small: float, merge_threshold: float, filename: str):
-        write_Cell_labels_txt_file(self.salientreducedMorseComplexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells, filename, params=[None, thresh_large, thresh_small, merge_threshold])
+        write_Cell_labels_txt_file(self.salient_reduced_morse_complexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells, filename, params=[None, thresh_large, thresh_small, merge_threshold])
 
     @timed
     def plot_labels_txt(self, label_dict: dict, filename: str):

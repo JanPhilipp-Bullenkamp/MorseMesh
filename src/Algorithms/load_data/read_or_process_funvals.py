@@ -45,7 +45,7 @@ def read_funvals(filename: str, vertices_dict: dict, edges_dict: dict, faces_dic
         "maxabs": maxabs_arr,
         "minabs": minabs_arr
     }
-
+    
     try:
         function = func_dict[operation]
     except KeyError:

@@ -108,7 +108,7 @@ class Mesh:
         
         self.reducedMorseComplexes = {}
 
-        self.salientreducedMorseComplexes = {}
+        self.salient_reduced_morse_complexes = {}
         
         self.maximalReducedComplex = None
 
