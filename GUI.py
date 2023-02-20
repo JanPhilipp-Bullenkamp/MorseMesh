@@ -83,14 +83,8 @@ class Data:
         self.current_segmentation = {}
         self.current_segmentation_params = None
 
-class Gui:
+class Window:
     def __init__(self):
-        self.data = Data()
-        self.flags = Flags()
-        self.parameters = Parameters()
-
-        self.app = QtWidgets.QApplication([])
-
         self.window = QtWidgets.QWidget()
         self.window.setGeometry(100,100,800,800)
         self.window.setWindowTitle("Mesh GUI")
@@ -105,16 +99,84 @@ class Gui:
         interactor = self.vtkWidget.GetRenderWindow().GetInteractor()
         style = CustomInteractorStyle()
         interactor.SetInteractorStyle(style)
+        self.window.setLayout(self.layout)
+        self.window.show()
+
+    def update_mesh(self, vert_dict: dict, face_dict: dict):
+        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
+        if ren != None:
+            ren.RemoveAllViewProps()
+
+        mesh = vtk.vtkPolyData()
+        points = vtk.vtkPoints()
+        polys = vtk.vtkCellArray()
+        for vert in vert_dict.values():
+            points.InsertNextPoint(np.array([vert.x, vert.y, vert.z]))
+        for face in face_dict.values():
+            polys.InsertNextCell(len(face.indices), np.array(list(face.indices)))
+        mesh.SetPoints(points)
+        mesh.SetPolys(polys)
+
+        mapper = vtk.vtkPolyDataMapper()
+        mapper.SetInputData(mesh)
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+
+        # Add the mesh actor to the vtk renderer and show the window
+        ren.AddActor(actor)
+        ren.ResetCamera()
+        self.vtkWidget.GetRenderWindow().Render()
+
+    def update_mesh_color(self, label_dict: dict, partial: bool = False):
+        # Get the renderer and mesh actor
+        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
+        actor = ren.GetActors().GetLastActor()
+
+        # Get the mapper and the mesh data
+        mapper = actor.GetMapper()
+        mesh = mapper.GetInput()
+
+        # Set the color of the points in the mesh
+        point_data = mesh.GetPointData()
+        color_array = vtk.vtkUnsignedCharArray()
+        color_array.SetNumberOfComponents(3)
+        color_array.SetName("Colors")
+
+        if partial: # write all points in white and update color points afterwards
+            number_of_points = mesh.GetNumberOfPoints()
+            white = (255, 255, 255)
+            for i in range(number_of_points):
+                color_array.InsertTypedTuple(i, white)
+
+        for label, cell in label_dict.items():
+            cell_color = color_list[label%len(color_list)]
+            for ind in cell.vertices:
+                color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
+        point_data.SetScalars(color_array)
+
+        # Update the mapper and render the window
+        mapper.Update()
+        self.vtkWidget.GetRenderWindow().Render()
+
+
         
+
+class Application:
+    def __init__(self):
+        self.data = Data()
+        self.flags = Flags()
+        self.parameters = Parameters()
+
+        self.app = QtWidgets.QApplication([])
+
+        self.window = Window()
+
         # Create the menu bar and add it to the layout
-        self.menu_bar = MenuBar(self.layout)
+        self.menu_bar = MenuBar(self.window.layout)
         self.connect_functions_to_menu_buttons()
 
         self.update_buttons()
-        self.parameters_sidebar = SideBar(self.layout, self.parameters)
-
-        self.window.setLayout(self.layout)
-        self.window.show()
+        self.parameters_sidebar = SideBar(self.window.layout, self.parameters)
 
         self.app.exec_()
 
@@ -473,4 +535,4 @@ class Gui:
 
 
 if __name__ == '__main__':
-    Gui()
+    Application()
