@@ -1,8 +1,4 @@
 var searchData=
 [
-  ['v12_192',['V12',['../classMorseTheory_1_1src_1_1mesh_1_1Mesh.html#a566d72fac18645d6e4c8266b9bb01323',1,'MorseTheory.src.mesh.Mesh.V12()'],['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a566d72fac18645d6e4c8266b9bb01323',1,'MorseTheory.src.morse.Morse.V12()']]],
-  ['v23_193',['V23',['../classMorseTheory_1_1src_1_1mesh_1_1Mesh.html#a13792d80e2a6b200ce21651f61bb0273',1,'MorseTheory.src.mesh.Mesh.V23()'],['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a13792d80e2a6b200ce21651f61bb0273',1,'MorseTheory.src.morse.Morse.V23()']]],
-  ['vertex_194',['Vertex',['../classMorseTheory_1_1src_1_1Algorithms_1_1load_data_1_1Datastructure_1_1Vertex.html',1,'MorseTheory::src::Algorithms::load_data::Datastructure']]],
-  ['vertices_195',['vertices',['../classMorseTheory_1_1src_1_1Algorithms_1_1load_data_1_1Datastructure_1_1Cell.html#a2134adf518ce3d0a2cc86b2b44af3084',1,'MorseTheory::src::Algorithms::load_data::Datastructure::Cell']]],
-  ['vertices_196',['Vertices',['../classMorseTheory_1_1src_1_1mesh_1_1Mesh.html#a6bc4120d552744ef3221ed0240245e8f',1,'MorseTheory::src::mesh::Mesh']]]
+  ['update_5fedges_5fand_5ffaces_5ffunvals_292',['update_edges_and_faces_funvals',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1read__or__process__funvals.html#afd1004f17ac8b128a035d7ed060e58e9',1,'MorseTheory::src::Algorithms::load_data::read_or_process_funvals']]]
 ];

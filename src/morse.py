@@ -38,10 +38,10 @@ from src.Algorithms.load_data.read_or_process_funvals import read_funvals, apply
 from src.Algorithms.process_lower_stars import process_lower_stars
 from src.Algorithms.extract_morse_complex import extract_morse_complex
 from src.Algorithms.reduce_morse_complex import cancel_critical_pairs
-from src.Algorithms.BettiNumbers import betti_via_pair_cells
+from src.Algorithms.betti_numbers import betti_via_pair_cells
 
-from src.Algorithms.MorseCells import get_morse_cells
-from src.Algorithms.EdgeDetection import ridge_detection, valley_detection
+from src.Algorithms.morse_cells import get_morse_cells
+from src.Algorithms.edge_detection import ridge_detection, valley_detection
 
 from src.Algorithms.cluster import cluster_mesh, merge_cluster
 

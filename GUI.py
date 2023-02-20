@@ -113,26 +113,26 @@ class Gui:
         self.menu_bar.save_edges_ply_action.triggered.connect(self.save_segmentation_result)
 
         # Create the compute Morse action and add it to the processing menu
-        self.menu_bar.compute_Morse_action.triggered.connect(self.compute_Morse)
+        self.menu_bar.compute_Morse_action.triggered.connect(self.compute_morse)
         self.menu_bar.compute_smoothing_action.triggered.connect(self.smoothing)
         self.menu_bar.compute_perona_malik_action.triggered.connect(self.compute_perona_malik)
 
         # Create the show sliders action and add it to the visualization menu
         self.menu_bar.show_sliders_action.triggered.connect(self.show_slider)
-        self.menu_bar.morsecells_action.triggered.connect(self.compute_persistent_MorseCells)
-        self.menu_bar.segment_action.triggered.connect(self.compute_Segmentation)
+        self.menu_bar.morsecells_action.triggered.connect(self.compute_persistent_morse_cells)
+        self.menu_bar.segment_action.triggered.connect(self.compute_segmentation)
         self.menu_bar.cluster_action.triggered.connect(self.cluster)
         self.menu_bar.cluster_boundary_action.triggered.connect(self.cluster_boundary)
         self.menu_bar.cluster_boundary_ridge_intersection_action.triggered.connect(self.cluster_boundary_ridge_intersection)
         self.menu_bar.merge_cluster_action.triggered.connect(self.merge_cluster)
-        self.menu_bar.segment_new_action.triggered.connect(self.compute_Segmentation_new)
+        self.menu_bar.segment_new_action.triggered.connect(self.compute_segmentation_new)
         self.menu_bar.show_funvals_action.triggered.connect(self.color_funvals)
 
     def update_buttons(self):
-        self.show_sliders_action.setEnabled(True if self.flag_morse_computations and not self.flag_sliders_shown else False)
-        self.compute_Morse_action.setEnabled(True if self.flag_loaded_data else False)
-        self.save_edges_ply_action.setEnabled(True if self.flag_morse_computations else False)
-        self.segment_action.setEnabled(True if self.flag_morse_computations else False)
+        self.menu_bar.show_sliders_action.setEnabled(True if self.flag_morse_computations and not self.flag_sliders_shown else False)
+        self.menu_bar.compute_Morse_action.setEnabled(True if self.flag_loaded_data else False)
+        self.menu_bar.save_edges_ply_action.setEnabled(True if self.flag_morse_computations else False)
+        self.menu_bar.segment_action.setEnabled(True if self.flag_morse_computations else False)
 
 
     def browse_file(self):
@@ -312,14 +312,14 @@ class Gui:
         mapper.Update()
         self.vtkWidget.GetRenderWindow().Render()
 
-    def compute_Morse(self):
+    def compute_morse(self):
         self.data.process_lower_stars()
         self.data.extract_morse_complex()
         self.data.reduce_morse_complex(self.data.range)
         #self.data.reduce_morse_complex(self.persistence)
 
-        self.high_thresh = self.data.max_separatrix_persistence*self.high_percent/100
-        self.low_thresh = self.data.max_separatrix_persistence*self.low_percent/100
+        self.high_thresh = (self.data.max_separatrix_persistence-self.data.min_separatrix_persistence)*self.high_percent/100
+        self.low_thresh = (self.data.max_separatrix_persistence-self.data.min_separatrix_persistence)*self.low_percent/100
         self.color_points = self.data.get_salient_ridges(self.high_thresh, self.low_thresh)
 
         self.flag_morse_computations = True
@@ -337,28 +337,28 @@ class Gui:
         self.data.smooth_fun_vals(3)
         self.color_funvals()
 
-    def compute_persistent_MorseCells(self):
+    def compute_persistent_morse_cells(self):
         self.data.reduce_morse_complex(self.persistence)
         self.data.extract_morse_cells(self.persistence)
         self.current_segmentation = self.data.reducedMorseComplexes[self.persistence].MorseCells.Cells
         self.color_segmentation()
 
-    def compute_Segmentation(self):
+    def compute_segmentation(self):
         if self.persistence not in self.data.reducedMorseComplexes.keys():
             self.data.reduce_morse_complex(self.persistence)
         if (self.high_thresh, self.low_thresh) not in self.data.reducedMorseComplexes[self.persistence].Segmentations.keys():
-            self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold, size_threshold=self.size_threshold)    
+            self.data.segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold, size_threshold=self.size_threshold)    
         else:
             if self.merge_threshold not in self.data.reducedMorseComplexes[self.persistence].Segmentations[(self.high_thresh, self.low_thresh)].keys():
-                self.data.Segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold, size_threshold=self.size_threshold)
+                self.data.segmentation(self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold, size_threshold=self.size_threshold)
                 
         self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
         self.current_segmentation = self.data.reducedMorseComplexes[self.current_segmentation_params[0]].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells
 
         self.color_segmentation()
 
-    def compute_Segmentation_new(self): 
-        self.data.Segmentation_SalientReduction(self.high_thresh, self.low_thresh, self.merge_threshold, self.persistence)
+    def compute_segmentation_new(self): 
+        self.data.segmentation_salient_reduction(self.high_thresh, self.low_thresh, self.merge_threshold, self.persistence)
                 
         self.current_segmentation_params = np.array([self.persistence, self.high_thresh, self.low_thresh, self.merge_threshold])
         self.current_segmentation = self.data.salientreducedMorseComplexes[(self.current_segmentation_params[0],self.current_segmentation_params[1],self.current_segmentation_params[2])].Segmentations[(self.current_segmentation_params[1], self.current_segmentation_params[2])][self.current_segmentation_params[3]].Cells
@@ -474,9 +474,6 @@ class Gui:
         self.param6_input.setText(str(self.size_threshold))
         self.param6_input.setMaximumSize(75, 25)
 
-        self.param7_input = QLineEdit()
-        self.param7_input.setText(str(self.mode))
-        self.param7_input.setMaximumSize(75, 25)
         self.param8_input = QLineEdit()
         self.param8_input.setText(str(self.min_length))
         self.param8_input.setMaximumSize(75, 25)
@@ -485,14 +482,15 @@ class Gui:
         self.param9_input.setMaximumSize(75, 25)
 
         # create three checkable boxes
-        self.box1 = QCheckBox("Ridges")
-        self.box2 = QCheckBox("Valleys")
-        self.box3 = QCheckBox("Both")
+        self.box1 = QCheckBox("Ridges", checked=True)
+        self.mode = "ridge"
+        self.box2 = QCheckBox("Valleys", checked=False)
+        self.box3 = QCheckBox("Both", checked=False)
 
         # connect the stateChanged signal of the boxes to a slot
-        self.box1.stateChanged.connect(self.check_boxes)
-        self.box2.stateChanged.connect(self.check_boxes)
-        self.box3.stateChanged.connect(self.check_boxes)
+        self.box1.stateChanged.connect(lambda state, checkbox=self.box1: self.check_boxes(state, checkbox))
+        self.box2.stateChanged.connect(lambda state, checkbox=self.box2: self.check_boxes(state, checkbox))
+        self.box3.stateChanged.connect(lambda state, checkbox=self.box3: self.check_boxes(state, checkbox))
 
         # Add the input widgets to the sidebar layout
         self.sidebar_layout.addWidget(QLabel("Persistence"))
@@ -507,9 +505,6 @@ class Gui:
         self.sidebar_layout.addWidget(self.param5_input)
         self.sidebar_layout.addWidget(QLabel("Size threshold segmentation (per label)"))
         self.sidebar_layout.addWidget(self.param6_input)
-
-        self.sidebar_layout.addWidget(QLabel("Edge mode"))
-        self.sidebar_layout.addWidget(self.param7_input)
         self.sidebar_layout.addWidget(QLabel("Min sepa length"))
         self.sidebar_layout.addWidget(self.param8_input)
         self.sidebar_layout.addWidget(QLabel("Max sepa length"))
@@ -526,23 +521,22 @@ class Gui:
         self.param4_input.editingFinished.connect(self.update_high_edge_thr)
         self.param5_input.editingFinished.connect(self.update_low_edge_thr)
         self.param6_input.editingFinished.connect(self.update_size_threshold)
-        self.param7_input.editingFinished.connect(self.update_edge_mode)
         self.param8_input.editingFinished.connect(self.update_min_sepa_length)
         self.param9_input.editingFinished.connect(self.update_max_sepa_length)
 
         # Add the sidebar to the main layout
         self.layout.addWidget(self.sidebar,0,1)
 
-    def check_boxes(self, state):
+    def check_boxes(self, state, checkbox):
         boxes = [self.box1, self.box2, self.box3]
         checked_boxes = [box for box in boxes if box.isChecked()]
 
         # make sure exactly one box is checked
         if len(checked_boxes) == 0:
-            self.box1.setChecked(True)
+            checkbox.setChecked(True)
         elif len(checked_boxes) > 1:
             for box in boxes:
-                if box != self.sender():
+                if box != checkbox:
                     box.setChecked(False)
 
         if self.box1.isChecked():
@@ -571,9 +565,6 @@ class Gui:
 
     def update_size_threshold(self):
         self.size_threshold = float(self.param6_input.text())
-
-    def update_edge_mode(self):
-        self.mode = str(self.param7_input.text())
 
     def update_min_sepa_length(self):
         self.min_length = float(self.param8_input.text())

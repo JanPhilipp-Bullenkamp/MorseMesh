@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['edge_5fdetection_311',['edge_detection',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1EdgeDetection.html#a8b4033e40e62d7ba80cf4fd7275e146e',1,'MorseTheory::src::Algorithms::EdgeDetection']]],
-  ['eliminate_5fboundaries_312',['eliminate_boundaries',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1BettiNumbers.html#ab13678a0e54fd01d82a17c52647af798',1,'MorseTheory::src::Algorithms::BettiNumbers']]],
-  ['extract_morse_cells_313',['extract_morse_cells',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#ae29a6da7404bd94240bad8de1d8f5726',1,'MorseTheory::src::morse::Morse']]],
-  ['extract_morse_complex_314',['extract_morse_complex',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#ab4d9197b9a9175fca599f443aa068f94',1,'MorseTheory.src.morse.Morse.extract_morse_complex()'],['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1extract_morse_complex.html#a6fde76ede5cb0866822567bfe9d822cb',1,'MorseTheory.src.Algorithms.extract_morse_complex.extract_morse_complex()']]]
+  ['diffusivity_5fcoeff_470',['diffusivity_coeff',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1anisotropic__diffusion.html#a2fc1d20be3980364092d8bbaef8432c7',1,'MorseTheory::src::Algorithms::load_data::anisotropic_diffusion']]],
+  ['distance_5fto_5fend_471',['distance_to_end',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1read__ply__test.html#aeca1e2cf06edafc33205aaaa0c55cad9',1,'MorseTheory::src::Algorithms::load_data::read_ply_test']]]
 ];

@@ -1,5 +1,5 @@
 import random
-from .CancellationQueue import CancellationQueue
+from .cancellation_queue import CancellationQueue
 from collections import Counter
 import numpy as np
 

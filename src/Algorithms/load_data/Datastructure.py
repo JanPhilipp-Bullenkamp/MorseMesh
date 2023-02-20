@@ -25,7 +25,7 @@ from copy import deepcopy
 import numpy as np
 
 from .weight_metrics import compute_weight_saledge
-from ..CancellationQueue import CancellationQueue
+from ..cancellation_queue import CancellationQueue
 
 
 class Vertex:

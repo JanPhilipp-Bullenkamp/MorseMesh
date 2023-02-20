@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['youngest_0',['youngest',['../class_morse_theory_1_1src_1_1_algorithms_1_1_betti_numbers_1_1_dell.html#a1d0b2193d64ba1614db3f18199f8e996',1,'MorseTheory::src::Algorithms::BettiNumbers::Dell']]]
+  ['update_5fedges_5fand_5ffaces_5ffunvals_562',['update_edges_and_faces_funvals',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1read__or__process__funvals.html#afd1004f17ac8b128a035d7ed060e58e9',1,'MorseTheory::src::Algorithms::load_data::read_or_process_funvals']]]
 ];

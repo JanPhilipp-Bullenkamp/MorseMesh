@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['range_416',['range',['../classMorseTheory_1_1src_1_1mesh_1_1Mesh.html#a5a95c5aa27dc12b07af34405942b7849',1,'MorseTheory.src.mesh.Mesh.range()'],['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a5a95c5aa27dc12b07af34405942b7849',1,'MorseTheory.src.morse.Morse.range()']]],
-  ['reducedmorsecomplexes_417',['reducedMorseComplexes',['../classMorseTheory_1_1src_1_1mesh_1_1Mesh.html#a1b9eba7de0c4168125c635c530b072e8',1,'MorseTheory::src::mesh::Mesh']]],
-  ['root_418',['root',['../classMorseTheory_1_1src_1_1Algorithms_1_1Tree_1_1Tree.html#ab4b8daf4b8ea9d39568719e1e320076f',1,'MorseTheory::src::Algorithms::Tree::Tree']]]
+  ['qbfs_628',['Qbfs',['../classMorseTheory_1_1src_1_1Algorithms_1_1Tree_1_1Tree.html#add6f0630bf3094cc6c066fcede2958fd',1,'MorseTheory::src::Algorithms::Tree::Tree']]],
+  ['quality_629',['quality',['../classMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1Datastructure_1_1Vertex.html#a517dde945463233a0d8c0a5b124ce917',1,'MorseTheory::src::Algorithms::load_data::Datastructure::Vertex']]],
+  ['queue_630',['queue',['../classMorseTheory_1_1src_1_1Algorithms_1_1cancellation__queue_1_1CancellationQueue.html#af8ceabb22d9297bd28382151f35a2252',1,'MorseTheory.src.Algorithms.cancellation_queue.CancellationQueue.queue()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1PriorityQueue_1_1PriorityQueue.html#af8ceabb22d9297bd28382151f35a2252',1,'MorseTheory.src.Algorithms.PriorityQueue.PriorityQueue.queue()']]]
 ];

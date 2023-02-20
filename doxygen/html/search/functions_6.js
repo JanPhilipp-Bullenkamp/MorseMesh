@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['get_5fboundary_317',['get_boundary',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1MorseCells.html#a01dcf713b79842851220c84c81a4b048',1,'MorseTheory::src::Algorithms::MorseCells']]],
-  ['get_5fclosest_5fextremum_318',['get_closest_extremum',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1reduce_morse_complex.html#a069643be098d21abdbda9a1270ded35d',1,'MorseTheory::src::Algorithms::reduce_morse_complex']]],
-  ['get_5fmorsecells_319',['get_morse_cells',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1MorseCells.html#a772fd0cacf8f078bf38113af2c44c9d6',1,'MorseTheory::src::Algorithms::MorseCells']]],
-  ['get_5fsalient_5fedge_5findices_320',['get_salient_edge_indices',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1EdgeDetection.html#a5ab3af1f957b6e461804a90fa73fa216',1,'MorseTheory::src::Algorithms::EdgeDetection']]],
-  ['get_5fsalient_5fedges_321',['get_salient_edges',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#aec2e6d923a3331b762e2e40024f74c5a',1,'MorseTheory::src::morse::Morse']]]
+  ['face_5fgradient_477',['face_gradient',['../classMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1Datastructure_1_1Simplex.html#a40e60fc21e650e95c988a8692580a0f4',1,'MorseTheory::src::Algorithms::load_data::Datastructure::Simplex']]],
+  ['fill_5fneighborhood_478',['fill_neighborhood',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1cluster.html#a688b8104d5539a06c8586588c905a7a4',1,'MorseTheory::src::Algorithms::cluster']]],
+  ['fun_5fval_5fstatistics_479',['fun_val_statistics',['../namespaceMorseTheory_1_1src_1_1plot__data_1_1statistics.html#ac958cad8dbda98d4bdd2d721f60295a9',1,'MorseTheory::src::plot_data::statistics']]],
+  ['funval_5fstatistics_480',['funval_statistics',['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#a98c6821faeb89913541258e29ba340c0',1,'MorseTheory::src::morse::Morse']]]
 ];
