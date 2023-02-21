@@ -3,163 +3,77 @@ import numpy as np
 import vtk
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QSlider, QLabel, QPushButton, QGridLayout
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from PyQt5.QtWidgets import QFileDialog, QSlider, QLabel, QPushButton
 
-from src.morse import Morse
+from gui_data import Data, Flags, Parameters
 from gui_menubar import MenuBar
 from gui_sidebar import SideBar
+from gui_window import Window
 
-color_list = [[255,0,0],  #red
-              [0,255,0], #lime
-              [0,0,255], # blue
-              [255,255,0], # yellow
-              [0,255,255], #cyan
-              [255,0,255], #magenta
-              [192,192,192], #silver
-              [128,0,0], #maroon
-              [128,128,0], #olive
-              [0,128,0], # green
-              [128,0,128], #purple
-              [0,128,128], #teal
-              [0,0,128] #navy
-             ]
-
-class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
+class PaintbrushInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
     def __init__(self):
-        self.AddObserver("MouseWheelForwardEvent", self.zoomIn)
-        self.AddObserver("MouseWheelBackwardEvent", self.zoomOut)
+        self.AddObserver("LeftButtonPressEvent", self.left_button_press_event)
+        self.AddObserver("LeftButtonReleaseEvent", self.left_button_release_event)
 
-    def zoomIn(self, obj, event):
-        self.GetCurrentRenderer().ResetCameraClippingRange()
-        self.GetCurrentRenderer().GetActiveCamera().Zoom(1.1)
-        self.GetInteractor().GetRenderWindow().Render()
-    
-    def zoomOut(self, obj, event):
-        self.GetCurrentRenderer().ResetCameraClippingRange()
-        self.GetCurrentRenderer().GetActiveCamera().Zoom(0.9)
-        self.GetInteractor().GetRenderWindow().Render()
+        self.paintbrush = vtk.vtkPolyData()
+        self.paintbrush_points = vtk.vtkPoints()
+        self.paintbrush_cells = vtk.vtkCellArray()
 
-class Parameters:
-    def __init__(self):
-        self.reset()
+        self.paintbrush.SetPoints(self.paintbrush_points)
+        self.paintbrush.SetVerts(self.paintbrush_cells)
 
-    def reset(self):
-        self.high_thresh = None
-        self.low_thresh = None
-        self.mode = "ridge"
-        self.min_length = 1
-        self.max_length = float('inf')
-
-        self.high_percent = 50
-        self.low_percent = 45
-
-        self.persistence = 0.04
-        self.merge_threshold = 0.3
-        self.cluster_seed_number = 150
-
-        self.size_threshold = 500
-
-    def update(self, value, attr: str):
-        setattr(self, attr, value)
-
-class Flags:
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.flag_morse_computations = False
-        self.flag_loaded_data = False
-        self.flag_sliders_shown = False
-
-class Data:
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.morse = Morse()
-
-        self.color_points = set()
-        self.current_segmentation = {}
-        self.current_segmentation_params = None
-
-class Window:
-    def __init__(self):
-        self.window = QtWidgets.QWidget()
-        self.window.setGeometry(100,100,800,800)
-        self.window.setWindowTitle("Mesh GUI")
-        self.layout = QGridLayout()
-
-        # Create the VTK widget and add it to the layout
-        self.vtkWidget = QVTKRenderWindowInteractor(self.window)
-        self.layout.addWidget(self.vtkWidget, 0,0)
-        ren = vtk.vtkRenderer()
-        ren.SetBackground(0.1, 0.1, 0.1)
-        self.vtkWidget.GetRenderWindow().AddRenderer(ren)
-        interactor = self.vtkWidget.GetRenderWindow().GetInteractor()
-        style = CustomInteractorStyle()
-        interactor.SetInteractorStyle(style)
-        self.window.setLayout(self.layout)
-        self.window.show()
-
-    def update_mesh(self, vert_dict: dict, face_dict: dict):
-        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
-        if ren != None:
-            ren.RemoveAllViewProps()
-
-        mesh = vtk.vtkPolyData()
-        points = vtk.vtkPoints()
-        polys = vtk.vtkCellArray()
-        for vert in vert_dict.values():
-            points.InsertNextPoint(np.array([vert.x, vert.y, vert.z]))
-        for face in face_dict.values():
-            polys.InsertNextCell(len(face.indices), np.array(list(face.indices)))
-        mesh.SetPoints(points)
-        mesh.SetPolys(polys)
-
-        mapper = vtk.vtkPolyDataMapper()
-        mapper.SetInputData(mesh)
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
-
-        # Add the mesh actor to the vtk renderer and show the window
-        ren.AddActor(actor)
-        ren.ResetCamera()
-        self.vtkWidget.GetRenderWindow().Render()
-
-    def update_mesh_color(self, label_dict: dict, partial: bool = False):
-        # Get the renderer and mesh actor
-        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
-        actor = ren.GetActors().GetLastActor()
-
-        # Get the mapper and the mesh data
-        mapper = actor.GetMapper()
-        mesh = mapper.GetInput()
-
-        # Set the color of the points in the mesh
-        point_data = mesh.GetPointData()
-        color_array = vtk.vtkUnsignedCharArray()
-        color_array.SetNumberOfComponents(3)
-        color_array.SetName("Colors")
-
-        if partial: # write all points in white and update color points afterwards
-            number_of_points = mesh.GetNumberOfPoints()
-            white = (255, 255, 255)
-            for i in range(number_of_points):
-                color_array.InsertTypedTuple(i, white)
-
-        for label, cell in label_dict.items():
-            cell_color = color_list[label%len(color_list)]
-            for ind in cell.vertices:
-                color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
-        point_data.SetScalars(color_array)
-
-        # Update the mapper and render the window
-        mapper.Update()
-        self.vtkWidget.GetRenderWindow().Render()
-
-
+        self.paintbrush_mapper = vtk.vtkPolyDataMapper()
+        self.paintbrush_mapper.SetInputData(self.paintbrush)
+        self.paintbrush_actor = vtk.vtkActor()
+        self.paintbrush_actor.SetMapper(self.paintbrush_mapper)
+        self.paintbrush_actor.GetProperty().SetPointSize(10)
+        self.paintbrush_actor.GetProperty().SetColor(1, 0, 0)
         
+        self.paint_radius = 10 # set the paint radius here
+
+    def left_button_press_event(self, obj, event):
+        self.OnLeftButtonDown()
+        self.paint_at_mouse_position()
+
+    def left_button_release_event(self, obj, event):
+        self.OnLeftButtonUp()
+
+    def paint_at_mouse_position(self):
+        # Get the mouse position in screen coordinates
+        screen_x, screen_y = self.GetInteractor().GetEventPosition()
+
+        # Convert the screen coordinates to world coordinates
+        picker = vtk.vtkPropPicker()
+        picker.Pick(screen_x, screen_y, 0, self.GetDefaultRenderer())
+        position = picker.GetPickPosition()
+
+        # Find all the points within the paint radius of the mouse position
+        point_ids = self.GetPointsWithinRadius(position)
+
+        # Add the points to the paintbrush
+        for point_id in point_ids:
+            self.paintbrush_points.InsertNextPoint(self.points.GetPoint(point_id))
+            self.paintbrush_cells.InsertNextCell(1)
+            self.paintbrush_cells.InsertCellPoint(self.paintbrush_points.GetNumberOfPoints() - 1)
+
+        # Update the paintbrush actor
+        self.paintbrush_points.Modified()
+        self.paintbrush_cells.Modified()
+        self.paintbrush_actor.Modified()
+        self.GetDefaultRenderer().AddActor(self.paintbrush_actor)
+
+    def GetPointsWithinRadius(self, position):
+        point_ids = []
+        radius_squared = self.paint_radius * self.paint_radius
+
+        for i in range(self.points.GetNumberOfPoints()):
+            point = self.points.GetPoint(i)
+            distance_squared = vtk.vtkMath.Distance2BetweenPoints(point, position)
+            if distance_squared <= radius_squared:
+                point_ids.append(i)
+
+        return point_ids
+
 
 class Application:
     def __init__(self):
@@ -191,7 +105,6 @@ class Application:
         except AttributeError:
             self.flags.flag_sliders_shown = False
 
-
     def connect_functions_to_menu_buttons(self):
         self.menu_bar.open_file_action.triggered.connect(self.browse_file)
         self.menu_bar.open_feature_vec_file_action.triggered.connect(self.browse_feature_vector_file)
@@ -214,12 +127,18 @@ class Application:
         self.menu_bar.segment_new_action.triggered.connect(self.compute_segmentation_new)
         self.menu_bar.show_funvals_action.triggered.connect(self.color_funvals)
 
+        self.menu_bar.paintbrush_action.triggered.connect(self.paint_test)
+
     def update_buttons(self):
         self.menu_bar.show_sliders_action.setEnabled(True if self.flags.flag_morse_computations and not self.flags.flag_sliders_shown else False)
         self.menu_bar.compute_Morse_action.setEnabled(True if self.flags.flag_loaded_data else False)
         self.menu_bar.save_edges_ply_action.setEnabled(True if self.flags.flag_morse_computations else False)
         self.menu_bar.segment_action.setEnabled(True if self.flags.flag_morse_computations else False)
 
+    def paint_test(self):
+        # set the interactor style to the paintbrush style
+        paintbrush_style = PaintbrushInteractorStyle()
+        self.window.vtkWidget.SetInteractorStyle(paintbrush_style)
 
     def browse_file(self):
         options = QFileDialog.Options()
@@ -240,6 +159,7 @@ class Application:
         file_name, _ = QFileDialog.getOpenFileName(None, "Select feature vector File", "", "Mat Files (*.mat)", options=options)
         if file_name:
             self.data.morse.load_new_funvals(file_name, operation="maxabs")
+            self.color_funvals()
 
     def save_edges_ply_file(self):
         options = QFileDialog.Options()
@@ -260,96 +180,19 @@ class Application:
             self.data.morse.plot_labels_txt(self.data.current_segmentation, filename)
 
     def update_mesh(self):
-        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
-        if ren != None:
-            ren.RemoveAllViewProps()
-
-        mesh = vtk.vtkPolyData()
-        points = vtk.vtkPoints()
-        polys = vtk.vtkCellArray()
-
-        for vert in self.data.morse.Vertices.values():
-            points.InsertNextPoint(np.array([vert.x, vert.y, vert.z]))
-        for face in self.data.morse.Faces.values():
-            polys.InsertNextCell(len(face.indices), np.array(list(face.indices)))
-        mesh.SetPoints(points)
-        mesh.SetPolys(polys)
-
-        mapper = vtk.vtkPolyDataMapper()
-        mapper.SetInputData(mesh)
-
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
-
-        # Add the mesh actor to the vtk renderer and show the window
-        ren.AddActor(actor)
-        ren.ResetCamera()
-
-        self.vtkWidget.GetRenderWindow().Render()
+        self.window.update_mesh(self.data.morse.Vertices, self.data.morse.Faces)
 
     def update_edge_color(self):
         if self.parameters.mode == "ridge":
             self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.min_length, self.parameters.max_length)
         elif self.parameters.mode == "valley":
             self.data.color_points = self.data.morse.get_salient_valleys(self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.min_length, self.parameters.max_length)
-        # Get the renderer and mesh actor
-        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
-        actor = ren.GetActors().GetLastActor()
-
-        # Get the mapper and the mesh data
-        mapper = actor.GetMapper()
-        mesh = mapper.GetInput()
-
-        # Set the color of the points in the mesh
-        point_data = mesh.GetPointData()
-        color_array = vtk.vtkUnsignedCharArray()
-        color_array.SetNumberOfComponents(3)
-        color_array.SetName("Colors")
-        for ind in range(mesh.GetNumberOfPoints()):
-            if ind in self.data.color_points:
-                color_array.InsertNextTuple3(0,0,255)
-            else:
-                color_array.InsertNextTuple3(255,255,255)
-        point_data.SetScalars(color_array)
-
-        # Update the mapper and render the window
-        mapper.Update()
-        self.vtkWidget.GetRenderWindow().Render()
-
-    def update_mesh_color_segmentation(self, label_dict: dict, partial: bool = False):
-        # Get the renderer and mesh actor
-        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
-        actor = ren.GetActors().GetLastActor()
-
-        # Get the mapper and the mesh data
-        mapper = actor.GetMapper()
-        mesh = mapper.GetInput()
-
-        # Set the color of the points in the mesh
-        point_data = mesh.GetPointData()
-        color_array = vtk.vtkUnsignedCharArray()
-        color_array.SetNumberOfComponents(3)
-        color_array.SetName("Colors")
-
-        if partial: # write all points in white and update color points afterwards
-            number_of_points = mesh.GetNumberOfPoints()
-            white = (255, 255, 255)
-            for i in range(number_of_points):
-                color_array.InsertTypedTuple(i, white)
-
-        for label, cell in label_dict.items():
-            cell_color = color_list[label%len(color_list)]
-            for ind in cell.vertices:
-                color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
-        point_data.SetScalars(color_array)
-
-        # Update the mapper and render the window
-        mapper.Update()
-        self.vtkWidget.GetRenderWindow().Render()
+        color_dict = {1: self.data.color_points}
+        self.window.update_mesh_color(color_dict, partial=True, cell_structure=False)
 
     def color_segmentation(self, partial: bool = False):
-        self.update_mesh_color_segmentation(self.data.current_segmentation, partial=partial)
-        
+        self.window.update_mesh_color(self.data.current_segmentation, partial=partial)
+
     def cluster(self):
         self.data.current_segmentation = self.data.morse.seed_cluster_mesh(self.data.color_points, self.parameters.cluster_seed_number)
         self.color_segmentation()
@@ -374,35 +217,12 @@ class Application:
         self.color_segmentation()
 
     def color_funvals(self):
-        # Get the renderer and mesh actor
-        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
-        actor = ren.GetActors().GetLastActor()
-
-        # Get the mapper and the mesh data
-        mapper = actor.GetMapper()
-        mesh = mapper.GetInput()
-
-        # Set the color of the points in the mesh
-        point_data = mesh.GetPointData()
-        color_array = vtk.vtkUnsignedCharArray()
-        color_array.SetNumberOfComponents(3)
-        color_array.SetName("Colors")
-        for ind, vert in self.data.morse.Vertices.items():
-            lamb = (vert.fun_val-self.data.morse.min)/self.data.morse.range
-            color = int(lamb*255) 
-            color_array.InsertTypedTuple(ind, (color,color,color))
-            
-        point_data.SetScalars(color_array)
-
-        # Update the mapper and render the window
-        mapper.Update()
-        self.vtkWidget.GetRenderWindow().Render()
+        self.window.update_fun_val_color(self.data.morse.Vertices, self.data.morse.range, self.data.morse.min)
 
     def compute_morse(self):
         self.data.morse.process_lower_stars()
         self.data.morse.extract_morse_complex()
         self.data.morse.reduce_morse_complex(self.data.morse.range)
-        #self.data.reduce_morse_complex(self.persistence)
 
         self.parameters.high_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.high_percent/100
         self.parameters.low_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.low_percent/100
@@ -490,38 +310,38 @@ class Application:
         # Connect the valueChanged signal of the slider to the update_parameter function
         self.slider2.valueChanged.connect(lambda value: self.update_low_thresh(value, self.label2))
 
-        self.layout.addWidget(self.label1,1,0)
-        self.layout.addWidget(self.slider1,2,0)
-        self.layout.addWidget(self.label2,3,0)
-        self.layout.addWidget(self.slider2,4,0)
+        self.window.layout.addWidget(self.label1,1,0)
+        self.window.layout.addWidget(self.slider1,2,0)
+        self.window.layout.addWidget(self.label2,3,0)
+        self.window.layout.addWidget(self.slider2,4,0)
 
         # Create the exit button
         self.exit_button = QPushButton("Close Sliders")
         # Connect the clicked signal to the remove_sliders function
         self.exit_button.clicked.connect(self.remove_sliders)
-        self.layout.addWidget(self.exit_button)
+        self.window.layout.addWidget(self.exit_button)
 
         # Add the layout to the main window
-        self.window.setLayout(self.layout)
+        self.window.window.setLayout(self.window.layout)
 
         self.flag_sliders_shown = True
         self.update_buttons()
 
     def remove_sliders(self):
         # Remove the first slider and its label from the layout
-        self.layout.removeWidget(self.slider1)
+        self.window.layout.removeWidget(self.slider1)
         self.slider1.setParent(None)
-        self.layout.removeWidget(self.label1)
+        self.window.layout.removeWidget(self.label1)
         self.label1.setParent(None)
 
         # Remove the second slider and its label from the layout
-        self.layout.removeWidget(self.slider2)
+        self.window.layout.removeWidget(self.slider2)
         self.slider2.setParent(None)
-        self.layout.removeWidget(self.label2)
+        self.window.layout.removeWidget(self.label2)
         self.label2.setParent(None)
 
         # remove exit button
-        self.layout.removeWidget(self.exit_button)
+        self.window.layout.removeWidget(self.exit_button)
         self.exit_button.setParent(None)
 
         #delete the object from memory

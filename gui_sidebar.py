@@ -11,9 +11,9 @@ class SideBar:
         self.create_boxes(parameters)
         
         # connect the stateChanged signal of the boxes to a slot
-        self.box_ridge.stateChanged.connect(lambda state, checkbox=self.box_ridge: self.check_boxes(state, checkbox))
-        self.box_valley.stateChanged.connect(lambda state, checkbox=self.box_valley: self.check_boxes(state, checkbox))
-        self.box_both.stateChanged.connect(lambda state, checkbox=self.box_both: self.check_boxes(state, checkbox))
+        self.box_ridge.stateChanged.connect(lambda state, checkbox=self.box_ridge: self.check_boxes(state, checkbox, parameters))
+        self.box_valley.stateChanged.connect(lambda state, checkbox=self.box_valley: self.check_boxes(state, checkbox, parameters))
+        self.box_both.stateChanged.connect(lambda state, checkbox=self.box_both: self.check_boxes(state, checkbox, parameters))
 
         self.add_boxes_to_sidebar_layout()
         self.connect_update_boxes(parameters)

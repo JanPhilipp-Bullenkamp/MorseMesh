@@ -34,3 +34,5 @@ class MenuBar:
         self.merge_cluster_action = self.visualization_menu.addAction("Merge Cluster")
         self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
         self.show_funvals_action = self.visualization_menu.addAction("Show funvals")
+
+        self.paintbrush_action = self.visualization_menu.addAction("Paintbrush")
