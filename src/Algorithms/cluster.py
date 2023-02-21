@@ -160,9 +160,6 @@ def compute_all_weights(cluster: dict, bd_pts: set):
             cluster[nei_seed].neighbors_weights[seed] = weight
             
 def compute_weight(cluster_boundary: set, edge_pts: set):
-    #print("Cluster bd: ",cluster_boundary)
-    #print("Inters w edges: ",cluster_boundary.intersection(edge_pts))
-    #print("Weight: ",len(cluster_boundary.intersection(edge_pts))/len(cluster_boundary))
     return len(cluster_boundary.intersection(edge_pts))/len(cluster_boundary)
 
 def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
