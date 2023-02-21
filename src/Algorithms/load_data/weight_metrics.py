@@ -2,14 +2,7 @@ import numpy as np
 
 # idea: percentage of salient edge pts on a boundary between two cells
 def compute_weight_saledge(points, sal_points):
-    edge = 0
-    noedge = 0
-    for ind in points:
-        if ind in sal_points:
-            edge += 1
-        else:
-            noedge += 1
-    return edge/(edge+noedge)
+    return len(points.intersection(sal_points))/len(points)
 
 # idea: average fun_val on a boundary between two cells
 def compute_weight_funvals(points, vert_dict):

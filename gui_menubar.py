@@ -35,4 +35,5 @@ class MenuBar:
         self.segment_new_action = self.visualization_menu.addAction("Segmentation new")
         self.show_funvals_action = self.visualization_menu.addAction("Show funvals")
 
+        self.cluster_neighbors_action = self.visualization_menu.addAction("Cluster neighbors")
         self.paintbrush_action = self.visualization_menu.addAction("Paintbrush")

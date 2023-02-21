@@ -127,6 +127,7 @@ class Application:
         self.menu_bar.segment_new_action.triggered.connect(self.compute_segmentation_new)
         self.menu_bar.show_funvals_action.triggered.connect(self.color_funvals)
 
+        self.menu_bar.cluster_neighbors_action.triggered.connect(self.cluster_boundary_to_other_clusters)
         self.menu_bar.paintbrush_action.triggered.connect(self.paint_test)
 
     def update_buttons(self):
@@ -210,6 +211,16 @@ class Application:
             comp.vertices = comp.boundary.intersection(self.data.color_points)
         self.data.current_segmentation = cluster_dict
         self.color_segmentation(partial=True)
+
+    def cluster_boundary_to_other_clusters(self):
+        cluster_dict = self.data.morse.seed_cluster_mesh(self.data.color_points, self.parameters.cluster_seed_number)
+        new_dict = {}
+        i=0
+        for comp in cluster_dict.values():
+            for nei, points in comp.neighbors.items():
+                new_dict[i] = points - self.data.color_points
+                i+=1
+        self.window.update_mesh_color(new_dict, partial=True, cell_structure=False)
 
     def merge_cluster(self):
         clust  = self.data.morse.seed_cluster_mesh(self.data.color_points, self.parameters.cluster_seed_number)

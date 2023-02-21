@@ -205,7 +205,7 @@ class Simplex:
     ## @var index
     # The index of this simplex (edge-index or face-index)
     
-    __slots__ = ("indices", "fun_val", "index", "max_fun_val_index", "area")
+    __slots__ = ("indices", "fun_val", "index", "max_fun_val_index", "area", "gradient")
     
     def __init__(self, indices: set = None, index: int = None):
         """! The Constructor of a Simplex
@@ -219,6 +219,7 @@ class Simplex:
         self.index = index #int
 
         self.area = None
+        self.gradient = None
     
     def set_fun_val(self, vertices_dict: dict):
         """! @brief Sets the function value of the simplex.
