@@ -115,6 +115,7 @@ class Application:
         self.menu_bar.compute_Morse_action.triggered.connect(self.compute_morse)
         self.menu_bar.compute_smoothing_action.triggered.connect(self.smoothing)
         self.menu_bar.compute_perona_malik_action.triggered.connect(self.compute_perona_malik)
+        self.menu_bar.compute_line_connected_components_action.triggered.connect(self.line_connected_components)
 
         # Create the show sliders action and add it to the visualization menu
         self.menu_bar.show_sliders_action.triggered.connect(self.show_slider)
@@ -129,6 +130,12 @@ class Application:
 
         self.menu_bar.cluster_neighbors_action.triggered.connect(self.cluster_boundary_to_other_clusters)
         self.menu_bar.paintbrush_action.triggered.connect(self.paint_test)
+
+    def line_connected_components(self):
+        box = self.data.morse.get_bounding_box()
+        print(box.min_x, box.min_y, box.min_z, box.max_x, box.max_y, box.max_z)
+        self.data.color_points = self.data.morse.clean_lines(self.data.color_points)
+        self.data.morse.get_connected_components_lines(self.data.color_points)
 
     def update_buttons(self):
         self.menu_bar.show_sliders_action.setEnabled(True if self.flags.flag_morse_computations and not self.flags.flag_sliders_shown else False)

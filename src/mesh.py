@@ -27,6 +27,27 @@
 # - maximalReducedComplex
 
 
+from src.Algorithms.load_data.read_ply import read_ply
+
+from src.Algorithms.load_data.read_ply_test import load_ply
+from src.Algorithms.load_data.anisotropic_diffusion import smooth_function_values
+from src.Algorithms.load_data.read_or_process_funvals import read_funvals, apply_perona_malik_diffusion
+
+from src.timer import timed
+
+import os
+import numpy as np
+
+class Box:
+    def __init__(self, min_x: float, min_y: float, min_z: float, max_x: float, max_y: float, max_z: float):
+        self.min_x = min_x
+        self.min_y = min_y
+        self.min_z = min_z
+        self.max_x = max_x
+        self.max_y = max_y
+        self.max_z = max_z
+
+
 class Mesh:
     """! @brief Mesh class used to store mesh, Morse Theory and Segmentation related structures."""
     ## @var filename
@@ -112,10 +133,10 @@ class Mesh:
         
         self.maximalReducedComplex = None
 
+    @timed
     def get_center(self):
         """! @brief Calculates the center of mass of the Vertices stored.
-        
-        @return center An array with x,y and z coordinate of the center of mass.
+        with poke needleer of mass.
         """
         sum_x, sum_y, sum_z = 0, 0, 0
         for v in self.Vertices.values():
@@ -124,6 +145,71 @@ class Mesh:
             sum_z += v.z
         center = [sum_x, sum_y, sum_z] / len(self.Vertices)
         return center
+
+    def get_bounding_box(self):
+        vertices = [np.array((v.x,v.y,v.z)) for v in self.Vertices.values()]
+        min_x, min_y, min_z = np.min(vertices, axis=0)
+        max_x, max_y, max_z = np.max(vertices, axis=0)
+        return Box(min_x, min_y, min_z, max_x, max_y, max_z)
+
+    ''' DATALOADING'''
+    @timed
+    def load_mesh_new(self, filename: str, morse_function: str = "quality", inverted: bool = False):
+        self.reset()
+
+        file_obj = open(filename, 'rb')
+        min_val, max_val = load_ply(file_obj, self.Vertices, self.Edges, self.Faces, morse_function=morse_function, inverted=inverted)
+
+        self.filename = os.path.splitext(filename)[0]
+        self.min = min_val
+        self.max = max_val
+        self.range = max_val - min_val
+    
+    @timed
+    def load_mesh_ply(self, filename: str, quality_index: int, inverted: bool = False):
+        """! @brief Loads a .ply file with a Morse function taken from the given index.
+
+        @param filename The location and filename of the ply file that should be loaded.
+        @param quality_index The index position where the Morse function should be taken from in the vertices.
+        @param inverted (Optional) Boolean, whether the Morse function should be inverted or not (multiplied with -1).
+        """
+        # Reset previously loaded data if necessary
+        self.reset()
+        min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
+                                    self.Edges, self.Faces, inverted=inverted)
+        self.filename = os.path.splitext(filename)[0]
+        self.min = min_val
+        self.max = max_val
+        self.range = max_val - min_val
+        
+    @timed    
+    def load_new_funvals(self, filename: str, operation: str = "max"):
+        """! @brief Loads new function values into the Mesh. Currently expects a feature vector file from Gigamesh i think.
+        @param filename The location and filename of the feature vector file that should give new Morse function values.
+        @param operation Optionally change the function on the feature vector: currently options are max, min, maxabs and minabs. Default is max.
+        """
+        min_val, max_val = read_funvals(filename, self.Vertices, self.Edges, self.Faces, operation=operation)
+        self.min = min_val
+        self.max = max_val
+        self.range = max_val - min_val
+        self.reset_morse()
+
+    @timed
+    def get_area(self):
+        area = sum([face.compute_area(self.Vertices) for face in self.Faces.values()])
+        return area
+
+    @timed
+    def smooth_fun_vals(self, n_neighboorhood: int = 1):
+        smooth_function_values(self.Vertices, n_neighboorhood)
+
+    @timed
+    def apply_perona_malik(self, iterations: int, lamb: float, k: float):
+        min_val, max_val = apply_perona_malik_diffusion(self.Vertices, self.Edges, self.Faces, iterations, lamb, k)
+        self.min = min_val
+        self.max = max_val
+        self.range = max_val - min_val
+        self.reset_morse()
 
     def __repr__(self):
         """! @brief Prints out Mesh information.

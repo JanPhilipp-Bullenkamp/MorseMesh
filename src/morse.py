@@ -32,9 +32,6 @@
 
 
 # import stuff
-from src.Algorithms.load_data.read_ply import read_ply
-from src.Algorithms.load_data.anisotropic_diffusion import smooth_function_values
-from src.Algorithms.load_data.read_or_process_funvals import read_funvals, apply_perona_malik_diffusion
 from src.Algorithms.process_lower_stars import process_lower_stars
 from src.Algorithms.extract_morse_complex import extract_morse_complex
 from src.Algorithms.reduce_morse_complex import cancel_critical_pairs
@@ -60,12 +57,8 @@ from src.timer import timed
 
 # import libraries
 import timeit
-import os
 import numpy as np
 import itertools
-
-from src.Algorithms.load_data.read_ply_test import load_ply
-
 
 class Morse(Mesh):
     def __init__(self):
@@ -78,60 +71,6 @@ class Morse(Mesh):
     @timed
     def cluster_segmentation(self, cluster: dict, bd_points: set, threshold: float):
         return merge_cluster(cluster, bd_points, threshold)
-    
-    ''' DATALOADING'''
-    @timed
-    def load_mesh_new(self, filename: str, morse_function: str = "quality", inverted: bool = False):
-        self.reset()
-
-        file_obj = open(filename, 'rb')
-        min_val, max_val = load_ply(file_obj, self.Vertices, self.Edges, self.Faces, morse_function=morse_function, inverted=inverted)
-
-        self.filename = os.path.splitext(filename)[0]
-        self.min = min_val
-        self.max = max_val
-        self.range = max_val - min_val
-    
-    @timed
-    def load_mesh_ply(self, filename: str, quality_index: int, inverted: bool = False):
-        """! @brief Loads a .ply file with a Morse function taken from the given index.
-
-        @param filename The location and filename of the ply file that should be loaded.
-        @param quality_index The index position where the Morse function should be taken from in the vertices.
-        @param inverted (Optional) Boolean, whether the Morse function should be inverted or not (multiplied with -1).
-        """
-        # Reset previously loaded data if necessary
-        self.reset()
-        min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
-                                    self.Edges, self.Faces, inverted=inverted)
-        self.filename = os.path.splitext(filename)[0]
-        self.min = min_val
-        self.max = max_val
-        self.range = max_val - min_val
-        
-    @timed    
-    def load_new_funvals(self, filename: str, operation: str = "max"):
-        """! @brief Loads new function values into the Mesh. Currently expects a feature vector file from Gigamesh i think.
-        @param filename The location and filename of the feature vector file that should give new Morse function values.
-        @param operation Optionally change the function on the feature vector: currently options are max, min, maxabs and minabs. Default is max.
-        """
-        min_val, max_val = read_funvals(filename, self.Vertices, self.Edges, self.Faces, operation=operation)
-        self.min = min_val
-        self.max = max_val
-        self.range = max_val - min_val
-        self.reset_morse()
-
-    @timed
-    def smooth_fun_vals(self, n_neighboorhood: int = 1):
-        smooth_function_values(self.Vertices, n_neighboorhood)
-
-    @timed
-    def apply_perona_malik(self, iterations: int, lamb: float, k: float):
-        min_val, max_val = apply_perona_malik_diffusion(self.Vertices, self.Edges, self.Faces, iterations, lamb, k)
-        self.min = min_val
-        self.max = max_val
-        self.range = max_val - min_val
-        self.reset_morse()
         
     ''' MORSE THEORY'''
     
@@ -366,6 +305,45 @@ class Morse(Mesh):
         valleys = valley_detection(self.maximalReducedComplex, thresh_high, thresh_low, 
                                self.Vertices, self.Edges, self.Faces, min_length=min_length, max_length=max_length)
         return valleys
+
+    @timed
+    def clean_lines(self, line_points: set):
+        print("Pts before cleaning",len(line_points))
+        cleaned_lines = set()
+        for pt in line_points:
+            #print(len(self.Vertices[pt].neighbors.intersection(line_points)))
+            if len(self.Vertices[pt].neighbors.intersection(line_points)) > 1:
+                cleaned_lines.add(pt)
+        print("Pts after cleaning",len(cleaned_lines))
+        return cleaned_lines
+                
+    @timed
+    def get_connected_components_lines(self, line_points: set):
+        components = {}
+        index = 1
+        while len(line_points) != 0:
+            start = line_points.pop()
+            connected = set()
+            component_length = 0
+            queue = [start]
+            while len(queue) != 0:
+                p = queue.pop()
+                connected.add(p)
+                for elt in self.Vertices[p].neighbors.intersection(line_points):
+                    queue.append(elt)
+                    line_points.remove(elt)
+                    component_length += self.Vertices[p].distance_to_vertex(self.Vertices[elt])
+                    #print("Dist ",p, " to ", elt)
+            components[index] = connected, component_length
+            index += 1
+
+        print("Number of lines: ",len(components))
+        for nb, comp in components.items():
+            pts, leng = comp
+            print("Index: ", nb)
+            print("Length: ",leng)
+            print("nb points: ", len(pts))
+        return components
 
     @timed
     def pipeline_salient_segmentation(self, infilename: str, outfilename: str, quality_index: int, inverted: bool, 

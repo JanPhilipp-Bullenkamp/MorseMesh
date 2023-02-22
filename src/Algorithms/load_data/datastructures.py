@@ -90,6 +90,9 @@ class Vertex:
         # needed for Morse Cells
         self.label = -1 #int
         self.boundary = False #bool
+
+    def distance_to_vertex(self, vert):
+        return np.linalg.norm(np.array((self.x, self.y, self.z))-np.array((vert.x, vert.y, vert.z)))
         
     def has_neighbor_label(self, vert_dict: dict) -> tuple[set, list]:
         neighbor_labels = set()
@@ -256,15 +259,19 @@ class Simplex:
         else:
             return False
 
-    def compute_area(self, vert_dict: dict):
+    def compute_area(self, vert_dict: dict) -> float:
         if len(self.indices) != 3:
             raise TypeError("This is not a Triangle-Simplex. Area only defined for triangles atm!")
-        vectors = np.diff([vert_dict[ind].coordinates() for ind in self.indices], axis = 0)
-        cross = np.cross(vectors[0], vectors[1])
-        area = (np.sum(cross**2)**.5) * .5
-        return area
+        if self.area != None:
+            return self.area
+        else:
+            vectors = np.diff([vert_dict[ind].coordinates() for ind in self.indices], axis = 0)
+            cross = np.cross(vectors[0], vectors[1])
+            area = (np.sum(cross**2)**.5) * .5
+            self.area = area
+            return area
 
-    def face_gradient(self, vert_dict: dict, area: float = None):
+    def face_gradient(self, vert_dict: dict, area: float = None) -> float:
         """! @brief bla bla
 
         @details If the face has vertices v_i, v_j, v_k with function values f_i, f_j, f_k and Area A_f, the gradient of th face
@@ -275,14 +282,17 @@ class Simplex:
         """
         if len(self.indices) != 3:
             raise TypeError("This is not a Triangle-Simplex. face_gradient only defined for triangles atm!")
-        if area == None:
-            area = self.compute_area(vert_dict)
-
+        if area == None and self.area == None:
+            self.area = self.compute_area(vert_dict)
+        elif area != None:
+            self.area = area
+        
         v_data = [[vert_dict[ind].coordinates(), ind, vert_dict[ind].fun_val] for ind in self.indices]
 
         vectors = np.diff([v[0] for v in v_data], axis = 0)
         fun_diffs = np.diff([v[2] for v in v_data], axis=0)
-        grad_face = fun_diffs[1]/(2 * area) * vectors[0] + (-1) * fun_diffs[0]/(2 * area) * vectors[1]
+        grad_face = fun_diffs[1]/(2 * self.area) * vectors[0] + (-1) * fun_diffs[0]/(2 * self.area) * vectors[1]
+        self.gradient = grad_face
         return grad_face
         
        

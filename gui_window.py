@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import QGridLayout, QWidget
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 color_list = [[255,0,0],  #red
-              [0,255,0], #lime
               [0,0,255], # blue
+              [0,255,0], #lime
               [255,255,0], # yellow
               [0,255,255], #cyan
               [255,0,255], #magenta
