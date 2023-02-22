@@ -333,7 +333,6 @@ class Morse(Mesh):
                     queue.append(elt)
                     line_points.remove(elt)
                     component_length += self.Vertices[p].distance_to_vertex(self.Vertices[elt])
-                    #print("Dist ",p, " to ", elt)
             components[index] = connected, component_length
             index += 1
 

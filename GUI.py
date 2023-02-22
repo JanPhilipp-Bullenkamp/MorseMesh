@@ -242,8 +242,8 @@ class Application:
         self.data.morse.extract_morse_complex()
         self.data.morse.reduce_morse_complex(self.data.morse.range)
 
-        self.parameters.high_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.high_percent/100
-        self.parameters.low_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.low_percent/100
+        self.parameters.high_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.high_percent/100 + self.data.morse.min_separatrix_persistence
+        self.parameters.low_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.low_percent/100 + self.data.morse.min_separatrix_persistence
         self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, self.parameters.low_thresh)
 
         self.flags.flag_morse_computations = True
@@ -292,7 +292,7 @@ class Application:
     # Create a function to update the parameter based on the slider value
     def update_high_thresh(self, value, label1):
         self.parameters.high_percent = value
-        self.parameters.high_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.high_percent/100
+        self.parameters.high_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.high_percent/100 + self.data.morse.min_separatrix_persistence
         label1.setText("High threshold: {} % -> {}".format(value, self.parameters.high_thresh))
         self.update_edge_color()
         self.parameters_sidebar.param4_input.setText("{:.5f}".format(self.parameters.high_thresh))
@@ -300,7 +300,7 @@ class Application:
     # Create a function to update the parameter based on the slider value
     def update_low_thresh(self, value, label2):
         self.parameters.low_percent = value
-        self.parameters.low_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.low_percent/100
+        self.parameters.low_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.low_percent/100 + self.data.morse.min_separatrix_persistence
         label2.setText("Low threshold: {} % -> {}".format(value, self.parameters.low_thresh))
         self.update_edge_color()
         self.parameters_sidebar.param5_input.setText("{:.5f}".format(self.parameters.low_thresh))

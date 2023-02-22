@@ -11,8 +11,8 @@ class Parameters:
         self.min_length = 1
         self.max_length = float('inf')
 
-        self.high_percent = 50
-        self.low_percent = 45
+        self.high_percent = 75
+        self.low_percent = 70
 
         self.persistence = 0.04
         self.merge_threshold = 0.3
