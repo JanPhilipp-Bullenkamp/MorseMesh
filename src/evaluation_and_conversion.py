@@ -97,7 +97,7 @@ def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename,
     return correctness, pers, high_thr, low_thr, merge_thr
 
 @timed
-def compare_result_txt_to_groundtruth_label_dict(result_filename, gt_label_dict, metric = "IoU", plot_correctness_mask = False):
+def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_dict: dict, metric: str = "IoU", plot_correctness_mask: bool = False):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a labels .txt file.
     @param result_filename The result .txt filename and location.
     @param groundtruth_filename The labels .txt groundtruth filename and location.
@@ -109,7 +109,11 @@ def compare_result_txt_to_groundtruth_label_dict(result_filename, gt_label_dict,
     @return correctness The percentage of correctly labelled vertices in the result file 
     compared to the groundtruth file.
     """    
-    comp_label, pers, high_thr, low_thr, merge_thr = read_labels_txt(result_filename, params=True)
+    comp_label = read_labels_txt(result_filename, params=False)
+
+    high = float(result_filename.split("/")[-1].split("_")[-3][:-1])
+    low = float(result_filename.split("/")[-1].split("_")[-2][:-1])
+    merge = float(result_filename.split("/")[-1].split("_")[-1][:-5])
     
     if metric == "IoU":
         IoU = compute_IoU(gt_label_dict, comp_label)
@@ -129,7 +133,7 @@ def compare_result_txt_to_groundtruth_label_dict(result_filename, gt_label_dict,
     
     correctness = len(correct_points)/total_points*100
     
-    return correctness, pers, high_thr, low_thr, merge_thr
+    return correctness, high, low, merge
 
 @timed    
 def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 0):

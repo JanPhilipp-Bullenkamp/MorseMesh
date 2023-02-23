@@ -406,11 +406,44 @@ class Morse(Mesh):
                         t10 = timeit.default_timer()
                         f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
                         self.plot_segmentation_label_txt(pers, high, low, merge, outfilename)
+
+    @timed
+    def pipeline_cluster_segmentation(self, infilename: str, outfilename: str, inverted: bool,
+                                      high_threshs: list[float], low_threshs: list[float], merge_thresholds: list[float]):
+        
+        with open(outfilename+"_timings.txt", "w") as f:
+            t1 = timeit.default_timer()
+            self.load_mesh_new(infilename, morse_function="quality", inverted=inverted)
+            t2 = timeit.default_timer()
+            f.write("ReadData: "+str(t2-t1)+"\n")
+            self.process_lower_stars()
+            t3 = timeit.default_timer()
+            f.write("process_lower_stars: "+str(t3-t2)+"\n")
+            self.extract_morse_complex()
+            t4 = timeit.default_timer()
+            f.write("extract_morse_complex: "+str(t4-t3)+"\n")
+            self.reduce_morse_complex(self.range)
+            t5 = timeit.default_timer()
+            f.write("ReduceMaximally: "+str(t5-t4)+"\n")
+
+            f.write("\tSegmentation (high,low,merge): time\n")
+            for high, low in list(itertools.product(high_threshs, low_threshs)):
+                t6 = timeit.default_timer()
+                bd_points = self.get_salient_ridges(high, low)
+                cluster = self.seed_cluster_mesh(bd_points, 200)
+                t7 = timeit.default_timer()
+                f.write("Bd points and cluster: "+str(t7-t6)+"\n")
+
+                for merge in merge_thresholds:
+                    t9 = timeit.default_timer()
+                    segmented_dict = self.cluster_segmentation(cluster, bd_points, merge)
+                    t10 = timeit.default_timer()
+                    f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
+                    self.plot_labels_txt(segmented_dict, outfilename+"_"+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
      
     @timed
     def pipeline_semi_auto(self, infilename: str, outfilename: str, quality_index: int, inverted: bool, 
                           merge_thresh: float):
-        
         with open(outfilename+"_timings.txt", "w") as f:
             t1 = timeit.default_timer()
             self.load_mesh_ply(infilename, quality_index, inverted)

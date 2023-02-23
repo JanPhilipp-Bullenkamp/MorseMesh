@@ -205,14 +205,87 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
     # now add boundary points to unoccupied vertices
     unoccupied_vertices.update(bd_pts)
 
+    c=0
+    # treat boundary points if necessary
+    while len(unoccupied_vertices) != 0:
+        remaining_pt = unoccupied_vertices.pop()
+        nei_labels, nei_indices = vert_dict[remaining_pt].has_neighbor_label(vert_dict)
+        if len(nei_labels) == 1:
+            label = nei_labels.pop()
+            cluster[label].vertices.add(remaining_pt)
+            vert_dict[remaining_pt].label = label
+        elif len(nei_labels) == 0:
+            unoccupied_vertices.add(remaining_pt)
+            c+=1
+        elif len(nei_labels) > 1:
+            nei_labels, nei_indices = vert_dict[remaining_pt].has_neighbor_label(vert_dict)
+            counts = Counter(np.array(nei_indices)[:,1])
+            label = counts.most_common(1)[0][0]
+            cluster[label].vertices.add(remaining_pt)
+            vert_dict[remaining_pt].label = label
+        else:
+            raise ValueError("Shouldnt happen!")
+
+    # fill boundary points
+    get_boundary_points(cluster, vert_dict)
+
+    # fill neighborhoods
+    fill_neighborhood(cluster, vert_dict)
+
+    # reset labels
+    for vertex in vert_dict.values():
+        vertex.label = -1
+    return cluster 
+
+def cluster_mesh_old(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
+    cluster = {}
+    
+    unoccupied_vertices = [ind for ind in vert_dict.keys() if ind not in bd_pts]
+
+    seeds = random.sample(unoccupied_vertices, num_seeds)
+    for seed in seeds:
+        cluster[seed] = Component(seed)
+        vert_dict[seed].label = seed
+
+    unoccupied_vertices = set(unoccupied_vertices) - set(seeds)
+
+    len_before = 0
+
+    while len(unoccupied_vertices) != len_before:
+        len_before = len(unoccupied_vertices)
+        for component in cluster.values():
+            open_neighbors = component.get_open_neighbors(vert_dict)
+            component.open = []
+            for ind in open_neighbors:
+                if ind in unoccupied_vertices:
+                    if ind in bd_pts:
+                        component.vertices.add(ind)
+                        vert_dict[ind].label = component.seed
+                    else:
+                        vert_dict[ind].label = component.seed
+                        component.vertices.add(ind)
+                        component.open.append(ind)
+                    unoccupied_vertices.remove(ind)
+
+        # can be the case, if there are enclosures of the boundary where no seed spawned inside
+        if len(unoccupied_vertices) == len_before and len(unoccupied_vertices - bd_pts) != 0:
+            new_seed = (unoccupied_vertices - bd_pts).pop()
+            cluster[new_seed] = Component(new_seed)
+            vert_dict[new_seed].label = new_seed
+            unoccupied_vertices.remove(new_seed)
+
+    if len(unoccupied_vertices) != 0:
+        raise AssertionError("Only boundary points should be left so unoccupied vertices should be empty!")
+
+    # now add boundary points to unoccupied vertices
+    unoccupied_vertices.update(bd_pts)
+
     in_between_points = set()
     c=0
     # treat boundary points if necessary
     while len(unoccupied_vertices) != 0:
         remaining_pt = unoccupied_vertices.pop()
         nei_labels, nei_indices = vert_dict[remaining_pt].has_neighbor_label(vert_dict)
-        if -1 in nei_labels:
-            nei_labels.remove(-1)
         if len(nei_labels) == 1:
             label = nei_labels.pop()
             cluster[label].vertices.add(remaining_pt)
@@ -222,6 +295,8 @@ def cluster_mesh(vert_dict: dict, bd_pts: set, num_seeds: int = 150) -> dict:
             c+=1
         elif len(nei_labels) > 1:
             in_between_points.add(remaining_pt)
+        else:
+            raise ValueError("Shouldnt happen!")
 
     while len(in_between_points) != 0:
         remaining_pt = in_between_points.pop()
