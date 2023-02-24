@@ -282,7 +282,7 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, vert_dict, edge_
                 instead of the 4 possibilities, we only take two (should topologically be equal, due to mod 2 or so ? 
                 Problem for all 4 would be the paths, as we store them such that we expect max 2 paths between two critical simplices
                 '''
-                for p in range(2):
+                for _ in range(2):
                     MorseComplex.CritFaces[new_max].connected_saddles.append(new_sad)
                     MorseComplex.CritEdges[new_sad].connected_maxima.append(new_max)
                 # add two paths: last part from max to new_sad and first part from new_max to sad are different,
@@ -295,7 +295,7 @@ def cancel_one_critical_pair_max(saddle, maximum, MorseComplex, vert_dict, edge_
                 
     # needs to be put out of new_max loop, otherwise repeated to often
     for new_sad, nb_sad in new_saddles_counts.items():
-        for j in range(nb_sad):
+        for _ in range(nb_sad):
             MorseComplex.CritEdges[new_sad].connected_maxima.remove(maximum.index)
                 
     # now pop old saddle and old min from complex, as they have been cancelled and reconnected:

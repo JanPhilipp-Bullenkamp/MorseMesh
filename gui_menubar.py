@@ -24,6 +24,7 @@ class MenuBar:
         self.compute_smoothing_action = self.processing_menu.addAction("Compute smoothing")
         self.compute_perona_malik_action = self.processing_menu.addAction("Compute Perona Malik")
         self.compute_line_connected_components_action = self.processing_menu.addAction("Line Connected Components")
+        self.compute_new_sepa_persistences_action = self.processing_menu.addAction("New Sepa persistence")
 
         # Create the show sliders action and add it to the visualization menu
         self.show_sliders_action = self.visualization_menu.addAction("Show Sliders")

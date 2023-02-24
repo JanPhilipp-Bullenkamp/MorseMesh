@@ -345,6 +345,12 @@ class Morse(Mesh):
         return components
 
     @timed
+    def change_separatrix_persistences_start_end_average(self):
+        if not self._flag_SalientEdge:
+            self.reduce_morse_complex(self.range)
+        self.maximalReducedComplex.change_separatrix_persistences(self.Vertices, self.Edges, self.Faces)
+
+    @timed
     def pipeline_salient_segmentation(self, infilename: str, outfilename: str, quality_index: int, inverted: bool, 
                                      high_thresh: float, low_thresh: float, merge_thresh: float):
         

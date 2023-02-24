@@ -656,6 +656,28 @@ class MorseComplex:
         else:
             self.Segmentations[(thresh_large, thresh_small)][merge_threshold] = SegmentationCells
             
+    def change_separatrix_persistences(self, vert_dict: dict, edge_dict: dict, face_dict: dict):
+        updated_separatrices = []
+        for _, sepa in self.Separatrices:
+            if sepa.dimension == 1:
+                v_ind_high = edge_dict[sepa.origin].max_fun_val_index
+                v_ind_low = sepa.destination
+            elif sepa.dimension == 2:
+                v_ind_high = face_dict[sepa.origin].max_fun_val_index
+                v_ind_low = edge_dict[sepa.destination].max_fun_val_index
+            else:
+                raise ValueError("Separatrix should have dimension 1 or 2!")
+
+            # new metric: average function value between start and finish
+            new_sepa_persistence = (vert_dict[v_ind_high].fun_val + vert_dict[v_ind_low].fun_val) / 2
+            sepa.separatrix_persistence = new_sepa_persistence
+            updated_separatrices.append(tuple((new_sepa_persistence, sepa)))
+
+        self.Separatrices = updated_separatrices
+
+        persistences = [pers for pers, _ in self.Separatrices]
+        self.max_separatrix_persistence = max(persistences)
+        self.min_separatrix_persistence = min(persistences)
         
     def __repr__(self) -> str:
         """! @brief Prints out an info block about this Morse Complex.
