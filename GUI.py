@@ -5,10 +5,10 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QSlider, QLabel, QPushButton
 
-from gui_data import Data, Flags, Parameters
-from gui_menubar import MenuBar
-from gui_sidebar import SideBar
-from gui_window import Window
+from gui.gui_data import Data, Flags, Parameters
+from gui.gui_menubar import MenuBar
+from gui.gui_sidebar import SideBar
+from gui.gui_window import Window
 
 class PaintbrushInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
     def __init__(self):

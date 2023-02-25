@@ -1,4 +1,4 @@
-from src.morse import Morse
+from ..src.morse import Morse
 
 class Parameters:
     def __init__(self):
