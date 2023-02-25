@@ -3,12 +3,14 @@
 # @mainpage Morse Theory Framework
 #
 # @section description_main Description
-# A framework for using discrete Morse Theory on 3D triangluar meshes. Can be used for segmentation 
-# when loading in a suitable scalar function (e.g. curvature values on each vertex).
+# A framework for using discrete Morse Theory on 3D triangluar meshes. 
+# Can be used for segmentation when loading in a suitable scalar function 
+# (e.g. curvature values on each vertex).
 #
 # @section contains_main Contains
-# A morse class that can load a 3D mesh (ply files only at the moment) and perform various Morse Theory
-# computations, as well as a segmentation method and various plotting functions.
+# A morse class that can load a 3D mesh (ply files only at the moment) 
+# and perform various Morse Theory computations, as well as a segmentation 
+# method and various plotting functions.
 #
 # @section libraries_install_main Libraries to install
 # - plyfile library (https://github.com/dranjan/python-plyfile)
@@ -45,9 +47,16 @@ from src.Algorithms.cluster import cluster_mesh, merge_cluster
 from src.Algorithms.roughness_test import variance_heat_map, extremal_points_ratio
 
 from src.plot_data.persistence_diagram import persistence_diagram
-from src.plot_data.write_overlay_ply_files import write_MSComplex_overlay_ply_file, write_MSComplex_detailed_overlay_ply_file, write_Cell_labels_overlay_ply_file, write_SalientEdge_overlay_ply_file
-from src.plot_data.write_labels_txt import write_Cell_labels_txt_file, write_funval_thresh_labels_txt_file, write_variance_heat_map_labels_txt_file
-from src.plot_data.statistics import fun_val_statistics, critical_fun_val_statistics, salient_edge_statistics
+from src.plot_data.write_overlay_ply_files import (write_MSComplex_overlay_ply_file, 
+                                                   write_MSComplex_detailed_overlay_ply_file, 
+                                                   write_Cell_labels_overlay_ply_file, 
+                                                   write_SalientEdge_overlay_ply_file)
+from src.plot_data.write_labels_txt import (write_Cell_labels_txt_file, 
+                                            write_funval_thresh_labels_txt_file, 
+                                            write_variance_heat_map_labels_txt_file)
+from src.plot_data.statistics import (fun_val_statistics, 
+                                      critical_fun_val_statistics, 
+                                      salient_edge_statistics)
 
 from src.plot_data.plot_points_for_debugging import write_overlay_points
 
@@ -76,7 +85,8 @@ class Morse(Mesh):
     
     @timed
     def process_lower_stars(self):
-        """! @brief Runs the process_lower_stars algorithm to get a discrete vector field representing the gradient of the discrete Morse function.
+        """! @brief Runs the process_lower_stars algorithm to get a discrete 
+        vector field representing the gradient of the discrete Morse function.
 
         @details Implementation of the algorithm described in Robins et al......
         """
@@ -84,7 +94,12 @@ class Morse(Mesh):
         if self._flag_process_lower_stars:
             self.reset_morse()
             
-        process_lower_stars(self.Vertices, self.Edges, self.Faces, self.C, self.V12, self.V23)
+        process_lower_stars(self.Vertices, 
+                            self.Edges, 
+                            self.Faces, 
+                            self.C, 
+                            self.V12, 
+                            self.V23)
         self._flag_process_lower_stars = True
         
     @timed
@@ -100,8 +115,12 @@ class Morse(Mesh):
             if self._flag_MorseComplex:
                 self.MorseComplex = None
 
-            self.MorseComplex = extract_morse_complex(self.Vertices, self.Edges, self.Faces, 
-                                                    self.V12, self.V23, self.C)
+            self.MorseComplex = extract_morse_complex(self.Vertices, 
+                                                      self.Edges, 
+                                                      self.Faces, 
+                                                      self.V12, 
+                                                      self.V23, 
+                                                      self.C)
             self.reducedMorseComplexes[0] = self.MorseComplex
             self.MorseComplex.filename = self.filename
             self._flag_MorseComplex = True
@@ -109,10 +128,13 @@ class Morse(Mesh):
     @timed
     def reduce_morse_complex(self, persistence: float):
         """! @brief Reduces the Morse complex up to the given persistence.
-        @details Always cancels two critical simplices of consectutive dimensions if their function values are closer than the given 
-        persistence. The resulting simplified Morse Complex is stored as a copy under reducedMorseComplexes[persistence].
+        @details Always cancels two critical simplices of consectutive dimensions 
+        if their function values are closer than the given persistence. The 
+        resulting simplified Morse Complex is stored as a copy under 
+        reducedMorseComplexes[persistence].
         
-        @param persistence The persistence up to which the Morse complex should be simplified.
+        @param persistence The persistence up to which the Morse complex 
+               should be simplified.
         
         @return The reduced Morse Complex object.
         """
@@ -123,13 +145,17 @@ class Morse(Mesh):
             print("This persistence has already been calculated!")
             print("You can access it via .reducedMorseComplexes[persistence] ") 
         else:
-            self.reducedMorseComplexes[persistence] = cancel_critical_pairs(self.MorseComplex, persistence, 
-                                                                          self.Vertices, self.Edges, self.Faces)
+            self.reducedMorseComplexes[persistence] = cancel_critical_pairs(self.MorseComplex, 
+                                                                            persistence, 
+                                                                            self.Vertices, 
+                                                                            self.Edges, 
+                                                                            self.Faces)
             if persistence >= self.range and not self._flag_SalientEdge:
                 self.maximalReducedComplex = self.reducedMorseComplexes[persistence]
                 self.maximalReducedComplex.maximalReduced = True
                 self._flag_SalientEdge = True
-                separatrix_persistences = [pers for pers,_ in self.maximalReducedComplex.Separatrices]
+                separatrix_persistences = [pers for pers,_ in 
+                                           self.maximalReducedComplex.Separatrices]
                 self.min_separatrix_persistence = min(separatrix_persistences)
                 self.max_separatrix_persistence = max(separatrix_persistences)
                 self.maximalReducedComplex.min_separatrix_persistence = min(separatrix_persistences)
@@ -138,7 +164,11 @@ class Morse(Mesh):
         return self.reducedMorseComplexes[persistence]
 
     @timed
-    def reduce_morse_complex_salient_edge(self, thresh_high: float, thresh_low: float = None, salient_edge_pts: set = None, pers: float = None):
+    def reduce_morse_complex_salient_edge(self, 
+                                          thresh_high: float, 
+                                          thresh_low: float = None, 
+                                          salient_edge_pts: set = None, 
+                                          pers: float = None):
         if not self._flag_MorseComplex:
             print("Need to call extract_morse_complex first...")
             self.extract_morse_complex() 
@@ -149,39 +179,60 @@ class Morse(Mesh):
             salient_edge_pts = self.get_salient_ridges(thresh_high, thresh_low)
 
         if pers == None:
-            self.salient_reduced_morse_complexes[(thresh_high, thresh_low)] = cancel_critical_pairs(self.MorseComplex, self.range, 
-                                                                            self.Vertices, self.Edges, self.Faces, salient_edge_pts=salient_edge_pts)
+            self.salient_reduced_morse_complexes[(thresh_high, thresh_low)] = cancel_critical_pairs(self.MorseComplex, 
+                                                                                                    self.range, 
+                                                                                                    self.Vertices, 
+                                                                                                    self.Edges, 
+                                                                                                    self.Faces, 
+                                                                                                    salient_edge_pts=salient_edge_pts)
             return self.salient_reduced_morse_complexes[(thresh_high, thresh_low)]
         else:
-            self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)] = cancel_critical_pairs(self.MorseComplex, pers,
-                                                                                    self.Vertices, self.Edges, self.Faces, salient_edge_pts)
+            self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)] = cancel_critical_pairs(self.MorseComplex, 
+                                                                                                          pers,
+                                                                                                          self.Vertices, 
+                                                                                                          self.Edges,
+                                                                                                          self.Faces, 
+                                                                                                          salient_edge_pts)
             return self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)]
 
     @timed
-    def extract_cells_salient_complex(self, thresh_high: float, thresh_low: float = None, pers: float = None):
+    def extract_cells_salient_complex(self, 
+                                      thresh_high: float,
+                                      thresh_low: float = None, 
+                                      pers: float = None):
         """! @brief Extracts the Morse Cells of the salient reduced Morse complex.
         
-        @details The extract_cells_salient_complex method extracts cells from a salient reduced Morse complex. It takes 
-        in two parameters: thresh_high and thresh_low. If a Morse complex with the given thresholds has not been reduced 
-        yet, it will be reduced using the reduce_morse_complex_salient_edge method. The method then calls the 
-        get_morse_cells function on the reduced Morse complex, and returns the resulting MorseCells object.
+        @details The extract_cells_salient_complex method extracts cells from 
+        a salient reduced Morse complex. It takes in two parameters: 
+        thresh_high and thresh_low. If a Morse complex with the given thresholds 
+        has not been reduced yet, it will be reduced using the 
+        reduce_morse_complex_salient_edge method. The method then calls the 
+        get_morse_cells function on the reduced Morse complex, and returns 
+        the resulting MorseCells object.
 
         @param thresh_high The higher threshold for the salient edges.
         @param thresh_low (Optional) The lower threshold for the salient edges.
 
-        @return Morse Cells object containing the cells of the salient reduced Morse Complex.
+        @return Morse Cells object containing the cells of the salient 
+                reduced Morse Complex.
         """
         if pers == None:
             if (thresh_high, thresh_low) not in self.salient_reduced_morse_complexes.keys():
                 print("Need to reduce with these edge thresholds first...")
                 self.reduce_morse_complex_salient_edge(thresh_high, thresh_low)
-            get_morse_cells(self.salient_reduced_morse_complexes[(thresh_high,thresh_low)], self.Vertices, self.Edges, self.Faces)
+            get_morse_cells(self.salient_reduced_morse_complexes[(thresh_high,thresh_low)], 
+                            self.Vertices, 
+                            self.Edges, 
+                            self.Faces)
             return self.salient_reduced_morse_complexes[(thresh_high,thresh_low)].MorseCells
         else:
             if (pers, thresh_high, thresh_low) not in self.salient_reduced_morse_complexes.keys():
                 print("Need to reduce with these edge thresholds and persistence first...")
                 self.reduce_morse_complex_salient_edge(thresh_high, thresh_low, pers=pers)
-            get_morse_cells(self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)], self.Vertices, self.Edges, self.Faces)
+            get_morse_cells(self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)], 
+                            self.Vertices, 
+                            self.Edges, 
+                            self.Faces)
             return self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)].MorseCells
     
     @timed
@@ -190,10 +241,14 @@ class Morse(Mesh):
             print("Need to reduce Morse complex to this persistence first...")
             self.reduce_morse_complex(persistence)
         if not self.reducedMorseComplexes[persistence]._flag_MorseCells:
-            get_morse_cells(self.reducedMorseComplexes[persistence], self.Vertices, self.Edges, self.Faces)
+            get_morse_cells(self.reducedMorseComplexes[persistence], 
+                            self.Vertices, 
+                            self.Edges, 
+                            self.Faces)
             return self.reducedMorseComplexes[persistence].MorseCells
         else:
-            print("MorseCells for the MorseComplex with this persistence have already been calculated!")
+            print("MorseCells for the MorseComplex with this "
+                  "persistence have already been calculated!")
     
     @timed
     def calculate_betti_numbers(self, persistence: float = 0):
@@ -218,9 +273,13 @@ class Morse(Mesh):
             self.MorseComplex.partner[2] = partner2
         
         if self.BettiNumbers is not None:
-            if betti[0]!=self.BettiNumbers[0] or betti[1]!=self.BettiNumbers[1] or betti[2]!=self.BettiNumbers[2]:
-                raise AssertionError("Betti numbers have changed since last computation on this mesh... "
-                                     "Shouldnt be possible as we do not change the mesh geometry")
+            if (betti[0]!=self.BettiNumbers[0] 
+                or betti[1]!=self.BettiNumbers[1] 
+                or betti[2]!=self.BettiNumbers[2]):
+                raise AssertionError("Betti numbers have changed since "
+                                     "last computation on this mesh... "
+                                     "Shouldnt be possible as we do not "
+                                     "change the mesh geometry")
         self.BettiNumbers = betti
         self._flag_BettiNumbers = True
         print("Betti Numbers: ", betti)
@@ -229,7 +288,13 @@ class Morse(Mesh):
     ''' SEGMENTATION'''
     
     @timed
-    def segmentation(self, persistence: float, thresh_large: float, thresh_small: float, merge_threshold: float, minimum_labels: int = 3, size_threshold: int = 500):
+    def segmentation(self, 
+                     persistence: float, 
+                     thresh_large: float, 
+                     thresh_small: float, 
+                     merge_threshold: float, 
+                     minimum_labels: int = 3, 
+                     size_threshold: int = 500):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
             self.reduce_morse_complex(persistence)
@@ -242,13 +307,22 @@ class Morse(Mesh):
             
         salient_edge_points = self.get_salient_ridges(thresh_large, thresh_small)
         
-        self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, thresh_large, thresh_small, 
-                                                                    merge_threshold, minimum_labels=minimum_labels, size_threshold=size_threshold)
+        self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, 
+                                                                    thresh_large, 
+                                                                    thresh_small, 
+                                                                    merge_threshold, 
+                                                                    minimum_labels=minimum_labels, 
+                                                                    size_threshold=size_threshold)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
     @timed
-    def segmentation_salient_reduction(self, thresh_large: float, thresh_small: float, merge_threshold: float, persistence: float = None, minimum_labels: int = 3):
+    def segmentation_salient_reduction(self, 
+                                       thresh_large: float, 
+                                       thresh_small: float, 
+                                       merge_threshold: float, 
+                                       persistence: float = None, 
+                                       minimum_labels: int = 3):
         salient_edge_points = self.get_salient_ridges(thresh_large, thresh_small)
 
         if persistence == None:

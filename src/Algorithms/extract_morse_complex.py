@@ -11,16 +11,19 @@
 # - Tree module (local)
 #   - need Tree for path finding to get adjacency between critical cells in the MS complex
 
-import numpy as np
 from .tree import Tree, Node
 
-from .load_data.datastructures import CritVertex, CritEdge, CritFace, MorseComplex
+from .load_data.datastructures import CritEdge, CritFace, MorseComplex
 
-def potential_cells(p, cell, vert_dict, edge_dict):
-    """! @brief Gives the faces(vert/edges) of a cell needed for finding a path from critical cell to critical cell.
+def potential_cells(p: int, 
+                    cell: CritEdge | CritFace, 
+                    vert_dict: dict, 
+                    edge_dict: dict):
+    """! @brief Gives the faces(vert/edges) of a cell needed for finding a 
+    path from critical cell to critical cell.
     
     @param p Dimension of the cell we are looking at (1 if edge, 2 for face).
-    @ param cell The cell we want to get potential faces of.
+    @param cell The cell we want to get potential faces of.
     @param vert_dict Dictionary containing all vertices.
     @param edges_dict Dictionary containing all edges.
     
@@ -38,13 +41,21 @@ def potential_cells(p, cell, vert_dict, edge_dict):
                     
     return pot_alphas
 
-def extract_morse_complex(vert_dict, edge_dict, face_dict, V12, V23, C):
-    """! @brief The function described in Robins et al. 2011, that returns a Morse Complex.
+def extract_morse_complex(vert_dict: dict, 
+                          edge_dict: dict, 
+                          face_dict: dict, 
+                          V12: dict, 
+                          V23: dict, 
+                          C: dict):
+    """! @brief The function described in Robins et al. 2011, that 
+    returns a Morse Complex.
     
-    @details Loops over all critical edges and faces and follows the paths indicated by the gradient field 
-    that start at each critical cell. This gives the adjacencies of the cells and their paths between each 
-    other, giving us the Morse Complex as well as the Separatrices and thereby represents the surface in 
-    a reduced skelton.
+    @details Loops over all critical edges and faces and follows 
+    the paths indicated by the gradient field that start at each 
+    critical cell. This gives the adjacencies of the cells and their 
+    paths between each other, giving us the Morse Complex as well 
+    as the Separatrices and thereby represents the surface in a 
+    reduced skelton.
     
     @param vert_dict The dictionary containing all vertices.
     @param edge_dict The dictionary containing all edges.
