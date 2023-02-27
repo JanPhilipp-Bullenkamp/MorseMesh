@@ -1,5 +1,3 @@
-import numpy as np
-
 def write_header(file):
     file.write("# +-----------------------------------------------------+\n")
     file.write("# | txt file with labels                                |\n")
@@ -19,7 +17,7 @@ def write_header_params(file, pers, thr_high, thr_low, merge_thr):
     file.write("# | Format: index label                                 |\n")
     file.write("# +-----------------------------------------------------+\n")
     
-def write_Cell_labels_txt_file(label_dict: dict, target_file: str, params = None):
+def write_Cell_labels_txt_file(label_dict: dict, target_file: str, params = None, cell_structure: bool = True):
     with open(target_file + ".txt", "w") as f:
         if params == None:
             write_header(f)
@@ -30,9 +28,14 @@ def write_Cell_labels_txt_file(label_dict: dict, target_file: str, params = None
             raise ValueError("The params variable needs the 4 parameters: pers, thr_high, thr_low, merge_thr!")
 
         # write labels
-        for label, indices in enumerate(label_dict.values(), start=1):
-            for index in indices.vertices:
-                f.write(str(index) + " " + str(label) + "\n")
+        if cell_structure:
+            for label, indices in enumerate(label_dict.values(), start=1):
+                for index in indices.vertices:
+                    f.write(str(index) + " " + str(label) + "\n")
+        else:
+            for label, indices in enumerate(label_dict.values(), start=1):
+                for index in indices:
+                    f.write(str(index) + " " + str(label) + "\n")
     
 def write_funval_thresh_labels_txt_file(vert_dict: dict, thresh: float, target_file: str):
     with open(target_file + "_" + str(thresh) + "thresh.txt", "w") as f:
