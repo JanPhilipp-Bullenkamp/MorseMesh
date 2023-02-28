@@ -1,6 +1,7 @@
 
 import collections
 import numpy as np
+import timeit
 
 from .datastructures import Vertex, Simplex
 
@@ -455,6 +456,40 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function
     else:
         raise ValueError('No faces in the plyfile!')
 
+
+    st = timeit.default_timer()
+
+    face_arr = [list(face.indices) for face in face_dict.values()]
+
+    print(face_arr)
+    print(np.array(elements['face']['data']))
+
+    face_arr = np.asanyarray(face_arr)
+
+    # each face has three edges
+    edges = face_arr[:, [0, 1, 1, 2, 2, 0]].reshape((-1, 2))
+
+    # remove duplicates
+    set_lst = map(set, edges)
+    lst = map(tuple, set_lst)
+    rem_dup = set(lst)
+
+    for e_index, edge_indices in enumerate(rem_dup):
+        edge = Simplex(set(edge_indices), e_index)
+        edge_dict[e_index] = edge
+        #vert_dict[edge_indices[0]].star["E"].append(e_index)
+        #vert_dict[edge_indices[1]].star["E"].append(e_index)
+        #vert_dict[edge_indices[0]].neighbors.add(edge_indices[1])
+        #vert_dict[edge_indices[1]].neighbors.add(edge_indices[0])
+
+
+    end = timeit.default_timer()
+
+    print("get edges: ",(end-st))
+    
+    '''
+
+    st = timeit.default_timer()
     eindex = 0
     unique_edges = set()
     for findex, face in face_dict.items():
@@ -474,8 +509,15 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function
                 eindex+=1
                 
                 unique_edges.add(frozenset(subset))
+    end = timeit.default_timer()
 
+    print("get edges: ",(end-st))
+    '''
+    st = timeit.default_timer()
     set_edge_and_face_fun_vals(vert_dict, edge_dict, face_dict)
+    end = timeit.default_timer()
+
+    print("set funvals: ",(end-st))
     
     return min_val, max_val
 
