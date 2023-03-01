@@ -16,7 +16,7 @@ from .tree import Tree, Node
 from .load_data.datastructures import CritEdge, CritFace, MorseComplex
 
 def potential_cells(p: int, 
-                    cell: CritEdge | CritFace, 
+                    cell, #: CritEdge | CritFace 
                     vert_dict: dict, 
                     edge_dict: dict):
     """! @brief Gives the faces(vert/edges) of a cell needed for finding a 

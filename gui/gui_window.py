@@ -37,7 +37,7 @@ class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
 class Window:
     def __init__(self):
         self.window = QWidget()
-        self.window.setGeometry(100,100,800,800)
+        self.window.setGeometry(100,100,1000,1000)
         self.window.setWindowTitle("Mesh GUI")
         self.layout = QGridLayout()
 

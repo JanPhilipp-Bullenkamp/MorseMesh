@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QSlider, QLabel, QPushButton
 
-from gui.gui_data import Data, Flags, Parameters
+from gui_data import Data, Flags, Parameters
 from gui.gui_menubar import MenuBar
 from gui.gui_sidebar import SideBar
 from gui.gui_window import Window
@@ -100,8 +100,7 @@ class Application:
         self.parameters.reset()
 
         try:
-            if self.flags.flag_sliders_shown:
-                self.remove_sliders()
+            self.remove_sliders()
         except AttributeError:
             self.flags.flag_sliders_shown = False
 
@@ -196,9 +195,17 @@ class Application:
 
     def update_edge_color(self):
         if self.parameters.mode == "ridge":
-            self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.min_length, self.parameters.max_length)
+            self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, 
+                                                                        self.parameters.low_thresh, 
+                                                                        self.parameters.min_length, 
+                                                                        self.parameters.max_length,
+                                                                        self.parameters.separatrix_type)
         elif self.parameters.mode == "valley":
-            self.data.color_points = self.data.morse.get_salient_valleys(self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.min_length, self.parameters.max_length)
+            self.data.color_points = self.data.morse.get_salient_valleys(self.parameters.high_thresh, 
+                                                                         self.parameters.low_thresh, 
+                                                                         self.parameters.min_length, 
+                                                                         self.parameters.max_length,
+                                                                         self.parameters.separatrix_type)
         color_dict = {1: self.data.color_points}
         self.window.update_mesh_color(color_dict, partial=True, cell_structure=False)
 
@@ -248,7 +255,9 @@ class Application:
 
         self.parameters.high_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.high_percent/100 + self.data.morse.min_separatrix_persistence
         self.parameters.low_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.low_percent/100 + self.data.morse.min_separatrix_persistence
-        self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, self.parameters.low_thresh)
+        self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, 
+                                                                    self.parameters.low_thresh,
+                                                                    separatrix_type=self.parameters.separatrix_type)
 
         self.flags.flag_morse_computations = True
         self.update_buttons()

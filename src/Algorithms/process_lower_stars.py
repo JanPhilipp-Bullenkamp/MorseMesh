@@ -63,7 +63,7 @@ def num_unpaired_faces(face, PQzero: PriorityQueue):
     # unpaired faces in lower star, since all edges from lower star go 
     # to PQzero or are paired/ added to C and removed from PQzero)
     number = 0
-    for simplex in PQzero.keys():
+    for simplex, _ in PQzero.items():
         if face.has_face(simplex):
             number+=1
     return number

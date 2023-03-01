@@ -3,24 +3,40 @@
 #
 # @brief Contains functions for edge detection based on salient edges
 
-def ridge_detection(maxRedComp, thresh_high: float, thresh_low: float, vert_dict: dict, edge_dict: dict, face_dict: dict, min_length: int = 1, max_length: int=None):
-    """! @brief Uses double threshold to get strong and weak ridges and adds weak ridges to strong
-    ridges if they are adjacent to a strong ridge.
+def ridge_detection(maxRedComp, 
+                    thresh_high: float, 
+                    thresh_low: float, 
+                    vert_dict: dict, 
+                    edge_dict: dict, 
+                    face_dict: dict, 
+                    min_length: int = 1, 
+                    max_length: int=None,
+                    separatrix_type: str = "all"):
+    """! @brief Uses double threshold to get strong and weak ridges and adds 
+    weak ridges to strong ridges if they are adjacent to a strong ridge.
     
     @param maxRedComp A maximally reduced Morse Complex (needed for the Separatrices).
     @param thresh_high The high threshold for ridges that will definitely be added.
-    @param thresh_low  The weak threshold for ridges that will be added of they are adjacent to a strong ridge.
+    @param thresh_low  The weak threshold for ridges that will be added of 
+           they are adjacent to a strong ridge.
     @param vert_dict Dictionary containing all vertices.
     @param edge_dict Dictionary containing all edges.
     @param face_dict Dictionary containing all faces.
     @param min_length Minimum length each separatrix should have: Default 1
     @param max_length Maximum length each separatrix should have: Default None.
     
-    @return strong_edge The double thresholded edges stored as a single set of vertex indices.
+    @return strong_edge The double thresholded edges stored as a single 
+            set of vertex indices.
     """
-    strong_ridge, weak_ridge = get_salient_sepa_indices(maxRedComp, thresh_high, thresh_low, 
-                                                      edge_dict, face_dict, mode=1,
-                                                      min_length=min_length, max_length=max_length)
+    strong_ridge, weak_ridge = get_salient_sepa_indices(maxRedComp, 
+                                                        thresh_high, 
+                                                        thresh_low, 
+                                                        edge_dict, 
+                                                        face_dict, 
+                                                        mode=1,
+                                                        min_length=min_length, 
+                                                        max_length=max_length,
+                                                        separatrix_type=separatrix_type)
 
     if len(weak_ridge) != 0:
         queue = []
@@ -42,24 +58,40 @@ def ridge_detection(maxRedComp, thresh_high: float, thresh_low: float, vert_dict
                     weak_ridge.remove(nei)
     return strong_ridge
 
-def valley_detection(maxRedComp, thresh_high: float, thresh_low: float, vert_dict: dict, edge_dict: dict, face_dict: dict, min_length: int=1, max_length: int=None):
-    """! @brief Uses double threshold to get strong and weak valleys and adds weak valleys to strong
-    valleys if they are adjacent to a strong valley.
+def valley_detection(maxRedComp, 
+                     thresh_high: float, 
+                     thresh_low: float, 
+                     vert_dict: dict, 
+                     edge_dict: dict, 
+                     face_dict: dict, 
+                     min_length: int=1, 
+                     max_length: int=None,
+                     separatrix_type: str = "all"):
+    """! @brief Uses double threshold to get strong and weak valleys and adds 
+    weak valleys to strong valleys if they are adjacent to a strong valley.
     
     @param maxRedComp A maximally reduced Morse Complex (needed for the Separatrices).
     @param thresh_high The high threshold for valleys that will definitely be added.
-    @param thresh_low  The weak threshold for valleys that will be added of they are adjacent to a strong valley.
+    @param thresh_low  The weak threshold for valleys that will be added of 
+           they are adjacent to a strong valley.
     @param vert_dict Dictionary containing all vertices.
     @param edge_dict Dictionary containing all edges.
     @param face_dict Dictionary containing all faces.
     @param min_length Minimum length each separatrix should have: Default 1
     @param max_length Maximum length each separatrix should have: Default None.
     
-    @return strong_valley The double thresholded valleys stored as a single set of vertex indices.
+    @return strong_valley The double thresholded valleys stored as a single 
+            set of vertex indices.
     """
-    strong_valley, weak_valley = get_salient_sepa_indices(maxRedComp, thresh_high, thresh_low, 
-                                                          edge_dict, face_dict, mode=2,
-                                                          min_length=min_length, max_length=max_length)
+    strong_valley, weak_valley = get_salient_sepa_indices(maxRedComp, 
+                                                          thresh_high, 
+                                                          thresh_low, 
+                                                          edge_dict, 
+                                                          face_dict, 
+                                                          mode=2,
+                                                          min_length=min_length, 
+                                                          max_length=max_length,
+                                                          separatrix_type=separatrix_type)
 
     if len(weak_valley) != 0:
         queue = []
@@ -81,11 +113,19 @@ def valley_detection(maxRedComp, thresh_high: float, thresh_low: float, vert_dic
                     weak_valley.remove(nei)
     return strong_valley
 
-def get_salient_sepa_indices(MorseComplex, thresh_high: float, thresh_low: float, edge_dict: dict, 
-                             face_dict: dict, mode: int = 1, min_length: int=1, max_length: int=None):
+def get_salient_sepa_indices(MorseComplex, 
+                             thresh_high: float, 
+                             thresh_low: float, 
+                             edge_dict: dict, 
+                             face_dict: dict, 
+                             mode: int = 1, 
+                             min_length: int = 1, 
+                             max_length: int = None,
+                             separatrix_type: str = "all"):
     """! @brief Gets strong and weak edges based on Separatrix persistence.
     
-    @details Separatrix persistence similar to Weinkauf and Günther (DOI: 10.1111/j.1467-8659.2009.01528.x)
+    @details Separatrix persistence similar to Weinkauf and Günther 
+    (DOI: 10.1111/j.1467-8659.2009.01528.x)
 https://www.researchgate.net/publication/227511709_Separatrix_Persistence_Extraction_of_Salient_Edges_on_Surfaces_Using_Topological_Methods
 
     @param MorseComplex A Morse Complex (needed for the Separatrices).
@@ -93,19 +133,30 @@ https://www.researchgate.net/publication/227511709_Separatrix_Persistence_Extrac
     @param thresh_low  The weak threshold for edges.
     @param edge_dict Dictionary containing all edges.
     @param face_dict Dictionary containing all faces.
-    @param mode Int giving operation mode: 1 for only ridges, 2 for only valleys or 3 for both.
+    @param mode Int giving operation mode: 1 for only ridges, 2 for only 
+           valleys or 3 for both.
     @param min_length Minimum length each separatrix should have: Default 1
     @param max_length Maximum length each separatrix should have: Default None.
+    @param separatrix_type Determines the type of separatrices to include. Can be 
+           all ("all), only the ones that were cut off ("cutoff"), or only the
+           ones that were reversed ("reverse"). Default is all.
     
-    @return strong_edge, weak edge Two sets of vertex indices containing the vertices of the separatrices that
-    had Separatrix persistences above the high/low threshold.
+    @return strong_edge, weak edge Two sets of vertex indices containing 
+            the vertices of the separatrices that had Separatrix persistences 
+            above the high/low threshold.
     
     """
+    attr_map = {
+        "all": "Separatrices",
+        "cutoff": "Separatrices_cutoff",
+        "reverse": "Separatrices_reversed"
+    }
+    attr = attr_map[separatrix_type]
     strong_edge = set()
     weak_edge = set()
     if max_length == None:
         max_length = float('inf')
-    for pers, sepa in MorseComplex.Separatrices:
+    for pers, sepa in getattr(MorseComplex, attr):
         if len(sepa.path) > min_length and len(sepa.path) < max_length:
             # add high persistence edge points
             if mode == 1: # ridge detection

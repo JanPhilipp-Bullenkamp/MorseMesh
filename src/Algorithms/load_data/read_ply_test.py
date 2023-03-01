@@ -456,7 +456,7 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function
     else:
         raise ValueError('No faces in the plyfile!')
 
-
+    '''
     st = timeit.default_timer()
 
     face_arr = [list(face.indices) for face in face_dict.values()]
@@ -486,7 +486,6 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function
     end = timeit.default_timer()
 
     print("get edges: ",(end-st))
-    
     '''
 
     st = timeit.default_timer()
@@ -512,13 +511,8 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function
     end = timeit.default_timer()
 
     print("get edges: ",(end-st))
-    '''
-    st = timeit.default_timer()
-    set_edge_and_face_fun_vals(vert_dict, edge_dict, face_dict)
-    end = timeit.default_timer()
-
-    print("set funvals: ",(end-st))
     
+    set_edge_and_face_fun_vals(vert_dict, edge_dict, face_dict)
     return min_val, max_val
 
 def make_discrete_morse_function(vert_dict: dict, function: str = "quality", inverted: bool = False):

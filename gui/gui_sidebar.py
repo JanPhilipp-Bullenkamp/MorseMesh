@@ -6,9 +6,14 @@ class SideBar:
         self.sidebar = QGroupBox("Further Parameters:")
         self.sidebar_layout = QVBoxLayout()
         self.sidebar.setLayout(self.sidebar_layout)
-        self.sidebar.setMaximumSize(175, 400)
+        self.sidebar.setMaximumSize(175, 700)
 
         self.create_boxes(parameters)
+
+        # connect the stateChanged signal of the boxes to a slot
+        self.box_all.stateChanged.connect(lambda state, checkbox=self.box_all: self.check_sepa_boxes(state, checkbox, parameters))
+        self.box_cutoff.stateChanged.connect(lambda state, checkbox=self.box_cutoff: self.check_sepa_boxes(state, checkbox, parameters))
+        self.box_reversed.stateChanged.connect(lambda state, checkbox=self.box_reversed: self.check_sepa_boxes(state, checkbox, parameters))
         
         # connect the stateChanged signal of the boxes to a slot
         self.box_ridge.stateChanged.connect(lambda state, checkbox=self.box_ridge: self.check_boxes(state, checkbox, parameters))
@@ -43,6 +48,11 @@ class SideBar:
         self.param6_input.setText(str(parameters.size_threshold))
         self.param6_input.setMaximumSize(75, 25)
 
+
+        self.box_all = QCheckBox("All", checked=True)
+        self.box_cutoff = QCheckBox("Cutoff", checked=False)
+        self.box_reversed = QCheckBox("Reversed", checked=False)
+
         self.param8_input = QLineEdit()
         self.param8_input.setText(str(parameters.min_length))
         self.param8_input.setMaximumSize(75, 25)
@@ -70,12 +80,19 @@ class SideBar:
         self.sidebar_layout.addWidget(self.param5_input)
         self.sidebar_layout.addWidget(QLabel("Size threshold segmentation (per label)"))
         self.sidebar_layout.addWidget(self.param6_input)
+
+        self.sidebar_layout.addWidget(QLabel("Seapratrix Type/ Density"))
+        self.sidebar_layout.addWidget(self.box_all)
+        self.sidebar_layout.addWidget(self.box_cutoff)
+        self.sidebar_layout.addWidget(self.box_reversed)
+
         self.sidebar_layout.addWidget(QLabel("Min separatrix length"))
         self.sidebar_layout.addWidget(self.param8_input)
         self.sidebar_layout.addWidget(QLabel("Max separatrix length"))
         self.sidebar_layout.addWidget(self.param9_input)
     
         # add the boxes to the layout
+        self.sidebar_layout.addWidget(QLabel("Extremal Line Type"))
         self.sidebar_layout.addWidget(self.box_ridge)
         self.sidebar_layout.addWidget(self.box_valley)
         self.sidebar_layout.addWidget(self.box_both)
@@ -107,6 +124,27 @@ class SideBar:
             parameters.mode = "both"
         else:
             raise ValueError("One of the ridge/valley/both boxes should be checked at all times!")
+        
+    def check_sepa_boxes(self, state, checkbox, parameters):
+        boxes = [self.box_all, self.box_cutoff, self.box_reversed]
+        checked_boxes = [box for box in boxes if box.isChecked()]
+
+        # make sure exactly one box is checked
+        if len(checked_boxes) == 0:
+            checkbox.setChecked(True)
+        elif len(checked_boxes) > 1:
+            for box in boxes:
+                if box != checkbox:
+                    box.setChecked(False)
+
+        if self.box_all.isChecked():
+            parameters.separatrix_type = "all"
+        elif self.box_cutoff.isChecked():
+            parameters.separatrix_type = "cutoff"
+        elif self.box_reversed.isChecked():
+            parameters.separatrix_type = "reverse"
+        else:
+            raise ValueError("One of the all/cutoff/reverse boxes should be checked at all times!")
 
     def connect_update_functions_to_boxes(self, parameters):
         self.param1_input.editingFinished.connect(lambda: parameters.update(float(self.param1_input.text()), "persistence"))

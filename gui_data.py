@@ -1,4 +1,4 @@
-from ..src.morse import Morse
+from src.morse import Morse
 
 class Parameters:
     def __init__(self):
@@ -8,6 +8,7 @@ class Parameters:
         self.high_thresh = None
         self.low_thresh = None
         self.mode = "ridge"
+        self.separatrix_type = "all"
         self.min_length = 1
         self.max_length = float('inf')
 

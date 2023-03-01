@@ -141,8 +141,14 @@ def cancel_one_critical_pair_min(saddle,
                                                  2, 
                                                  MorseComplex.CritFaces[conn_max].paths[saddle.index][i], 
                                                  max_cancel_line_persistence)
-                    MorseComplex.Separatrices.append(tuple((max_cancel_line_persistence, 
-                                                            max_cancel_line)))
+                    MorseComplex.Separatrices.append(
+                        tuple((max_cancel_line_persistence,
+                               max_cancel_line))
+                    )
+                    MorseComplex.Separatrices_cutoff.append(
+                        tuple((max_cancel_line_persistence,
+                               max_cancel_line))
+                    )
             else:
                 max_cancel_line_persistence = compute_max_sad_persistence(MorseComplex.CritFaces[conn_max].paths[saddle.index], 
                                                                           edge_dict, 
@@ -152,8 +158,14 @@ def cancel_one_critical_pair_min(saddle,
                                              2, 
                                              MorseComplex.CritFaces[conn_max].paths[saddle.index], 
                                              max_cancel_line_persistence)
-                MorseComplex.Separatrices.append(tuple((max_cancel_line_persistence, 
-                                                        max_cancel_line)))
+                MorseComplex.Separatrices.append(
+                    tuple((max_cancel_line_persistence,
+                           max_cancel_line))
+                )
+                MorseComplex.Separatrices_cutoff.append(
+                        tuple((max_cancel_line_persistence,
+                               max_cancel_line))
+                )
         MorseComplex.CritFaces[conn_max].paths.pop(saddle.index, None)
         
     # find new saddles and minima:
@@ -177,7 +189,14 @@ def cancel_one_critical_pair_min(saddle,
                               1, 
                               original_path, 
                               minimal_line_persistence)
-    MorseComplex.Separatrices.append(tuple((minimal_line_persistence, minimal_line)))
+    MorseComplex.Separatrices.append(
+        tuple((minimal_line_persistence, 
+               minimal_line))
+    )
+    MorseComplex.Separatrices_reversed.append(
+        tuple((minimal_line_persistence,
+               minimal_line))
+    )
     
     # save the inverted path between sadle and minimum:
     # reverse path and remove first and last elt (min and saddle otherwise duplicated)
@@ -279,6 +298,10 @@ def cancel_one_critical_pair_max(saddle,
                                                  min_cancel_line_persistence)
                     MorseComplex.Separatrices.append(tuple((min_cancel_line_persistence, 
                                                             min_cancel_line)))
+                    MorseComplex.Separatrices_cutoff.append(
+                        tuple((min_cancel_line_persistence,
+                               min_cancel_line))
+                    )
             else:
                 min_cancel_line_persistence = compute_min_sad_persistence(saddle.paths[conn_min], 
                                                                           vert_dict, 
@@ -290,6 +313,10 @@ def cancel_one_critical_pair_max(saddle,
                                              min_cancel_line_persistence)
                 MorseComplex.Separatrices.append(tuple((min_cancel_line_persistence, 
                                                         min_cancel_line)))
+                MorseComplex.Separatrices_cutoff.append(
+                    tuple((min_cancel_line_persistence,
+                           min_cancel_line))
+                )
         MorseComplex.CritVertices[conn_min].connected_saddles.remove(saddle.index)
         
     # find new saddles and maxima:
@@ -315,6 +342,10 @@ def cancel_one_critical_pair_max(saddle,
                               maximal_line_persistence)
     MorseComplex.Separatrices.append(tuple((maximal_line_persistence, 
                                             maximal_line)))
+    MorseComplex.Separatrices_reversed.append(
+        tuple((maximal_line_persistence,
+               maximal_line))
+    )
     
     # save the inverted path between sadle and maximum:
     # reverse path and remove first and last elt (max and saddle otherwise duplicated)

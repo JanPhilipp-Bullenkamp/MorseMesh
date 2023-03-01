@@ -693,7 +693,8 @@ class MorseComplex:
                  "_flag_MorseCells", "MorseCells", "Segmentations", 
                  "_flag_BettiNumbers", "BettiNumbers", "partners", 
                  "maximalReduced", "max_separatrix_persistence", 
-                 "min_separatrix_persistence", "persistence", "filename")
+                 "min_separatrix_persistence", "persistence", "filename",
+                 "Separatrices_cutoff", "Separatrices_reversed")
         
     def __init__(self, persistence: float = 0, filename: str = None):
         """! The Constructor of a MorseComplex.
@@ -706,6 +707,8 @@ class MorseComplex:
         self.CritFaces = {}
         
         self.Separatrices = []
+        self.Separatrices_cutoff = []
+        self.Separatrices_reversed = []
         
         self._flag_MorseCells = False
         self.MorseCells = MorseCells()
