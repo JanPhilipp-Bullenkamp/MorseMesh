@@ -37,14 +37,21 @@ def diffusivity_coeff(grad, k, option="fraction"):
         c = np.exp(-(np.abs(grad)/k)**2)
     return c
 
-def compute_anisotropic_diffusion(vert_dict: dict, face_dict: dict, iterations: int, lamb: float, k: float):
+def compute_anisotropic_diffusion(vert_dict: dict, 
+                                  face_dict: dict, 
+                                  iterations: int, 
+                                  lamb: float, 
+                                  k: float):
     """! @brief Calculates Perona-Malik anisostropic diffusion on the vertices given.
     @details Explain ....
 
-    @param vert_dict The vertices dictionary to be smoothed. (Needs Vertex objects with compute_gradient method)
+    @param vert_dict The vertices dictionary to be smoothed. (Needs Vertex 
+           objects with compute_gradient method)
     @param iterations Number of "time steps" to be performed. Higher -> more smoothing.
-    @param lamb Scaling factor: small -> slower smoothing, high -> faster smothing. Typical values between 0.1-0.25
-    @param k Controls the sensitivity of the diffusivity coefficient to the gradient .... Typical values between 0.1-0.25
+    @param lamb Scaling factor: small -> slower smoothing, high -> faster smothing. 
+           Typical values between 0.1-0.25
+    @param k Controls the sensitivity of the diffusivity coefficient to the 
+           gradient .... Typical values between 0.1-0.25
     
     @return vert_dict The smoothed vertices dictionary.
     """
@@ -55,9 +62,12 @@ def compute_anisotropic_diffusion(vert_dict: dict, face_dict: dict, iterations: 
 
         print("Iteration: ",i, " Funval: ",vert_dict[10].fun_val)
         if len(gradient) != len(vert_dict):
-            raise AssertionError("Gradient and Vertices dictionaries should have same length!")
+            raise AssertionError("Gradient and Vertices dictionaries "
+                                 "should have same length!")
         
         for v_ind, vert in vert_dict.items():
-            vert.fun_val += lamb * np.linalg.norm(diffusivity_coeff(gradient[v_ind], k, option="exp"))
+            vert.fun_val += lamb * np.linalg.norm(diffusivity_coeff(gradient[v_ind], 
+                                                                    k, 
+                                                                    option="exp"))
 
     return vert_dict

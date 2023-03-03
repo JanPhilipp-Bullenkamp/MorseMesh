@@ -9,10 +9,13 @@ class Slider:
         self.slider1.setRange(0,100)
         self.slider1.setValue(parameters.high_percent)
         # Create a label to display above the first slider
-        self.label1 = QLabel("High edge threshold: {} % -> {}".format(parameters.high_percent, parameters.high_thresh))
+        self.label1 = QLabel("High edge threshold: {} % -> {}".format(parameters.high_percent, 
+                                                                      parameters.high_thresh))
         
         # Connect the valueChanged signal of the slider to the update_parameter function
-        self.slider1.valueChanged.connect(lambda value: self.update_high_thresh(value, self.label1))
+        self.slider1.valueChanged.connect(lambda value: 
+                                          self.update_high_thresh(value, 
+                                                                  self.label1))
         
 
         # Create the slider and set its range and default value
@@ -20,10 +23,13 @@ class Slider:
         self.slider2.setRange(0,100)
         self.slider2.setValue(parameters.low_percent)
         # Create a label to display above the second slider
-        self.label2 = QLabel("Low edge threshold: {} % -> {}".format(parameters.low_percent, parameters.low_thresh))
+        self.label2 = QLabel("Low edge threshold: {} % -> {}".format(parameters.low_percent, 
+                                                                     parameters.low_thresh))
         
         # Connect the valueChanged signal of the slider to the update_parameter function
-        self.slider2.valueChanged.connect(lambda value: self.update_low_thresh(value, self.label2))
+        self.slider2.valueChanged.connect(lambda value: 
+                                          self.update_low_thresh(value, 
+                                                                 self.label2))
 
         layout.addWidget(self.label1,1,0)
         layout.addWidget(self.slider1,2,0)

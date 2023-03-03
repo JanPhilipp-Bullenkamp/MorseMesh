@@ -17,7 +17,10 @@ def write_header_params(file, pers, thr_high, thr_low, merge_thr):
     file.write("# | Format: index label                                 |\n")
     file.write("# +-----------------------------------------------------+\n")
     
-def write_Cell_labels_txt_file(label_dict: dict, target_file: str, params = None, cell_structure: bool = True):
+def write_Cell_labels_txt_file(label_dict: dict, 
+                               target_file: str, 
+                               params = None, 
+                               cell_structure: bool = True):
     with open(target_file + ".txt", "w") as f:
         if params == None:
             write_header(f)
@@ -25,7 +28,8 @@ def write_Cell_labels_txt_file(label_dict: dict, target_file: str, params = None
             pers, thr_high, thr_low, merge_thr = params
             write_header_params(f, pers, thr_high, thr_low, merge_thr)
         else:
-            raise ValueError("The params variable needs the 4 parameters: pers, thr_high, thr_low, merge_thr!")
+            raise ValueError("The params variable needs the 4 "
+                             "parameters: pers, thr_high, thr_low, merge_thr!")
 
         # write labels
         if cell_structure:
@@ -37,7 +41,9 @@ def write_Cell_labels_txt_file(label_dict: dict, target_file: str, params = None
                 for index in indices:
                     f.write(str(index) + " " + str(label) + "\n")
     
-def write_funval_thresh_labels_txt_file(vert_dict: dict, thresh: float, target_file: str):
+def write_funval_thresh_labels_txt_file(vert_dict: dict, 
+                                        thresh: float, 
+                                        target_file: str):
     with open(target_file + "_" + str(thresh) + "thresh.txt", "w") as f:
         write_header(f)
 
@@ -48,8 +54,12 @@ def write_funval_thresh_labels_txt_file(vert_dict: dict, thresh: float, target_f
             else:
                 f.write(str(ind) + " " +str(2) + "\n")
 
-def write_variance_heat_map_labels_txt_file(variance: dict, thresh1: float, thresh2: float, target_file: str):
-    with open(target_file + "_" + str(thresh1) + "_" + str(thresh2) + "thresh.txt", "w") as f:
+def write_variance_heat_map_labels_txt_file(variance: dict, 
+                                            thresh1: float, 
+                                            thresh2: float, 
+                                            target_file: str):
+    with open(target_file + "_" + str(thresh1) + "_" 
+              + str(thresh2) + "thresh.txt", "w") as f:
         write_header(f)
 
         # write labels

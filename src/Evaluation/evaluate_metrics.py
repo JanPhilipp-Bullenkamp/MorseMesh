@@ -1,6 +1,6 @@
 import numpy as np
 
-def compute_IoU(labels1, labels2):
+def compute_IoU(labels1: dict, labels2: dict):
     IoU12 = {}
     for label, points in labels1.items():
         if len(points) > 5:
@@ -14,7 +14,7 @@ def compute_IoU(labels1, labels2):
     return IoU12
 
 # also called dice coefficient
-def compute_F1_Score(labels1, labels2):
+def compute_F1_Score(labels1: dict, labels2: dict):
     F1 = {}
     for label, points in labels1.items():
         if len(points) > 5:
@@ -27,7 +27,7 @@ def compute_F1_Score(labels1, labels2):
                     
     return F1
 
-def get_correct_points(labels1, labels2, IoU):
+def get_correct_points(labels1: dict, labels2: dict, IoU: dict):
     # correct means lb1 is max IoU of lb2 and lb2 is max IoU of lb1
     correct_points = set()
     
@@ -46,7 +46,6 @@ def get_correct_points(labels1, labels2, IoU):
     for id2, id1 in enumerate(lb2max):
         for id1p, id2p in enumerate(lb1max):
             if lb1s[id1] == lb1s[id1p] and lb2s[id2] == lb2s[id2p]:
-                #print("Correct:",lb1s[id1],lb2s[id2])
-                correct_points.update( labels1[lb1s[id1]].intersection(labels2[lb2s[id2]]) )
+                correct_points.update(labels1[lb1s[id1]].intersection(labels2[lb2s[id2]]))
     
     return correct_points

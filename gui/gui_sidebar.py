@@ -11,14 +11,32 @@ class SideBar:
         self.create_boxes(parameters)
 
         # connect the stateChanged signal of the boxes to a slot
-        self.box_all.stateChanged.connect(lambda state, checkbox=self.box_all: self.check_sepa_boxes(state, checkbox, parameters))
-        self.box_cutoff.stateChanged.connect(lambda state, checkbox=self.box_cutoff: self.check_sepa_boxes(state, checkbox, parameters))
-        self.box_reversed.stateChanged.connect(lambda state, checkbox=self.box_reversed: self.check_sepa_boxes(state, checkbox, parameters))
+        self.box_all.stateChanged.connect(lambda state, checkbox=self.box_all: 
+                                          self.check_sepa_boxes(state, 
+                                                                checkbox, 
+                                                                parameters))
+        self.box_cutoff.stateChanged.connect(lambda state, checkbox=self.box_cutoff: 
+                                             self.check_sepa_boxes(state, 
+                                                                   checkbox, 
+                                                                   parameters))
+        self.box_reversed.stateChanged.connect(lambda state, checkbox=self.box_reversed: 
+                                               self.check_sepa_boxes(state, 
+                                                                     checkbox, 
+                                                                     parameters))
         
         # connect the stateChanged signal of the boxes to a slot
-        self.box_ridge.stateChanged.connect(lambda state, checkbox=self.box_ridge: self.check_boxes(state, checkbox, parameters))
-        self.box_valley.stateChanged.connect(lambda state, checkbox=self.box_valley: self.check_boxes(state, checkbox, parameters))
-        self.box_both.stateChanged.connect(lambda state, checkbox=self.box_both: self.check_boxes(state, checkbox, parameters))
+        self.box_ridge.stateChanged.connect(lambda state, checkbox=self.box_ridge: 
+                                            self.check_boxes(state, 
+                                                             checkbox, 
+                                                             parameters))
+        self.box_valley.stateChanged.connect(lambda state, checkbox=self.box_valley: 
+                                             self.check_boxes(state, 
+                                                              checkbox, 
+                                                              parameters))
+        self.box_both.stateChanged.connect(lambda state, checkbox=self.box_both: 
+                                           self.check_boxes(state, 
+                                                            checkbox, 
+                                                            parameters))
 
         self.add_boxes_to_sidebar_layout()
         self.connect_update_boxes(parameters)
@@ -99,9 +117,18 @@ class SideBar:
 
     def connect_update_boxes(self, parameters):
         # connect the stateChanged signal of the boxes to a slot
-        self.box_ridge.stateChanged.connect(lambda state, checkbox=self.box_ridge: self.check_boxes(state, checkbox, parameters))
-        self.box_valley.stateChanged.connect(lambda state, checkbox=self.box_valley: self.check_boxes(state, checkbox, parameters))
-        self.box_both.stateChanged.connect(lambda state, checkbox=self.box_both: self.check_boxes(state, checkbox, parameters))
+        self.box_ridge.stateChanged.connect(lambda state, checkbox=self.box_ridge: 
+                                            self.check_boxes(state, 
+                                                             checkbox, 
+                                                             parameters))
+        self.box_valley.stateChanged.connect(lambda state, checkbox=self.box_valley: 
+                                             self.check_boxes(state, 
+                                                              checkbox, 
+                                                              parameters))
+        self.box_both.stateChanged.connect(lambda state, checkbox=self.box_both: 
+                                           self.check_boxes(state, 
+                                                            checkbox, 
+                                                            parameters))
 
     
     def check_boxes(self, state, checkbox, parameters):
@@ -123,7 +150,8 @@ class SideBar:
         elif self.box_both.isChecked():
             parameters.mode = "both"
         else:
-            raise ValueError("One of the ridge/valley/both boxes should be checked at all times!")
+            raise ValueError("One of the ridge/valley/both boxes should "
+                             "be checked at all times!")
         
     def check_sepa_boxes(self, state, checkbox, parameters):
         boxes = [self.box_all, self.box_cutoff, self.box_reversed]
@@ -144,7 +172,8 @@ class SideBar:
         elif self.box_reversed.isChecked():
             parameters.separatrix_type = "reverse"
         else:
-            raise ValueError("One of the all/cutoff/reverse boxes should be checked at all times!")
+            raise ValueError("One of the all/cutoff/reverse boxes "
+                             "should be checked at all times!")
 
     def connect_update_functions_to_boxes(self, parameters):
         self.param1_input.editingFinished.connect(lambda: parameters.update(float(self.param1_input.text()), "persistence"))

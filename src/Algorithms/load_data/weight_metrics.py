@@ -1,18 +1,19 @@
 import numpy as np
 
 # idea: percentage of salient edge pts on a boundary between two cells
-def compute_weight_saledge(points, sal_points):
+def compute_weight_saledge(points: set, sal_points: set):
     return len(points.intersection(sal_points))/len(points)
 
 # idea: average fun_val on a boundary between two cells
-def compute_weight_funvals(points, vert_dict):
+def compute_weight_funvals(points: set, vert_dict: dict):
     fun_vals = []
     for ind in points:
         fun_vals.append(vert_dict[ind].fun_val)
     return sum(fun_vals)/len(fun_vals)
 
-# idea: compare average normals of two cells and normalize such that 0 means parallel and 1 means antiparallel (0.5 means orthogonal)
-def compute_weight_normals(set1, set2, vert_dict):
+# idea: compare average normals of two cells and normalize such that 0 means 
+# parallel and 1 means antiparallel (0.5 means orthogonal)
+def compute_weight_normals(set1: set, set2: set, vert_dict: dict):
     nx1, ny1, nz1 = [], [], []
     for ind in set1:
         nx1.append(vert_dict[ind].nx)
@@ -33,8 +34,9 @@ def compute_weight_normals(set1, set2, vert_dict):
     # test with sqrt
     return np.sqrt(1-(cos_angle+1)/2)
 
-# idea: calculate variance of normals on boundary (high variance means many normal direction shifts, low variance menas mostly flat)
-def compute_weight_normalvariance(points, vert_dict):
+# idea: calculate variance of normals on boundary (high variance means 
+# many normal direction shifts, low variance menas mostly flat)
+def compute_weight_normalvariance(points: set, vert_dict: dict):
     nx, ny, nz = [], [], []
     for ind in points:
         nx.append(vert_dict[ind].nx)

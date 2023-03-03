@@ -38,7 +38,7 @@ class Window:
     def __init__(self):
         self.window = QWidget()
         self.window.setGeometry(100,100,1000,1000)
-        self.window.setWindowTitle("Mesh GUI")
+        self.window.setWindowTitle("MorseMesh")
         self.layout = QGridLayout()
 
         # Create the VTK widget and add it to the layout
@@ -69,7 +69,8 @@ class Window:
             # Convert the mouse position to world coordinates
             mouse_pos = vtk.vtkCoordinate()
             mouse_pos.SetCoordinateSystemToNormalizedViewport()
-            mouse_pos.SetValue((mouse_x - viewport[0]) / (viewport[2] - viewport[0]), (mouse_y - viewport[1]) / (viewport[3] - viewport[1]))
+            mouse_pos.SetValue((mouse_x - viewport[0]) / (viewport[2] - viewport[0]), 
+                               (mouse_y - viewport[1]) / (viewport[3] - viewport[1]))
             world_pos = mouse_pos.GetComputedWorldValue(camera)
             world_pos = (world_pos[0], world_pos[1], 0)
 
@@ -85,7 +86,8 @@ class Window:
 
             # Print the information about the closest point
             if closest_point is not None:
-                print(f"Closest vertex: ({closest_point[0]:.2f}, {closest_point[1]:.2f}, {closest_point[2]:.2f})")
+                print(f"Closest vertex: ({closest_point[0]:.2f}, "
+                      f"{closest_point[1]:.2f}, {closest_point[2]:.2f})")
 
 
     def update_mesh(self, vert_dict: dict, face_dict: dict):
@@ -116,7 +118,10 @@ class Window:
         interactor = self.vtkWidget.GetRenderWindow().GetInteractor()
         interactor.AddObserver('KeyPressEvent', self.print_vertex_info(points))
 
-    def update_mesh_color(self, label_dict: dict, partial: bool = False, cell_structure: bool = True):
+    def update_mesh_color(self, 
+                          label_dict: dict, 
+                          partial: bool = False, 
+                          cell_structure: bool = True):
         # Get the renderer and mesh actor
         ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
         actor = ren.GetActors().GetLastActor()
@@ -140,12 +145,16 @@ class Window:
             for label, cell in label_dict.items():
                 cell_color = color_list[label%len(color_list)]
                 for ind in cell.vertices:
-                    color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
+                    color_array.InsertTypedTuple(ind, (cell_color[0],
+                                                       cell_color[1],
+                                                       cell_color[2]))
         else:
             for label, points in label_dict.items():
                 cell_color = color_list[label%len(color_list)]
                 for ind in points:
-                    color_array.InsertTypedTuple(ind, (cell_color[0],cell_color[1],cell_color[2]))
+                    color_array.InsertTypedTuple(ind, (cell_color[0],
+                                                       cell_color[1],
+                                                       cell_color[2]))
         point_data.SetScalars(color_array)
 
         # Update the mapper and render the window

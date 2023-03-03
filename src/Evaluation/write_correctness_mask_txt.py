@@ -8,7 +8,12 @@ def write_header(file, correctness, gt_file):
     file.write("# | Format: index label                                 |\n")
     file.write("# +-----------------------------------------------------+\n")
     
-def write_correctness_mask_txt(total_points, points, gt_file, target_file, label_correct=1, label_wrong=2):
+def write_correctness_mask_txt(total_points: int, 
+                               points: set, 
+                               gt_file: str, 
+                               target_file: str, 
+                               label_correct: int = 1, 
+                               label_wrong: int = 2):
     if label_wrong == label_correct:
         raise ValueError('cannot label correct and wrong points the same')
     

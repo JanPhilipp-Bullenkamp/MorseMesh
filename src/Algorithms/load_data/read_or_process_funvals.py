@@ -13,18 +13,24 @@
 from collections import Counter
 from .anisotropic_diffusion import compute_anisotropic_diffusion
 
-def read_funvals(filename: str, vertices_dict: dict, edges_dict: dict, faces_dict: dict, operation: str = "max"):
-    """! @brief Reads a feature vector file and uses the max of each vector as new Morse function values.
+def read_funvals(filename: str, 
+                 vertices_dict: dict, 
+                 edges_dict: dict, 
+                 faces_dict: dict, 
+                 operation: str = "max"):
+    """! @brief Reads a feature vector file and uses the max of each vector 
+    as new Morse function values.
     
-    @details CURRENTLY JUST SUPPORTS THE MAX OF A FEATURE VECTOR...... might be updated in future to also
-    enable min or other metrics.
+    @details CURRENTLY JUST SUPPORTS THE MAX OF A FEATURE VECTOR...... might 
+    be updated in future to also enable min or other metrics.
     
     @param filename The feature vector file to be read for new function values.
     @param vertices_dict The vertices dictionary to be updated with new function values.
     @param edges_dict The edges dictionary to be updated with new function values.
     @param faces_dict The faces dictionary to be updated with new function values.
     
-    @return Despite updating the dictionaries, returns the minimum and maximum function value as min, max.
+    @return Despite updating the dictionaries, returns the minimum and maximum 
+            function value as min, max.
     """
     def max_arr(arr):
         return max(arr)
@@ -71,7 +77,12 @@ def read_funvals(filename: str, vertices_dict: dict, edges_dict: dict, faces_dic
 
     return min_funval, max_funval 
 
-def apply_perona_malik_diffusion(vert_dict: dict, edge_dict: dict, face_dict: dict, iterations: int, lamb: float, k: float):
+def apply_perona_malik_diffusion(vert_dict: dict, 
+                                 edge_dict: dict, 
+                                 face_dict: dict, 
+                                 iterations: int, 
+                                 lamb: float, 
+                                 k: float):
     # compute diffusion (vert dict changed in place)
     compute_anisotropic_diffusion(vert_dict, face_dict, iterations, lamb, k)
     # make sure vert fun_vals are unique and update edges and faces accordingly

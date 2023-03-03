@@ -12,16 +12,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def persistence_diagram(MorseComplex, partner, maxval, minval, pointsize = 4, save = False, filepath = 'persistence_diagram'):
-    """! @brief Plots a persistence diagram of the given Morse Complex and optionally saves the figure.
+def persistence_diagram(MorseComplex, 
+                        partner, 
+                        maxval, 
+                        minval, 
+                        pointsize = 4, 
+                        save = False, 
+                        filepath = 'persistence_diagram'):
+    """! @brief Plots a persistence diagram of the given Morse Complex 
+    and optionally saves the figure.
     
     @param MorseComplex The Morse Complex we want to take the persistence diagram of.
-    @param partner The dictionary containing the paired up cells, giving the non-infinte points in the diagram.
+    @param partner The dictionary containing the paired up cells, giving 
+           the non-infinte points in the diagram.
     @param maxval The maximum possible function value in the mesh.
     @param minval The minimum possible function value in the mesh.
     @param pointsize (Optional) The pointsize in the diagram. Default is 4. 
     @param save Optional) Bool. Whether to save the diagram or not. Default is False.
-    @param filepath (Optional) The filename under which the diagram should be stored. Default is 'persistence_diagram'.
+    @param filepath (Optional) The filename under which the diagram should 
+           be stored. Default is 'persistence_diagram'.
     """
     points = {}
     M = {}
@@ -51,14 +60,29 @@ def persistence_diagram(MorseComplex, partner, maxval, minval, pointsize = 4, sa
 
     linsp = np.linspace(minval, maxval, 1000)
     plt.plot(linsp, linsp, color='black', linewidth=0.4)
-    plt.scatter(points[0]['x'],points[0]['y'], s = 0.1*pointsize, c = 'r', alpha=1, label = None)
-    plt.scatter(points[1]['x'],points[1]['y'], s = 0.1*pointsize, c = 'g', alpha=1, label = None)
+    plt.scatter(points[0]['x'],
+                points[0]['y'], 
+                s = 0.1*pointsize, 
+                c = 'r', 
+                alpha=1, 
+                label = None)
+    plt.scatter(points[1]['x'],
+                points[1]['y'], 
+                s = 0.1*pointsize, 
+                c = 'g', 
+                alpha=1, 
+                label = None)
     for x in points[0]['infinite cycles']:
         plt.scatter(x,[maxval+0.2*maxval], s = 5*pointsize, c = 'r', marker = 'x')
     for x in points[1]['infinite cycles']:
         plt.scatter(x,[maxval+0.2*maxval], s = 5*pointsize, c = 'g', marker = 'x')
     for x in points[2]['infinite cycles']:
-        plt.scatter(x,[maxval+0.2*maxval], s = 5*pointsize, c = 'b', marker = 'x', label = None)
+        plt.scatter(x,
+                    [maxval+0.2*maxval], 
+                    s = 5*pointsize, 
+                    c = 'b', 
+                    marker = 'x', 
+                    label = None)
     
     plt.scatter([],[], c='r', marker='.', s= 5*pointsize, label = '0 cells')
     plt.scatter([],[], c='g', marker='.', s= 5*pointsize, label = '1 cells')

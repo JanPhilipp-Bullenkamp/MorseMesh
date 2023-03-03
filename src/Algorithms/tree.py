@@ -46,7 +46,8 @@ class Node():
         """! @brief The constructor of a Node.
         @param data The index of the simplex assigned to this Node.
         @param parent The parent Node of this Node.
-        @param end_flag (Optional) Boolean. Defualt is False. Tells whether this Node tís the end of a Path
+        @param end_flag (Optional) Boolean. Defualt is False. Tells whether 
+               this Node tís the end of a Path
         """
         self.parent = parent
         self.data = data

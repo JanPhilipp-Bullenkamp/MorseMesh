@@ -1,6 +1,6 @@
 from plyfile import PlyData
 
-def read_labels_from_color_ply(filename):
+def read_labels_from_color_ply(filename: str):
     rawdata = PlyData.read(filename)
     
     labels = {}

@@ -24,6 +24,9 @@ def ridge_detection(maxRedComp,
     @param face_dict Dictionary containing all faces.
     @param min_length Minimum length each separatrix should have: Default 1
     @param max_length Maximum length each separatrix should have: Default None.
+    @param separatrix_type Determines the type of separatrices to include. Can be 
+           all ("all), only the ones that were cut off ("cutoff"), or only the
+           ones that were reversed ("reverse"). Default is all.
     
     @return strong_edge The double thresholded edges stored as a single 
             set of vertex indices.
@@ -79,6 +82,9 @@ def valley_detection(maxRedComp,
     @param face_dict Dictionary containing all faces.
     @param min_length Minimum length each separatrix should have: Default 1
     @param max_length Maximum length each separatrix should have: Default None.
+    @param separatrix_type Determines the type of separatrices to include. Can be 
+           all ("all), only the ones that were cut off ("cutoff"), or only the
+           ones that were reversed ("reverse"). Default is all.
     
     @return strong_valley The double thresholded valleys stored as a single 
             set of vertex indices.

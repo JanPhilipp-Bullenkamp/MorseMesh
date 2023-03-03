@@ -9,28 +9,33 @@ def write_header(file):
     file.write("# +-----------------------------------------------------+\n")
 
 class Mesh:
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         self.filename = filename
         
         self.Vertices = {}
         
 class Vertex:
-    def __init__(self, x=None, y=None, z=None,
-                label=None):
+    def __init__(self, 
+                 x: float = None, 
+                 y: float = None, 
+                 z: float = None,
+                 label: int = None):
         self.x = x
         self.y = y
         self.z = z
         self.label=label
         self.star = set()
         
-def neighbor_labels(vert_dict, ind):
+def neighbor_labels(vert_dict: dict, ind: int) -> list:
     labels = []
     for vert_ind in vert_dict[ind].star:
         if vert_dict[vert_ind].label != vert_dict[ind].label:
             labels.append(vert_dict[vert_ind].label)
     return labels
         
-def clean_and_read_labels_from_color_ply(mesh_filename, label_filename=None, threshold=10):
+def clean_and_read_labels_from_color_ply(mesh_filename: str, 
+                                         label_filename: str = None, 
+                                         threshold: int = 10):
     rawdata = PlyData.read(mesh_filename)
     
     data = Mesh(mesh_filename)
@@ -52,7 +57,12 @@ def clean_and_read_labels_from_color_ply(mesh_filename, label_filename=None, thr
         else:
             labels[conversion[ tuple((pt['red'], pt['green'], pt['blue'])) ]].add(ind)
             
-            vert = Vertex(pt['x'], pt['y'], pt['z'], conversion[ tuple((pt['red'], pt['green'], pt['blue'])) ])
+            vert = Vertex(pt['x'], 
+                          pt['y'], 
+                          pt['z'], 
+                          conversion[tuple((pt['red'], 
+                                            pt['green'], 
+                                            pt['blue']))])
             data.Vertices[ind] = vert
             
     for face in rawdata['face']:
@@ -103,7 +113,9 @@ def clean_and_read_labels_from_color_ply(mesh_filename, label_filename=None, thr
         with open(label_filename +".txt", "w") as f:
             write_header(f)
 
-            for count, indices in enumerate(sorted(labels.values(), key=lambda kv: len(kv), reverse=True)):
+            for count, indices in enumerate(sorted(labels.values(), 
+                                                   key=lambda kv: len(kv), 
+                                                   reverse=True)):
                 label = count+1 # start with label 1
                 for index in indices:
                     f.write(str(index) + " " + str(label) + "\n")

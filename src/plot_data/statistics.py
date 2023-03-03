@@ -1,8 +1,9 @@
 ##
 # @file statistics.py
 #
-# @brief Contains functions to get statistics on function values of vertices, critical simplices and 
-# separatrix persistence as well as plotting their histograms.
+# @brief Contains functions to get statistics on function values 
+# of vertices, critical simplices and separatrix persistence as 
+# well as plotting their histograms.
 #
 # @section libraries_plot_statistics Libraries/Modules
 # - numpy standard library
@@ -15,20 +16,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def fun_val_statistics(vert_dict, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
-    """! @brief Creates statistics of function values on all vertices and allows to optionally plot 
-    and save a histogram as well.
+def fun_val_statistics(vert_dict, 
+                       nb_bins = 15, 
+                       log=False, 
+                       save = False, 
+                       filepath = 'histogram', 
+                       show = True):
+    """! @brief Creates statistics of function values on all vertices 
+    and allows to optionally plot and save a histogram as well.
     
     @param vert_dict A dictionary of Vertex class objects that have function values.
     @param nb_bins (Optional) Integer. The number of bins for the histogram. Default is 15.
     @param log (Optional) Bool. Use logarithmic scale for the counts /y-axis in the 
     histogram. Default is False.
     @param save (Optional) Bool. Whether to save the histogram as a file. Default is False.
-    @param filepath (Optional) The filepath to use if the histogram should be saved. Default is 'histogram'.
+    @param filepath (Optional) The filepath to use if the histogram should be saved. 
+           Default is 'histogram'.
     @param show (Optional) Bool. Whether to plot the histogram or not. Default is True.
     
-    @return stat A dictionary containing the keys 'mean', 'std' and 'fun_vals' containing the mean, 
-    the standard deviation and a list of the function values.
+    @return stat A dictionary containing the keys 'mean', 'std' and 'fun_vals' 
+            containing the mean, the standard deviation and a list of the function values.
     """
     fun_vals = []
     for vert in vert_dict.values():
@@ -50,23 +57,35 @@ def fun_val_statistics(vert_dict, nb_bins = 15, log=False, save = False, filepat
     stat['fun_vals'] = fun_vals
     return stat
 
-def critical_fun_val_statistics(MSComplex, nb_bins = 15, log=False, save = False, filepath = 'histogram', show = True):
-    """! @brief Creates statistics of function values on all critical vertices, edges and faces separately and 
-    allows to optionally plot and save the histograms as well.
+def critical_fun_val_statistics(MSComplex, 
+                                nb_bins = 15, 
+                                log=False, 
+                                save = False, 
+                                filepath = 'histogram', 
+                                show = True):
+    """! @brief Creates statistics of function values on all critical vertices, 
+    edges and faces separately and allows to optionally plot and save the 
+    histograms as well.
     
-    @details the histograms will be plotted adding 'critV', 'critE' and 'critF' to the filepath.
+    @details the histograms will be plotted adding 'critV', 'critE' and 
+    'critF' to the filepath.
     
-    @param MSComplex The Morse Complex we want to have the function value statistics of (will use CritV, CritE and CritF).
-    @param nb_bins (Optional) Integer. The number of bins for the histogram. Default is 15.
+    @param MSComplex The Morse Complex we want to have the function value 
+           statistics of (will use CritV, CritE and CritF).
+    @param nb_bins (Optional) Integer. The number of bins for the histogram. 
+           Default is 15.
     @param log (Optional) Bool. Use logarithmic scale for the counts /y-axis in the 
     histogram. Default is False.
-    @param save (Optional) Bool. Whether to save the histogram as a file. Default is False.
-    @param filepath (Optional) The filepath to use if the histogram should be saved. Default is 'histogram'.
+    @param save (Optional) Bool. Whether to save the histogram as a file. 
+           Default is False.
+    @param filepath (Optional) The filepath to use if the histogram should be saved. 
+           Default is 'histogram'.
     @param show (Optional) Bool. Whether to plot the histogram or not. Default is True.
     
-    @return stat A dictionary containing the keys 'V', 'E' and 'F' each containing dictionaries with keys 'mean', 
-    'std' and 'fun_vals' containing the mean, the standard deviation and a list of the function values for the critical 
-    vertices, edges or faces respectively.
+    @return stat A dictionary containing the keys 'V', 'E' and 'F' each containing 
+            dictionaries with keys 'mean', 'std' and 'fun_vals' containing the mean, 
+            the standard deviation and a list of the function values for the critical 
+            vertices, edges or faces respectively.
     """
     fun_vals_CritV = []
     for vert in MSComplex.CritVertices.values():
@@ -132,20 +151,31 @@ def critical_fun_val_statistics(MSComplex, nb_bins = 15, log=False, save = False
     stat['F']['fun_vals'] = fun_vals_CritF
     return stat
 
-def salient_edge_statistics(Complex, nb_bins=15, log=False, save=False, filepath='histogram', show=True):
-    """! @brief Creates statistics of the separatrix persistences of the cancelled separatrices in the given 
-    Morse Complex and allows to optionally plot and save a histogram as well.
+def salient_edge_statistics(Complex, 
+                            nb_bins=15, 
+                            log=False, 
+                            save=False, 
+                            filepath='histogram', 
+                            show=True):
+    """! @brief Creates statistics of the separatrix persistences of the 
+    cancelled separatrices in the given Morse Complex and allows to optionally 
+    plot and save a histogram as well.
     
-    @param Complex The Morse Complex we want to have the separatrix persistence statistics of.
-    @param nb_bins (Optional) Integer. The number of bins for the histogram. Default is 15.
+    @param Complex The Morse Complex we want to have the separatrix 
+           persistence statistics of.
+    @param nb_bins (Optional) Integer. The number of bins for the histogram. 
+           Default is 15.
     @param log (Optional) Bool. Use logarithmic scale for the counts /y-axis in the 
-    histogram. Default is False.
-    @param save (Optional) Bool. Whether to save the histogram as a file. Default is False.
-    @param filepath (Optional) The filepath to use if the histogram should be saved. Default is 'histogram'.
+           histogram. Default is False.
+    @param save (Optional) Bool. Whether to save the histogram as a file. 
+           Default is False.
+    @param filepath (Optional) The filepath to use if the histogram should be 
+           saved. Default is 'histogram'.
     @param show (Optional) Bool. Whether to plot the histogram or not. Default is True.
     
-    @return stat A dictionary containing the keys 'mean', 'std' and 'persistences' containing the mean, 
-    the standard deviation and a list of the separatrix persistences.
+    @return stat A dictionary containing the keys 'mean', 'std' and 'persistences' 
+            containing the mean, the standard deviation and a list of 
+            the separatrix persistences.
     """
     persistences = []
     for pers, _ in Complex.Separatrices:

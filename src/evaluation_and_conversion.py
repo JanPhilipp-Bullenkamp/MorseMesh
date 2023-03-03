@@ -135,6 +135,34 @@ def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_
     
     return correctness, high, low, merge
 
+#@timed
+def compare_result_dict_to_groundtruth_label_dict(result_dict: str, gt_label_dict: dict, metric: str = "IoU"):
+    """! @brief Takes a result .txt labels file and compares to a groundtruth given as a labels .txt file.
+    @param result_dict The result segmentation as label dictionary.
+    @param groundtruth_filename The labels .txt groundtruth filename and location.
+    @param metric (Optional) Which metric to use for evaluation: Intersection of Union ("IoU") 
+    or F1-Score ("F1). Default is "IoU".
+
+    @return correctness The percentage of correctly labelled vertices in the result file 
+    compared to the groundtruth file.
+    """   
+    if metric == "IoU":
+        IoU = compute_IoU(gt_label_dict, result_dict)
+        correct_points = get_correct_points(gt_label_dict, result_dict, IoU)
+    elif metric == "F1":
+        F1 = compute_F1_Score(gt_label_dict, result_dict)
+        correct_points = get_correct_points(gt_label_dict, result_dict, F1)
+    else:
+        raise ValueError("Currently only IoU and F1 metrics are implemented...")
+    
+    total_points = 0
+    for pts in gt_label_dict.values():
+        total_points += len(pts)
+    
+    correctness = len(correct_points)/total_points*100
+    
+    return correctness
+
 @timed    
 def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 0):
     """! @brief Takes a colored .ply file and returns a labels .txt file based on those colors.

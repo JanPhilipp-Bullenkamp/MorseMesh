@@ -1,7 +1,6 @@
 
 import collections
 import numpy as np
-import timeit
 
 from .datastructures import Vertex, Simplex
 
@@ -78,7 +77,12 @@ def load_ply(file_obj,
         _ply_binary(elements, file_obj)
 
     # translate loaded PLY elements to kwargs
-    min_val, max_val = _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function, inverted)
+    min_val, max_val = _elements_to_dicts(elements, 
+                                          vert_dict, 
+                                          edge_dict, 
+                                          face_dict, 
+                                          morse_function, 
+                                          inverted)
 
     return min_val, max_val
 
@@ -418,7 +422,12 @@ def distance_to_end(file_obj):
     distance = position_end - position_current
     return distance
 
-def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function, inverted):
+def _elements_to_dicts(elements, 
+                       vert_dict: dict, 
+                       edge_dict: dict, 
+                       face_dict: dict, 
+                       morse_function: str, 
+                       inverted: bool):
     """
     Given an elements data structure, extract the keyword
     arguments that a Trimesh object constructor will expect.
@@ -445,13 +454,17 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function
                                 y=elements['vertex']['data']['y'][ind],
                                 z=elements['vertex']['data']['z'][ind],
                                 quality=elements['vertex']['data']['quality'][ind],
-                                index=ind) for ind in range(elements['vertex']['length'])})
-        min_val, max_val = make_discrete_morse_function(vert_dict=vert_dict, function=morse_function, inverted=inverted)
+                                index=ind) 
+                                for ind in range(elements['vertex']['length'])})
+        min_val, max_val = make_discrete_morse_function(vert_dict=vert_dict, 
+                                                        function=morse_function, 
+                                                        inverted=inverted)
     else:
         raise ValueError('No vertices in the plyfile!')
 
     if 'face' in elements and elements['face']['length']:
-        face_dict.update({face_ind: Simplex(indices=set(elements['face']['data'][face_ind][0][1]),index=face_ind) 
+        face_dict.update({face_ind: Simplex(indices=set(elements['face']['data'][face_ind][0][1]),
+                                            index=face_ind) 
                             for face_ind in range(elements['face']['length'])})
     else:
         raise ValueError('No faces in the plyfile!')
@@ -488,7 +501,6 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function
     print("get edges: ",(end-st))
     '''
 
-    st = timeit.default_timer()
     eindex = 0
     unique_edges = set()
     for findex, face in face_dict.items():
@@ -508,14 +520,13 @@ def _elements_to_dicts(elements, vert_dict, edge_dict, face_dict, morse_function
                 eindex+=1
                 
                 unique_edges.add(frozenset(subset))
-    end = timeit.default_timer()
-
-    print("get edges: ",(end-st))
     
     set_edge_and_face_fun_vals(vert_dict, edge_dict, face_dict)
     return min_val, max_val
 
-def make_discrete_morse_function(vert_dict: dict, function: str = "quality", inverted: bool = False):
+def make_discrete_morse_function(vert_dict: dict, 
+                                 function: str = "quality", 
+                                 inverted: bool = False):
     # load fun_vals:
     attr_map = {
         "quality": "quality",

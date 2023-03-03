@@ -1,7 +1,8 @@
 ##
 # @file read_ply.py
 #
-# @brief Contains function for reading a ply file into vertices, edges and faces dictionaries.
+# @brief Contains function for reading a ply file into vertices, 
+# edges and faces dictionaries.
 #
 # @section libraries_read_ply Libraries/Modules
 # - plyfile library (https://github.com/dranjan/python-plyfile)
@@ -19,23 +20,27 @@ from collections import Counter
 from .datastructures import Vertex, Simplex
 
 def read_ply(filename, quality_index, vertices_dict, edges_dict, faces_dict, inverted=False):
-    """! @brief Reads a ply file and writes the simplicial complex into vertices, edges and faces dictionaries.
+    """! @brief Reads a ply file and writes the simplicial complex into vertices, 
+    edges and faces dictionaries.
     
-    @details This function reads the given ply file and fills the given vertices dictionary, edges dictionary 
-    and faces dictionary. It uses the values given at the quality index position as Morse function values and makes 
-    sure that they are all unique so that we can use it for discrete Morse theory. Also allows to flip the function values
-    by multiplying with -1 and thereby switching minima and maxima.
+    @details This function reads the given ply file and fills the given vertices 
+    dictionary, edges dictionary and faces dictionary. It uses the values given 
+    at the quality index position as Morse function values and makes sure that 
+    they are all unique so that we can use it for discrete Morse theory. Also 
+    allows to flip the function values by multiplying with -1 and thereby 
+    switching minima and maxima.
     
     @param filename The ply file to be read.
-    @param quality_index The position of the quality you want to read in as the Morse function. Might vary depending on the
-           ply file and application.
+    @param quality_index The position of the quality you want to read in as the 
+           Morse function. Might vary depending on the ply file and application.
     @param vertices_dict The vertices dictionary to be filled with vertices.
     @param edges_dict The edges dictionary to be filled with edges.
     @param faces_dict The faces dictionary to be filled with faces.
-    @param inverted Optional boolean: whether the Morse function values (quality values) should be multiplied with -1. 
-           Doing this flips maxima and minima, default is False
+    @param inverted Optional boolean: whether the Morse function values (quality values) 
+           should be multiplied with -1. Doing this flips maxima and minima, default is False
     
-    @return Despite filling the dictionaries, returns the minimum and maximum function value as min, max.
+    @return Despite filling the dictionaries, returns the minimum and maximum 
+            function value as min, max.
     """
     rawdata = PlyData.read(filename)
     

@@ -133,10 +133,10 @@ class Vertex:
         star_area = 0
         sum_grads = 0
         for f_index in self.star["F"]:
-            f_area = face_dict[f_index].area(vert_dict)
+            f_area = face_dict[f_index].compute_area(vert_dict)
             star_area += f_area
             sum_grads += f_area * face_dict[f_index].face_gradient(vert_dict, f_area)
-            print("face_grad: ",face_dict[f_index].face_gradient(vert_dict, f_area))
+            #print("face_grad: ",face_dict[f_index].face_gradient(vert_dict, f_area))
 
         print("average_gradient_star: ",sum_grads/star_area)
         return sum_grads/star_area

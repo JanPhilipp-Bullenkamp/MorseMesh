@@ -12,9 +12,9 @@ import heapq
 class PriorityQueue(object):
     """! @brief Priority Queue class used for a queue sorted after function values.
     
-    @details The elements in this queue should consist of a key - value pair (value stored under index 0 
-    and key under index 1), since the priority will be sorted after position 0.
-      
+    @details The elements in this queue should consist of a key - value pair 
+    (value stored under index 0 and key under index 1), since the priority 
+    will be sorted after position 0.
     """
     ## @var queue 
     # The priority queue stored as an array.
@@ -34,7 +34,8 @@ class PriorityQueue(object):
     # for inserting an element in the queue 
     def insert(self, data): 
         """! @brief Inserts one element at the right place in the queue.
-        @param data The element to be added to the queue. The priority after which it should be ranked has to be stored at the first position (index 0).
+        @param data The element to be added to the queue. The priority after which 
+               it should be ranked has to be stored at the first position (index 0).
         """
         heapq.heappush(self.queue, data)
   
@@ -52,7 +53,8 @@ class PriorityQueue(object):
         return self.queue
     
     def pop(self, data):
-        """! @brief Removes an element from the heapq that is not at the highest priority and heapifies it again.
+        """! @brief Removes an element from the heapq that is not at the highest 
+        priority and heapifies it again.
         
         @param data The data to be removed.
         """

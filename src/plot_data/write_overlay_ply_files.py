@@ -1,4 +1,3 @@
-import numpy as np
 from collections import Counter
 
 '''
@@ -46,11 +45,16 @@ def write_header(file, nb_points, nb_faces=0):
     file.write("end_header\n")
     
 def write_vertex(file, vert, vert_dict, color=[0,0,0], alpha=None):
-    file.write(str(vert_dict[vert.index].x) + " " + str(vert_dict[vert.index].y) + " " + str(vert_dict[vert.index].z) + " ") 
+    file.write(str(vert_dict[vert.index].x) 
+               + " " + str(vert_dict[vert.index].y) 
+               + " " + str(vert_dict[vert.index].z) + " ") 
     if alpha == None:
         file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
     else:
-        file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + " " + str(alpha) + "\n")
+        file.write(str(color[0]) 
+                   + " " + str(color[1]) 
+                   + " " + str(color[2]) 
+                   + " " + str(alpha) + "\n")
         
 def write_edge(file, edge, vert_dict, color=[0,0,0], alpha=None):
     x,y,z = 0,0,0
@@ -65,7 +69,10 @@ def write_edge(file, edge, vert_dict, color=[0,0,0], alpha=None):
     if alpha == None:
         file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
     else:
-        file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + " " + str(alpha) + "\n")
+        file.write(str(color[0]) + " " 
+                   + str(color[1]) + " " 
+                   + str(color[2]) + " " 
+                   + str(alpha) + "\n")
     
 def write_face(file, face, vert_dict, color=[0,0,0], alpha=None):
     x,y,z = 0,0,0
@@ -80,14 +87,24 @@ def write_face(file, face, vert_dict, color=[0,0,0], alpha=None):
     if alpha == None:
         file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
     else:
-        file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + " " + str(alpha) + "\n")
+        file.write(str(color[0]) + " " 
+                   + str(color[1]) + " " 
+                   + str(color[2]) + " " 
+                   + str(alpha) + "\n")
     
 def write_real_face(file, first_ind, second_ind, third_ind, color=[0,0,0], alpha=None):
-    file.write("3 " + str(first_ind) + " " + str(second_ind) + " " + str(third_ind) + " ")
+    file.write("3 " + str(first_ind) + " " 
+               + str(second_ind) + " " 
+               + str(third_ind) + " ")
     if alpha == None:
-        file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
+        file.write(str(color[0]) + " " 
+                   + str(color[1]) + " " 
+                   + str(color[2]) + "\n")
     else:
-        file.write(str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + " " + str(alpha) + "\n")
+        file.write(str(color[0]) + " " 
+                   + str(color[1]) + " " 
+                   + str(color[2]) + " " 
+                   + str(alpha) + "\n")
 
 def write_Cell_labels_overlay_ply_file(MorseCells, vert_dict, target_file):
     with open(target_file + "_OverlayCells.ply", "w") as f:
@@ -102,8 +119,15 @@ def write_Cell_labels_overlay_ply_file(MorseCells, vert_dict, target_file):
             for ind in cells.vertices:
                 write_vertex(f, vert_dict[ind], vert_dict, color=cell_color)
 
-def write_MSComplex_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_file, color_paths=[0,0,0]):
-    with open(target_file + "_" + str(MorseCpx.persistence) + "P_OverlayMorseComplex.ply", "w") as f:
+def write_MSComplex_overlay_ply_file(MorseCpx, 
+                                     vert_dict, 
+                                     edge_dict, 
+                                     face_dict, 
+                                     target_file, 
+                                     color_paths=[0,0,0]):
+    with open(target_file + "_" 
+              + str(MorseCpx.persistence) 
+              + "P_OverlayMorseComplex.ply", "w") as f:
         path_vert = set()
         path_edges = set()
         path_faces = set()
@@ -163,7 +187,9 @@ def write_MSComplex_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, 
                                 path_edges.add(elt)
                             count+=1
 
-        nb_points = len(MorseCpx.CritVertices) + len(MorseCpx.CritEdges) + len(MorseCpx.CritFaces) + len(path_vert) + len(path_edges) + len(path_faces)
+        nb_points = (len(MorseCpx.CritVertices) + len(MorseCpx.CritEdges) 
+                     + len(MorseCpx.CritFaces) + len(path_vert) 
+                     + len(path_edges) + len(path_faces))
         
         write_header(f, nb_points)
 
@@ -181,8 +207,15 @@ def write_MSComplex_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, 
         for ind in path_faces:
             write_face(f, face_dict[ind], vert_dict, color=color_paths)
             
-def write_MSComplex_detailed_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, target_file, color_paths=[0,0,0], separate_points_file=False):
-    with open(target_file + "_" + str(MorseCpx.persistence) + "P_DetailedOverlayMorseComplex.ply", "w") as f:
+def write_MSComplex_detailed_overlay_ply_file(MorseCpx, 
+                                              vert_dict, 
+                                              edge_dict, 
+                                              face_dict, 
+                                              target_file, 
+                                              color_paths=[0,0,0], 
+                                              separate_points_file=False):
+    with open(target_file + "_" + str(MorseCpx.persistence) 
+              + "P_DetailedOverlayMorseComplex.ply", "w") as f:
         path_vert = set()
         path_edges = set()
         path_faces = set()
@@ -277,10 +310,15 @@ def write_MSComplex_detailed_overlay_ply_file(MorseCpx, vert_dict, edge_dict, fa
                                 path_edges.add(elt)
                                 path_segment_edge_vert.add(elt)
                             count+=1
-        nb_points = 3*len(MorseCpx.CritVertices) + 4*len(MorseCpx.CritEdges) + 4*len(MorseCpx.CritFaces) + len(path_vert) + len(path_edges) + len(path_faces) + 3*len(path_segment_edge_vert)
+        nb_points = (3*len(MorseCpx.CritVertices) + 4*len(MorseCpx.CritEdges) 
+                     + 4*len(MorseCpx.CritFaces) + len(path_vert) 
+                     + len(path_edges) + len(path_faces) 
+                     + 3*len(path_segment_edge_vert))
         
-        nb_faces = len(path_segment_face_edge) + len(MorseCpx.CritEdges) + len(MorseCpx.CritFaces) + len(path_segment_edge_vert) + len(MorseCpx.CritVertices)
-        extra_points = set([face for (face,saddle) in path_segment_face_edge])
+        nb_faces = (len(path_segment_face_edge) + len(MorseCpx.CritEdges) 
+                    + len(MorseCpx.CritFaces) + len(path_segment_edge_vert) 
+                    + len(MorseCpx.CritVertices))
+        extra_points = set([face for (face,_) in path_segment_face_edge])
 
         write_header(f, nb_points+len(extra_points), nb_faces)
         
@@ -308,7 +346,11 @@ def write_MSComplex_detailed_overlay_ply_file(MorseCpx, vert_dict, edge_dict, fa
             for vert in ed.indices:
                 write_vertex(f, vert_dict[vert], vert_dict, color=[0,255,0], alpha=0)
                 v_index+=1
-            write_vertex(f, vert_dict[next(iter(ed.indices))], vert_dict, color=[0,255,0], alpha=0)
+            write_vertex(f, 
+                         vert_dict[next(iter(ed.indices))], 
+                         vert_dict, 
+                         color=[0,255,0], 
+                         alpha=0)
             v_index+=1
             
         for fa in MorseCpx.CritFaces.values():
@@ -336,7 +378,11 @@ def write_MSComplex_detailed_overlay_ply_file(MorseCpx, vert_dict, edge_dict, fa
                 for vert in edge_dict[ind].indices:
                     write_vertex(f, vert_dict[vert], vert_dict, color=color_paths, alpha=0)
                     v_index+=1
-                write_vertex(f, vert_dict[next(iter(edge_dict[ind].indices))], vert_dict, color=color_paths, alpha=0)
+                write_vertex(f, 
+                             vert_dict[next(iter(edge_dict[ind].indices))], 
+                             vert_dict, 
+                             color=color_paths, 
+                             alpha=0)
                 v_index+=1
                 
         for ind in path_faces:
@@ -349,39 +395,69 @@ def write_MSComplex_detailed_overlay_ply_file(MorseCpx, vert_dict, edge_dict, fa
             
         '''Write Faces (that will be visualized edges)'''
         for (face_ind, edge_ind) in path_segment_face_edge:
-            write_real_face(f, transfer_faces[face_ind], transfer_faces[face_ind]+1, transfer_edges[edge_ind], color=color_paths, alpha=255)
+            write_real_face(f, 
+                            transfer_faces[face_ind], 
+                            transfer_faces[face_ind]+1, 
+                            transfer_edges[edge_ind], 
+                            color=color_paths, 
+                            alpha=255)
             
         for edge_ind, first_index in path_edge_transfer.items():
-            write_real_face(f, first_index, first_index+1, first_index+2, color=color_paths, alpha=255)
+            write_real_face(f, 
+                            first_index, 
+                            first_index+1, 
+                            first_index+2, 
+                            color=color_paths, 
+                            alpha=255)
         
         for vert_ind, first_index in crit_vert_transfer.items():
-            write_real_face(f, first_index, first_index+1, first_index+2, color=[255,0,0], alpha=255)
+            write_real_face(f, 
+                            first_index, 
+                            first_index+1, 
+                            first_index+2, 
+                            color=[255,0,0], 
+                            alpha=255)
         
         for edge_ind, first_index in crit_edge_transfer.items():
-            write_real_face(f, first_index, first_index+1, first_index+2, color=[0,255,0], alpha=255)
+            write_real_face(f, 
+                            first_index, 
+                            first_index+1, 
+                            first_index+2, 
+                            color=[0,255,0], 
+                            alpha=255)
         
         for face_ind, first_index in crit_face_transfer.items():
-            write_real_face(f, first_index, first_index+1, first_index+2, color=[0,0,255], alpha=255)
+            write_real_face(f, 
+                            first_index, 
+                            first_index+1, 
+                            first_index+2, 
+                            color=[0,0,255], 
+                            alpha=255)
             
     if separate_points_file == True:
-        with open(target_file + "_" + str(MorseCpx.persistence) + "P_DetailedOverlayMorseComplex_CritPoints.ply", "w") as f:
+        with open(target_file + "_" + str(MorseCpx.persistence) 
+                  + "P_DetailedOverlayMorseComplex_CritPoints.ply", "w") as f:
             
             write_header(f, len(MorseCpx.CritVertices))
             #v_index = 0
         
             '''Write Vertices'''
             for vert in MorseCpx.CritVertices.values():
-                #crit_vert_transfer[vert.index] = v_index # vert can be chosen as v_ind, v_ind+1, v_ind+2
-                #for i in range(3):
                 write_vertex(f, vert, vert_dict, color=[255,0,0])
-                #    v_index+=1
         
          
 
-def write_SalientEdge_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict, 
-                                       thresh_high, thresh_low, 
-                                       target_file, color_high=[0,0,0], color_low=[255,255,255]):
-    with open(target_file+"_"+str(thresh_low)+"Tlow_"+str(thresh_high)+"Thigh_OverlaySalientEdge.ply", "w") as f:
+def write_SalientEdge_overlay_ply_file(MorseCpx, 
+                                       vert_dict, 
+                                       edge_dict, 
+                                       face_dict, 
+                                       thresh_high, 
+                                       thresh_low, 
+                                       target_file, 
+                                       color_high=[0,0,0], 
+                                       color_low=[255,255,255]):
+    with open(target_file+"_"+str(thresh_low)+"Tlow_"+str(thresh_high)
+              +"Thigh_OverlaySalientEdge.ply", "w") as f:
         path_vert_high = set()
         path_edges_high = set()
         path_faces_high = set()
@@ -422,7 +498,9 @@ def write_SalientEdge_overlay_ply_file(MorseCpx, vert_dict, edge_dict, face_dict
                             path_edges_low.add(elt)
 
 
-        nb_points = len(path_vert_high) + len(path_edges_high) + len(path_faces_high) + len(path_vert_low) + len(path_edges_low) + len(path_faces_low)
+        nb_points = (len(path_vert_high) + len(path_edges_high) 
+                     + len(path_faces_high) + len(path_vert_low) 
+                     + len(path_edges_low) + len(path_faces_low))
 
         write_header(f, nb_points)
 

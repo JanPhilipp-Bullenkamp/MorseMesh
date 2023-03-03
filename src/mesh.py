@@ -31,7 +31,8 @@ from src.Algorithms.load_data.read_ply import read_ply
 
 from src.Algorithms.load_data.read_ply_test import load_ply
 from src.Algorithms.load_data.anisotropic_diffusion import smooth_function_values
-from src.Algorithms.load_data.read_or_process_funvals import read_funvals, apply_perona_malik_diffusion
+from src.Algorithms.load_data.read_or_process_funvals import (read_funvals, 
+                                                              apply_perona_malik_diffusion)
 
 from src.timer import timed
 
@@ -39,7 +40,13 @@ import os
 import numpy as np
 
 class Box:
-    def __init__(self, min_x: float, min_y: float, min_z: float, max_x: float, max_y: float, max_z: float):
+    def __init__(self, 
+                 min_x: float, 
+                 min_y: float, 
+                 min_z: float, 
+                 max_x: float, 
+                 max_y: float, 
+                 max_z: float):
         self.min_x = min_x
         self.min_y = min_y
         self.min_z = min_z
@@ -49,7 +56,9 @@ class Box:
 
 
 class Mesh:
-    """! @brief Mesh class used to store mesh, Morse Theory and Segmentation related structures."""
+    """! @brief Mesh class used to store mesh, Morse Theory 
+    and Segmentation related structures.
+    """
     ## @var filename
     # The filename of the underlying mesh.
     ## @var min
@@ -59,18 +68,22 @@ class Mesh:
     ## @var range
     # The range of function values. (max-min)
     ## @var Vertices
-    # A dictionary to store the vertices. Stored as key-value with key: vertex index and value: Vertex class object
+    # A dictionary to store the vertices. Stored as key-value with key: vertex 
+    # index and value: Vertex class object
     ## @var Edges
-    # A dictionary to store the edges. Stored as key-value with key: edge index and value: Simplex class object
+    # A dictionary to store the edges. Stored as key-value with key: edge index 
+    # and value: Simplex class object
     ## @var Faces
-    # A dictionary to store the faces. Stored as key-value with key: face index and value: Simplex class object
+    # A dictionary to store the faces. Stored as key-value with key: face index 
+    # and value: Simplex class object
     
     ## @var _flag_process_lower_stars
     # Boolean whether the discrete vector field V has been calculated.
     ## @var _flag_MorseComplex
     # Boolean whether the initial Morse complex has been calculated.
     ## @var _flag_SalientEdge
-    # Boolean whether a maximally reduced Morse complex has been calculated for salient edge extraction.
+    # Boolean whether a maximally reduced Morse complex has been calculated 
+    # for salient edge extraction.
     ## @var _flag_BettiNumbers
     # Boolean whether the Betti numbers have been calculated.
     ## @var partners
@@ -82,12 +95,13 @@ class Mesh:
     ## @var V23
     # Discrete vectors/ pairings dictionary between edges and faces.
     ## @var C
-    # Dictionary with critical simplices: has keys 0,1 and 2. Each of these contains a set with critical 
-    # simplices of the respective dimension
+    # Dictionary with critical simplices: has keys 0,1 and 2. Each of these 
+    # contains a set with critical simplices of the respective dimension
     ## @var MorseComplex
     # The initial Morse complex.
     ## @var reducedMorseComplexes
-    # A dictionary of reduced Morse complexes. The keys are the persistences of the respective reduced Morse complex in value.
+    # A dictionary of reduced Morse complexes. The keys are the persistences of 
+    # the respective reduced Morse complex in value.
     ## @var maximalReducedComplex
     # The maximally reduced Morse complex
     def __init__(self):
@@ -154,11 +168,19 @@ class Mesh:
 
     ''' DATALOADING'''
     @timed
-    def load_mesh_new(self, filename: str, morse_function: str = "quality", inverted: bool = False):
+    def load_mesh_new(self, 
+                      filename: str, 
+                      morse_function: str = "quality", 
+                      inverted: bool = False):
         self.reset()
 
         file_obj = open(filename, 'rb')
-        min_val, max_val = load_ply(file_obj, self.Vertices, self.Edges, self.Faces, morse_function=morse_function, inverted=inverted)
+        min_val, max_val = load_ply(file_obj, 
+                                    self.Vertices, 
+                                    self.Edges, 
+                                    self.Faces, 
+                                    morse_function=morse_function, 
+                                    inverted=inverted)
 
         self.filename = os.path.splitext(filename)[0]
         self.min = min_val
@@ -170,8 +192,10 @@ class Mesh:
         """! @brief Loads a .ply file with a Morse function taken from the given index.
 
         @param filename The location and filename of the ply file that should be loaded.
-        @param quality_index The index position where the Morse function should be taken from in the vertices.
-        @param inverted (Optional) Boolean, whether the Morse function should be inverted or not (multiplied with -1).
+        @param quality_index The index position where the Morse function should 
+               be taken from in the vertices.
+        @param inverted (Optional) Boolean, whether the Morse function should be 
+               inverted or not (multiplied with -1).
         """
         # Reset previously loaded data if necessary
         self.reset()
@@ -184,11 +208,18 @@ class Mesh:
         
     @timed    
     def load_new_funvals(self, filename: str, operation: str = "max"):
-        """! @brief Loads new function values into the Mesh. Currently expects a feature vector file from Gigamesh i think.
-        @param filename The location and filename of the feature vector file that should give new Morse function values.
-        @param operation Optionally change the function on the feature vector: currently options are max, min, maxabs and minabs. Default is max.
+        """! @brief Loads new function values into the Mesh. Currently expects a 
+        feature vector file from Gigamesh i think.
+        @param filename The location and filename of the feature vector file that 
+               should give new Morse function values.
+        @param operation Optionally change the function on the feature vector: 
+               currently options are max, min, maxabs and minabs. Default is max.
         """
-        min_val, max_val = read_funvals(filename, self.Vertices, self.Edges, self.Faces, operation=operation)
+        min_val, max_val = read_funvals(filename, 
+                                        self.Vertices, 
+                                        self.Edges, 
+                                        self.Faces, 
+                                        operation=operation)
         self.min = min_val
         self.max = max_val
         self.range = max_val - min_val
@@ -205,7 +236,12 @@ class Mesh:
 
     @timed
     def apply_perona_malik(self, iterations: int, lamb: float, k: float):
-        min_val, max_val = apply_perona_malik_diffusion(self.Vertices, self.Edges, self.Faces, iterations, lamb, k)
+        min_val, max_val = apply_perona_malik_diffusion(self.Vertices, 
+                                                        self.Edges, 
+                                                        self.Faces, 
+                                                        iterations, 
+                                                        lamb, 
+                                                        k)
         self.min = min_val
         self.max = max_val
         self.range = max_val - min_val
@@ -225,7 +261,8 @@ class Mesh:
         "| Number of Edges: " + str(len(self.Edges)) + "\n"
         "| Number of Faces: " + str(len(self.Faces)) + "\n"
         "+-------------------------------------------------------\n"
-        "| Euler characteristic: " + str(len(self.Vertices) + len(self.Faces) -len(self.Edges)) + "\n"
+        "| Euler characteristic: " + str(len(self.Vertices) 
+                                         + len(self.Faces) -len(self.Edges)) + "\n"
         "| Betti numbers: " + str(self.BettiNumbers) + "\n" 
         "+-------------------------------------------------------")
         

@@ -2,14 +2,19 @@ import scipy.io
 import numpy as np
 from scipy.spatial import KDTree
 
-def artifact3D_to_labels(filename, scarfilename):
+def artifact3D_to_labels(filename: str, scarfilename: str):
     mat = scipy.io.loadmat(filename)
     scarmat = scipy.io.loadmat(scarfilename)
     
     reorientation_trafo = {}
-    reorientation_trafo['Flipvector'] = [scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]
+    reorientation_trafo['Flipvector'] = [scarmat['ds'][0][0][1][0][0],
+                                         scarmat['ds'][0][0][1][0][0],
+                                         1]
     reorientation_trafo['Trafomatrix'] = scarmat['ds'][0][0][0]
-    data = ([scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]*mat['vertices'].dot(scarmat['ds'][0][0][0])[:,:])
+    data = ([scarmat['ds'][0][0][1][0][0],
+             scarmat['ds'][0][0][1][0][0],
+             1]
+            *mat['vertices'].dot(scarmat['ds'][0][0][0])[:,:])
     reorientation_trafo['Translationvector'] = np.sum(data,axis=0)/len(data)
     data = data - np.sum(data,axis=0)/len(data)
     
@@ -55,13 +60,16 @@ def artifact3D_to_labels(filename, scarfilename):
         label_dict[lab_pt_dict[transf[closest_labelled_ind]]].add(ind)
     return label_dict, reorientation_trafo
 
-def artifact3D_get_trafo(filename, scarfilename):
+def artifact3D_get_trafo(filename: str, scarfilename: str):
     mat = scipy.io.loadmat(filename)
     scarmat = scipy.io.loadmat(scarfilename)
     
     reorientation_trafo = {}
-    reorientation_trafo['Flipvector'] = [scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]
+    reorientation_trafo['Flipvector'] = [scarmat['ds'][0][0][1][0][0],
+                                         scarmat['ds'][0][0][1][0][0],
+                                         1]
     reorientation_trafo['Trafomatrix'] = scarmat['ds'][0][0][0]
-    data = ([scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]*mat['vertices'].dot(scarmat['ds'][0][0][0])[:,:])
+    data = ([scarmat['ds'][0][0][1][0][0],scarmat['ds'][0][0][1][0][0],1]
+            *mat['vertices'].dot(scarmat['ds'][0][0][0])[:,:])
     reorientation_trafo['Translationvector'] = np.sum(data,axis=0)/len(data)
     return reorientation_trafo
