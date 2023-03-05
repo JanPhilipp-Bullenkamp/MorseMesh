@@ -11,6 +11,7 @@
 
 #Imports
 from collections import Counter
+import numpy as np
 from .anisotropic_diffusion import compute_anisotropic_diffusion
 
 def read_funvals(filename: str, 
@@ -28,6 +29,9 @@ def read_funvals(filename: str,
     @param vertices_dict The vertices dictionary to be updated with new function values.
     @param edges_dict The edges dictionary to be updated with new function values.
     @param faces_dict The faces dictionary to be updated with new function values.
+    @param operation The function used to get a scalar value from the feature
+           vector array. Default is "max".
+           
     
     @return Despite updating the dictionaries, returns the minimum and maximum 
             function value as min, max.
@@ -44,12 +48,21 @@ def read_funvals(filename: str,
         abs_arr = [abs(x) for x in arr]
         index = abs_arr.index(min(abs_arr))
         return (arr[index]/abs(arr[index]))*arr[index] # sign times value
+    def std_dev_arr(arr):
+        return np.std(arr)
+    def mean_arr(arr):
+        return np.mean(arr)
+    def median_arr(arr):
+        return np.median(arr)
 
     func_dict = {
         "max": max_arr,
         "min": min_arr,
         "maxabs": maxabs_arr,
-        "minabs": minabs_arr
+        "minabs": minabs_arr,
+        "std": std_dev_arr,
+        "mean": mean_arr,
+        "median": median_arr
     }
     
     try:
@@ -68,7 +81,6 @@ def read_funvals(filename: str,
                 ind = int(line.split()[0])
                 feature_vec = [float(x) for x in line.split()[1:]]
                 
-                # possible change calculation here????
                 vertices_dict[ind].fun_val = function(feature_vec)
                 vals.append(function(feature_vec))
     
