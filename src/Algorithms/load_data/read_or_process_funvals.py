@@ -54,6 +54,11 @@ def read_funvals(filename: str,
         return np.mean(arr)
     def median_arr(arr):
         return np.median(arr)
+    def sign_median_arr(arr):
+        if np.median(arr) < 0:
+            return min(arr)
+        else:
+            return max(arr)
 
     func_dict = {
         "max": max_arr,
@@ -62,7 +67,8 @@ def read_funvals(filename: str,
         "minabs": minabs_arr,
         "std": std_dev_arr,
         "mean": mean_arr,
-        "median": median_arr
+        "median": median_arr,
+        "sign_median": sign_median_arr
     }
     
     try:
