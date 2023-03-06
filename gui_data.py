@@ -5,6 +5,7 @@ class Parameters:
         self.reset()
 
     def reset(self):
+        self.feature_vector_function = "maxabs"
         self.high_thresh = None
         self.low_thresh = None
         self.mode = "ridge"

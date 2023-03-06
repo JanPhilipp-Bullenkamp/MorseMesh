@@ -147,7 +147,7 @@ class Mesh:
         
         self.maximalReducedComplex = None
 
-    @timed
+    @timed()
     def get_center(self):
         """! @brief Calculates the center of mass of the Vertices stored.
         with poke needleer of mass.
@@ -167,7 +167,7 @@ class Mesh:
         return Box(min_x, min_y, min_z, max_x, max_y, max_z)
 
     ''' DATALOADING'''
-    @timed
+    @timed(False)
     def load_mesh_new(self, 
                       filename: str, 
                       morse_function: str = "quality", 
@@ -187,7 +187,7 @@ class Mesh:
         self.max = max_val
         self.range = max_val - min_val
     
-    @timed
+    @timed()
     def load_mesh_ply(self, filename: str, quality_index: int, inverted: bool = False):
         """! @brief Loads a .ply file with a Morse function taken from the given index.
 
@@ -206,7 +206,7 @@ class Mesh:
         self.max = max_val
         self.range = max_val - min_val
         
-    @timed    
+    @timed() 
     def load_new_funvals(self, filename: str, operation: str = "max"):
         """! @brief Loads new function values into the Mesh. Currently expects a 
         feature vector file from Gigamesh i think.
@@ -225,16 +225,16 @@ class Mesh:
         self.range = max_val - min_val
         self.reset_morse()
 
-    @timed
+    @timed()
     def get_area(self):
         area = sum([face.compute_area(self.Vertices) for face in self.Faces.values()])
         return area
 
-    @timed
+    @timed()
     def smooth_fun_vals(self, n_neighboorhood: int = 1):
         smooth_function_values(self.Vertices, n_neighboorhood)
 
-    @timed
+    @timed()
     def apply_perona_malik(self, iterations: int, lamb: float, k: float):
         min_val, max_val = apply_perona_malik_diffusion(self.Vertices, 
                                                         self.Edges, 

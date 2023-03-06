@@ -169,7 +169,7 @@ class Application:
         options |= QFileDialog.ReadOnly
         file_name, _ = QFileDialog.getOpenFileName(None, "Select feature vector File", "", "Mat Files (*.mat)", options=options)
         if file_name:
-            self.data.morse.load_new_funvals(file_name, operation="maxabs")
+            self.data.morse.load_new_funvals(file_name, operation=self.parameters.feature_vector_function)
             self.color_funvals()
 
     def save_edges_ply_file(self):
@@ -267,7 +267,7 @@ class Application:
         self.show_slider()
 
     def compute_perona_malik(self):
-        self.data.morse.apply_perona_malik(1,0.6,0.2)
+        self.data.morse.apply_perona_malik(3,0.3,0.2)
         self.color_funvals()
 
     def smoothing(self):

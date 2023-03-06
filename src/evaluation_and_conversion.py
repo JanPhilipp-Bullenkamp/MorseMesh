@@ -22,7 +22,7 @@ from .timer import timed
 
 import os
 
-@timed
+@timed()
 def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename, metric = "IoU", plot_correctness_mask = False):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a colored .ply file.
     @param result_filename The result .txt filename and location.
@@ -59,7 +59,7 @@ def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename,
     
     return correctness, pers, high_thr, low_thr, merge_thr
 
-@timed   
+@timed()
 def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename, metric = "IoU", plot_correctness_mask = False):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a labels .txt file.
     @param result_filename The result .txt filename and location.
@@ -96,7 +96,7 @@ def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename,
     
     return correctness, pers, high_thr, low_thr, merge_thr
 
-@timed
+@timed()
 def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_dict: dict, metric: str = "IoU", plot_correctness_mask: bool = False):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a labels .txt file.
     @param result_filename The result .txt filename and location.
@@ -135,7 +135,7 @@ def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_
     
     return correctness, high, low, merge
 
-#@timed
+@timed(False)
 def compare_result_dict_to_groundtruth_label_dict(result_dict: str, gt_label_dict: dict, metric: str = "IoU"):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a labels .txt file.
     @param result_dict The result segmentation as label dictionary.
@@ -163,7 +163,7 @@ def compare_result_dict_to_groundtruth_label_dict(result_dict: str, gt_label_dic
     
     return correctness
 
-@timed    
+@timed()
 def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 0):
     """! @brief Takes a colored .ply file and returns a labels .txt file based on those colors.
     @param filename The colored .ply filename and location.
@@ -177,7 +177,7 @@ def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 0):
     labels = clean_and_read_labels_from_color_ply(filename, outfilename, threshold=clean_thresh)
     return labels
 
-@timed
+@timed()
 def painted_ply_to_label_dict(filename, clean_thresh = 0):
     """! @brief Takes a colored .ply file and returns a labels dict based on those colors.
     @param filename The colored .ply filename and location.
@@ -190,7 +190,7 @@ def painted_ply_to_label_dict(filename, clean_thresh = 0):
     labels = clean_and_read_labels_from_color_ply(filename, threshold=clean_thresh)
     return labels
     
-@timed    
+@timed()
 def label_txt_to_label_dict(filename, sort_enum = True):
     """! @brief Takes a labels .txt file and returns a label dictionary.
     @param filename The labels .txt file to be read.
@@ -208,7 +208,7 @@ def label_txt_to_label_dict(filename, sort_enum = True):
         labels = sort_enum_labels
     return labels
 
-@timed
+@timed()
 def label_dict_to_label_txt(labels, filename):
     """! @brief Takes a label dictionary and writes a corresponding labels .txt file.
     @param labels A label dictionary with key=label_id and value=set of vertex indices.
@@ -216,7 +216,7 @@ def label_dict_to_label_txt(labels, filename):
     """
     write_Cell_labels_txt_file(labels, filename, cell_structure=False)
 
-@timed    
+@timed()
 def label_txt_to_sorted_label_txt(filename, outfilename):
     """! @brief Takes a labels .txt file and writes another labels .txt file with the labels being sorted and enumerated.
     @param filename The labels .txt file to be read.
@@ -226,7 +226,7 @@ def label_txt_to_sorted_label_txt(filename, outfilename):
     label_dict_to_label_txt(sorted_labels, outfilename)
     return sorted_labels
 
-@timed
+@timed()
 def artifact3D_to_label_dict(filename, scarfilename, sort_enum = True, get_trafo = False):
     """! @brief Takes the output of the Artifact3D Software and returns their resulting labelling as a 
     label dictionary with key=label_id and value=set of vertex indices.
@@ -251,7 +251,7 @@ def artifact3D_to_label_dict(filename, scarfilename, sort_enum = True, get_trafo
     else:
         return label_dict
 
-@timed
+@timed()
 def artifact3D_get_trafo_dict(filename, scarfilename):
     """! @brief Reads the Artifact3D Softwares results and returns the reorientation they got to align the artefacts.
     @details The reorientation returned can be used to recreate the alignment done by the Artifact3D Software as follows:
@@ -276,7 +276,7 @@ def artifact3D_get_trafo_dict(filename, scarfilename):
     reorientation_trafo = artifact3D_get_trafo(filename, scarfilename)
     return reorientation_trafo
 
-@timed
+@timed()
 def artifact3D_to_label_txt(filename, scarfilename, outfilename, sort_enum = True):
     """! @brief Takes the output of the Artifact3D Software and writes their resulting labelling as a 
     label .txt file.

@@ -47,6 +47,8 @@ class SideBar:
 
     def create_boxes(self, parameters):
         # Create the input widgets and their default values
+        self.param0_input = QLineEdit()
+        self.param0_input.setText(str(parameters.feature_vector_function))
         self.param1_input = QLineEdit()
         self.param1_input.setText(str(parameters.persistence))
         self.param1_input.setMaximumSize(75, 25)
@@ -86,6 +88,8 @@ class SideBar:
 
     def add_boxes_to_sidebar_layout(self):
         # Add the input widgets to the sidebar layout
+        self.sidebar_layout.addWidget(QLabel("Feat. Vec. Fct."))
+        self.sidebar_layout.addWidget(self.param0_input)
         self.sidebar_layout.addWidget(QLabel("Persistence"))
         self.sidebar_layout.addWidget(self.param1_input)
         self.sidebar_layout.addWidget(QLabel("Merge threshold"))
@@ -176,6 +180,7 @@ class SideBar:
                              "should be checked at all times!")
 
     def connect_update_functions_to_boxes(self, parameters):
+        self.param0_input.editingFinished.connect(lambda: parameters.update(str(self.param0_input.text()), "feature_vector_function"))
         self.param1_input.editingFinished.connect(lambda: parameters.update(float(self.param1_input.text()), "persistence"))
         self.param2_input.editingFinished.connect(lambda: parameters.update(float(self.param2_input.text()), "merge_threshold"))
         self.param3_input.editingFinished.connect(lambda: parameters.update(int(self.param3_input.text()), "cluster_seed_number"))
