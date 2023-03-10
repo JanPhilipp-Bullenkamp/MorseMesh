@@ -6,13 +6,20 @@ def compute_gradient(vert_dict: dict, face_dict: dict) -> dict:
         gradient[ind] = vert.average_gradient_on_star(vert_dict, face_dict)
     return gradient
 
-def get_nabla_and_dist(vert_dict: dict):
+def get_nabla_and_dist(vert_dict: dict) -> dict:
     nabla_and_dist = {}
     for ind, vert in vert_dict.items():
         nabla_and_dist[ind] = [(vert_dict[nei].fun_val-vert.fun_val, 
                                 vert.distance_to_vertex(vert_dict[nei])) 
                                 for nei in vert.neighbors]
     return nabla_and_dist
+
+def steepest_descent(vert_dict: dict) -> dict:
+    steepest_desc = {}
+    for ind, vert in vert_dict.items():
+        steepest_desc[ind] = [(vert_dict[nei].fun_val-vert.fun_val, nei)
+                              for nei in vert.neighbors]
+
 
 def smooth_gradient(gradient: dict, vert_dict: dict, lamb: float):
     smoothed_gradient = {}
@@ -42,7 +49,7 @@ def diffusivity_coeff(nabla, k, option="fraction"):
     if option == "fraction":
         c = 1/(1+(np.abs(nabla)/k)**2)
     elif option == "exp":
-        c = np.exp(-((nabla)/k)**2)
+        c = np.exp(-(np.abs(nabla)/k)**2)
     return c
 
 def compute_anisotropic_diffusion(vert_dict: dict, 
@@ -70,12 +77,12 @@ def compute_anisotropic_diffusion(vert_dict: dict,
         for ind, vert in vert_dict.items():
             grad = sum([nabla*diffusivity_coeff(nabla, k, option="exp") 
                         for dist, nabla in nabla_and_dist[ind]])
-            if ind in [1,27,49]:
+            if ind in [1,27,49,3067]:
                 print("Val before: ",vert.fun_val)
                 print(grad, len(vert.neighbors))
             vert.fun_val = vert.fun_val + lamb*(grad)
             vals.append(vert.fun_val)
-            if ind in [1,27,49]:
+            if ind in [1,27,49,3067]:
                 print("Val after: ",vert.fun_val)
 
         print("Range: ",min(vals)," to ", max(vals))
@@ -99,3 +106,9 @@ def compute_anisotropic_diffusion(vert_dict: dict,
         #                                                            option="exp"))
 
     return vert_dict
+
+def update_steepest_descent(vert_dict: dict,
+                            iterations: int,
+                            lamb: float):
+    for i in range(iterations):
+        do=0

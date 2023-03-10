@@ -5,6 +5,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QSlider, QLabel, QPushButton
 
+import qdarkstyle
+
 from gui_data import Data, Flags, Parameters
 from gui.gui_menubar import MenuBar
 from gui.gui_sidebar import SideBar
@@ -82,6 +84,7 @@ class Application:
         self.parameters = Parameters()
 
         self.app = QtWidgets.QApplication([])
+        self.app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
 
         self.window = Window()
 
@@ -267,7 +270,7 @@ class Application:
         self.show_slider()
 
     def compute_perona_malik(self):
-        self.data.morse.apply_perona_malik(3,0.3,0.2)
+        self.data.morse.apply_perona_malik(3,0.25,40)
         self.color_funvals()
 
     def smoothing(self):

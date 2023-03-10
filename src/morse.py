@@ -100,7 +100,7 @@ class Morse(Mesh):
                             self.V23)
         self._flag_process_lower_stars = True
         
-    @timed()
+    @timed(False)
     def extract_morse_complex(self):
         """! @brief Runs the extract_morse_complex algorithm to get a Morse Complex.
         
@@ -123,7 +123,7 @@ class Morse(Mesh):
             self.MorseComplex.filename = self.filename
             self._flag_MorseComplex = True
         
-    @timed()
+    @timed(False)
     def reduce_morse_complex(self, persistence: float):
         """! @brief Reduces the Morse complex up to the given persistence.
         @details Always cancels two critical simplices of consectutive dimensions 
@@ -161,7 +161,7 @@ class Morse(Mesh):
                 print("Persistence was high enough that this complex is maximally reduced.")
         return self.reducedMorseComplexes[persistence]
 
-    @timed()
+    @timed(False)
     def reduce_morse_complex_salient_edge(self, 
                                           thresh_high: float, 
                                           thresh_low: float = None, 
@@ -193,7 +193,7 @@ class Morse(Mesh):
                                                                                                           salient_edge_pts)
             return self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)]
 
-    @timed()
+    @timed(False)
     def extract_cells_salient_complex(self, 
                                       thresh_high: float,
                                       thresh_low: float = None, 
@@ -233,7 +233,7 @@ class Morse(Mesh):
                             self.Faces)
             return self.salient_reduced_morse_complexes[(pers, thresh_high, thresh_low)].MorseCells
     
-    @timed()
+    @timed(False)
     def extract_morse_cells(self, persistence: float):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
@@ -248,7 +248,7 @@ class Morse(Mesh):
             print("MorseCells for the MorseComplex with this "
                   "persistence have already been calculated!")
     
-    @timed()
+    @timed(False)
     def calculate_betti_numbers(self, persistence: float = 0):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce to this persistence first...")
@@ -285,7 +285,7 @@ class Morse(Mesh):
     
     ''' SEGMENTATION'''
     
-    @timed()
+    @timed(False)
     def segmentation(self, 
                      persistence: float, 
                      thresh_large: float, 
@@ -317,7 +317,7 @@ class Morse(Mesh):
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
-    @timed()
+    @timed(False)
     def segmentation_salient_reduction(self, 
                                        thresh_large: float, 
                                        thresh_small: float, 
@@ -341,7 +341,7 @@ class Morse(Mesh):
                                                                                             merge_threshold, minimum_labels)
             return self.salient_reduced_morse_complexes[(persistence,thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
     
-    @timed()
+    @timed(False)
     def segmentation_no_pers(self, 
                              thresh_large: float, 
                              thresh_small: float, 
@@ -414,7 +414,7 @@ class Morse(Mesh):
                                    separatrix_type=separatrix_type)
         return valleys
 
-    @timed()
+    @timed(False)
     def clean_lines(self, line_points: set):
         print("Pts before cleaning",len(line_points))
         cleaned_lines = set()
@@ -425,7 +425,7 @@ class Morse(Mesh):
         print("Pts after cleaning",len(cleaned_lines))
         return cleaned_lines
                 
-    @timed()
+    @timed(False)
     def get_connected_components_lines(self, line_points: set):
         components = {}
         index = 1
@@ -452,7 +452,7 @@ class Morse(Mesh):
             print("nb points: ", len(pts))
         return components
 
-    @timed()
+    @timed(False)
     def change_separatrix_persistences_start_end_average(self):
         if not self._flag_SalientEdge:
             self.reduce_morse_complex(self.range)
@@ -460,7 +460,7 @@ class Morse(Mesh):
                                                                   self.Edges, 
                                                                   self.Faces)
 
-    @timed()
+    @timed(False)
     def pipeline_salient_segmentation(self, 
                                       infilename: str, 
                                       outfilename: str, 
@@ -493,7 +493,7 @@ class Morse(Mesh):
                     f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
                     self.plot_segmentation_salient_edge_label_txt(high, low, merge, outfilename+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
     
-    @timed()
+    @timed(False)
     def pipeline(self, 
                  infilename: str, 
                  outfilename: str, 
@@ -536,7 +536,7 @@ class Morse(Mesh):
                         f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
                         self.plot_segmentation_label_txt(pers, high, low, merge, outfilename)
 
-    @timed()
+    @timed(False)
     def pipeline_cluster_segmentation(self, 
                                       infilename: str, 
                                       outfilename: str, 
@@ -577,7 +577,7 @@ class Morse(Mesh):
                     self.plot_labels_txt(segmented_dict, 
                                          outfilename+"_"+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
      
-    @timed()
+    @timed(False)
     def pipeline_semi_auto(self, 
                            infilename: str, 
                            outfilename: str, 
@@ -635,13 +635,13 @@ class Morse(Mesh):
                                                   outfilename)
 
     ''' SURFACE ROUGHNESS'''
-    @timed()
+    @timed(False)
     def get_variance(self, n: int):
         fun_vals = [v.fun_val for v in self.Vertices.values()]
         mean_fun_val = np.mean(fun_vals)
         return variance_heat_map(self.Vertices, mean_fun_val, n)
 
-    @timed()
+    @timed(False)
     def get_extremal_point_ratio(self, pers: float, n: int):
         self.reduce_morse_complex(pers)
         extremal_points = set()
