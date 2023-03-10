@@ -3,10 +3,30 @@ from PyQt5.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QLineEdit, QCheckBox
 class SideBar:
     def __init__(self, layout, parameters):
         # Create the sidebar group box
-        self.sidebar = QGroupBox("Further Parameters:")
-        self.sidebar_layout = QVBoxLayout()
-        self.sidebar.setLayout(self.sidebar_layout)
-        self.sidebar.setMaximumSize(175, 700)
+        self.sidebar_data_loading = QGroupBox("Data loading:")
+        self.sidebar_data_loading_layout = QVBoxLayout()
+        self.sidebar_data_loading.setLayout(self.sidebar_data_loading_layout)
+        self.sidebar_data_loading.setMaximumSize(195, 100)
+
+        self.sidebar_edge_detection = QGroupBox("Edge detection:")
+        self.sidebar_edge_detection_layout = QVBoxLayout()
+        self.sidebar_edge_detection.setLayout(self.sidebar_edge_detection_layout)
+        self.sidebar_edge_detection.setMaximumSize(195, 150)
+
+        self.sidebar_adv_edge_detection = QGroupBox("Advanced edge detection:")
+        self.sidebar_adv_edge_detection_layout = QVBoxLayout()
+        self.sidebar_adv_edge_detection.setLayout(self.sidebar_adv_edge_detection_layout)
+        self.sidebar_adv_edge_detection.setMaximumSize(195, 400)
+
+        self.sidebar_morse_seg = QGroupBox("Morse Segmentation:")
+        self.sidebar_morse_seg_layout = QVBoxLayout()
+        self.sidebar_morse_seg.setLayout(self.sidebar_morse_seg_layout)
+        self.sidebar_morse_seg.setMaximumSize(195, 150)
+
+        self.sidebar_cluster_seg = QGroupBox("Cluster Segmentation:")
+        self.sidebar_cluster_seg_layout = QVBoxLayout()
+        self.sidebar_cluster_seg.setLayout(self.sidebar_cluster_seg_layout)
+        self.sidebar_cluster_seg.setMaximumSize(195, 150)
 
         self.create_boxes(parameters)
 
@@ -43,6 +63,16 @@ class SideBar:
         self.connect_update_functions_to_boxes(parameters)
         
         # Add the sidebar to the main layout
+        self.sidebar = QGroupBox("Parameters:")
+        self.sidebar_layout = QVBoxLayout()
+        self.sidebar.setLayout(self.sidebar_layout)
+        self.sidebar.setMaximumSize(230, 1000)
+        self.sidebar_layout.addWidget(self.sidebar_data_loading)
+        self.sidebar_layout.addWidget(self.sidebar_edge_detection)
+        self.sidebar_layout.addWidget(self.sidebar_adv_edge_detection)
+        self.sidebar_layout.addWidget(self.sidebar_morse_seg)
+        self.sidebar_layout.addWidget(self.sidebar_cluster_seg)
+
         layout.addWidget(self.sidebar,0,1)
 
     def create_boxes(self, parameters):
@@ -88,36 +118,42 @@ class SideBar:
 
     def add_boxes_to_sidebar_layout(self):
         # Add the input widgets to the sidebar layout
-        self.sidebar_layout.addWidget(QLabel("Feat. Vec. Fct."))
-        self.sidebar_layout.addWidget(self.param0_input)
-        self.sidebar_layout.addWidget(QLabel("Persistence"))
-        self.sidebar_layout.addWidget(self.param1_input)
-        self.sidebar_layout.addWidget(QLabel("Merge threshold"))
-        self.sidebar_layout.addWidget(self.param2_input)
-        self.sidebar_layout.addWidget(QLabel("Cluster Seed number"))
-        self.sidebar_layout.addWidget(self.param3_input)
-        self.sidebar_layout.addWidget(QLabel("High edge Thr"))
-        self.sidebar_layout.addWidget(self.param4_input)
-        self.sidebar_layout.addWidget(QLabel("Low edge Thr"))
-        self.sidebar_layout.addWidget(self.param5_input)
-        self.sidebar_layout.addWidget(QLabel("Size threshold segmentation (per label)"))
-        self.sidebar_layout.addWidget(self.param6_input)
+        self.sidebar_data_loading_layout.addWidget(QLabel("Feat. Vec. Fct."))
+        self.sidebar_data_loading_layout.addWidget(self.param0_input)
 
-        self.sidebar_layout.addWidget(QLabel("Seapratrix Type/ Density"))
-        self.sidebar_layout.addWidget(self.box_all)
-        self.sidebar_layout.addWidget(self.box_cutoff)
-        self.sidebar_layout.addWidget(self.box_reversed)
+        self.sidebar_edge_detection_layout.addWidget(QLabel("High edge Thr"))
+        self.sidebar_edge_detection_layout.addWidget(self.param4_input)
+        self.sidebar_edge_detection_layout.addWidget(QLabel("Low edge Thr"))
+        self.sidebar_edge_detection_layout.addWidget(self.param5_input)
 
-        self.sidebar_layout.addWidget(QLabel("Min separatrix length"))
-        self.sidebar_layout.addWidget(self.param8_input)
-        self.sidebar_layout.addWidget(QLabel("Max separatrix length"))
-        self.sidebar_layout.addWidget(self.param9_input)
+        self.sidebar_adv_edge_detection_layout.addWidget(QLabel("Seapratrix Density"))
+        self.sidebar_adv_edge_detection_layout.addWidget(self.box_all)
+        self.sidebar_adv_edge_detection_layout.addWidget(self.box_cutoff)
+        self.sidebar_adv_edge_detection_layout.addWidget(self.box_reversed)
+
+        self.sidebar_adv_edge_detection_layout.addWidget(QLabel("Min separatrix length"))
+        self.sidebar_adv_edge_detection_layout.addWidget(self.param8_input)
+        self.sidebar_adv_edge_detection_layout.addWidget(QLabel("Max separatrix length"))
+        self.sidebar_adv_edge_detection_layout.addWidget(self.param9_input)
     
         # add the boxes to the layout
-        self.sidebar_layout.addWidget(QLabel("Extremal Line Type"))
-        self.sidebar_layout.addWidget(self.box_ridge)
-        self.sidebar_layout.addWidget(self.box_valley)
-        self.sidebar_layout.addWidget(self.box_both)
+        self.sidebar_adv_edge_detection_layout.addWidget(QLabel("Extremal Line Type"))
+        self.sidebar_adv_edge_detection_layout.addWidget(self.box_ridge)
+        self.sidebar_adv_edge_detection_layout.addWidget(self.box_valley)
+        self.sidebar_adv_edge_detection_layout.addWidget(self.box_both)
+
+        self.sidebar_morse_seg_layout.addWidget(QLabel("Persistence"))
+        self.sidebar_morse_seg_layout.addWidget(self.param1_input)
+        self.sidebar_morse_seg_layout.addWidget(QLabel("Merge threshold"))
+        self.sidebar_morse_seg_layout.addWidget(self.param2_input)
+        self.sidebar_morse_seg_layout.addWidget(QLabel("Label size threshold"))
+        self.sidebar_morse_seg_layout.addWidget(self.param6_input)
+
+        self.sidebar_cluster_seg_layout.addWidget(QLabel("Cluster Seed number"))
+        self.sidebar_cluster_seg_layout.addWidget(self.param3_input)
+        self.sidebar_cluster_seg_layout.addWidget(QLabel("Merge threshold"))
+        self.sidebar_cluster_seg_layout.addWidget(self.param2_input)
+
 
     def connect_update_boxes(self, parameters):
         # connect the stateChanged signal of the boxes to a slot

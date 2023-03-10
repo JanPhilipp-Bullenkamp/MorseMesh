@@ -331,15 +331,34 @@ class Morse(Mesh):
                                                    thresh_small, 
                                                    salient_edge_points)
             self.extract_cells_salient_complex(thresh_large, thresh_small)
-            self.salient_reduced_morse_complexes[(thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
-                                                                                            merge_threshold, minimum_labels)
-            return self.salient_reduced_morse_complexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
+            self.salient_reduced_morse_complexes[(thresh_large,
+                                                  thresh_small)].create_segmentation(salient_edge_points, 
+                                                                                     thresh_large, 
+                                                                                     thresh_small,
+                                                                                     merge_threshold, 
+                                                                                     minimum_labels)
+            return self.salient_reduced_morse_complexes[(thresh_large,
+                                                         thresh_small)].Segmentations[(thresh_large, 
+                                                                                       thresh_small)][merge_threshold]
         else:
-            self.reduce_morse_complex_salient_edge(thresh_large, thresh_small, salient_edge_points, pers=persistence)
-            self.extract_cells_salient_complex(thresh_large, thresh_small, persistence)
-            self.salient_reduced_morse_complexes[(persistence,thresh_large,thresh_small)].create_segmentation(salient_edge_points, thresh_large, thresh_small,
-                                                                                            merge_threshold, minimum_labels)
-            return self.salient_reduced_morse_complexes[(persistence,thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold]
+            self.reduce_morse_complex_salient_edge(thresh_large, 
+                                                   thresh_small, 
+                                                   salient_edge_points, 
+                                                   pers=persistence)
+            self.extract_cells_salient_complex(thresh_large, 
+                                               thresh_small, 
+                                               persistence)
+            self.salient_reduced_morse_complexes[(persistence,
+                                                  thresh_large,
+                                                  thresh_small)].create_segmentation(salient_edge_points, 
+                                                                                     thresh_large, 
+                                                                                     thresh_small,
+                                                                                     merge_threshold, 
+                                                                                     minimum_labels)
+            return self.salient_reduced_morse_complexes[(persistence,
+                                                         thresh_large,
+                                                         thresh_small)].Segmentations[(thresh_large, 
+                                                                                       thresh_small)][merge_threshold]
     
     @timed(False)
     def segmentation_no_pers(self, 
@@ -362,7 +381,8 @@ class Morse(Mesh):
                                               merge_threshold, 
                                               minimum_labels=minimum_labels)
         
-        return self.MorseComplex.Segmentations[(thresh_large, thresh_small)][merge_threshold]
+        return self.MorseComplex.Segmentations[(thresh_large, 
+                                                thresh_small)][merge_threshold]
     
     @timed(False)
     def get_salient_ridges(self, 
@@ -485,13 +505,21 @@ class Morse(Mesh):
             t5 = timeit.default_timer()
             f.write("ReduceMaximally: "+str(t5-t4)+"\n")
             f.write("\tSegmentation (high,low,merge): time\n")
-            for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
+            for high, low, merge in list(itertools.product(high_thresh, 
+                                                           low_thresh, 
+                                                           merge_thresh)):
                 if high > low:
                     t9 = timeit.default_timer()
-                    self.Segmentation_SalientReduction(high, low, merge, minimum_labels=5)
+                    self.Segmentation_SalientReduction(high, 
+                                                       low, 
+                                                       merge, 
+                                                       minimum_labels=5)
                     t10 = timeit.default_timer()
                     f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
-                    self.plot_segmentation_salient_edge_label_txt(high, low, merge, outfilename+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
+                    self.plot_segmentation_salient_edge_label_txt(high, 
+                                                                  low, 
+                                                                  merge, 
+                                                                  outfilename+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
     
     @timed(False)
     def pipeline(self, 
@@ -528,13 +556,23 @@ class Morse(Mesh):
                 f.write("MorseCells: "+str(t8-t7)+"\n")
 
                 f.write("\tSegmentation (high,low,merge): time\n")
-                for high, low, merge in list(itertools.product(high_thresh, low_thresh, merge_thresh)):
+                for high, low, merge in list(itertools.product(high_thresh, 
+                                                               low_thresh, 
+                                                               merge_thresh)):
                     if high > low:
                         t9 = timeit.default_timer()
-                        self.Segmentation(pers, high, low, merge, minimum_labels=5)
+                        self.Segmentation(pers, 
+                                          high, 
+                                          low, 
+                                          merge, 
+                                          minimum_labels=5)
                         t10 = timeit.default_timer()
                         f.write("\t"+str(high)+" "+str(low)+" "+str(merge)+": "+str(t10-t9)+"\n")
-                        self.plot_segmentation_label_txt(pers, high, low, merge, outfilename)
+                        self.plot_segmentation_label_txt(pers, 
+                                                         high, 
+                                                         low, 
+                                                         merge, 
+                                                         outfilename)
 
     @timed(False)
     def pipeline_cluster_segmentation(self, 
@@ -721,13 +759,17 @@ class Morse(Mesh):
         MorseComplex of the given persistence in 13 different colors. (Cannot 
         guarantee that neighboring labels have different colors!).
         
-        @param persistence The persistence of the Morse Complex whose Cells should be plotted.
-        @param filename The name of the output file. "_(persistence)P_OverlayCells" will be added.
+        @param persistence The persistence of the Morse Complex whose Cells 
+               should be plotted.
+        @param filename The name of the output file. "_(persistence)P_OverlayCells" 
+               will be added.
         """
         if persistence not in self.reducedMorseComplexes.keys():
-            raise ValueError('No reduced Morse Complex calculated for this persistence!')
+            raise ValueError("No reduced Morse Complex calculated "
+                             "for this persistence!")
         elif self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
-            raise ValueError('No Morse cells computed for the Morse complex with this persistence!')
+            raise ValueError("No Morse cells computed for the Morse "
+                             "complex with this persistence!")
         else:
             write_Cell_labels_overlay_ply_file(self.reducedMorseComplexes[persistence].MorseCells.Cells, 
                                                self.Vertices, 
@@ -739,7 +781,8 @@ class Morse(Mesh):
         that can be read in by GigaMesh as labels. Each label is a Morse Cell 
         from the Morse Complex of the given persistence.
         
-        @param persistence The persistence of the Morse Complex whose Cells should be plotted.
+        @param persistence The persistence of the Morse Complex whose 
+               Cells should be plotted.
         @param filename The name of the output file.
         """
         if persistence not in self.reducedMorseComplexes.keys():
@@ -777,11 +820,13 @@ class Morse(Mesh):
         if (thresh_large, thresh_small) not in self.reducedMorseComplexes[persistence].Segmentations.keys():
             raise ValueError("Segmentation for this salient edge "
                              "threshold pair has not been calculated!")
-        if merge_threshold not in self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)].keys():
+        if merge_threshold not in self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, 
+                                                                                         thresh_small)].keys():
             raise ValueError("Segmentation for this merge percentage "
                              "threshold has not been calculated!")
         else:
-            write_Cell_labels_txt_file(self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells, 
+            write_Cell_labels_txt_file(self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, 
+                                                                                              thresh_small)][merge_threshold].Cells, 
                                        filename+ "_" + str(persistence) + "P_" + str(thresh_large) + "-" + str(thresh_small) 
                                        + "T_" + str(merge_threshold),
                                        params = [persistence, thresh_large, thresh_small, merge_threshold])
