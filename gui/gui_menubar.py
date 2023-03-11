@@ -18,6 +18,7 @@ class MenuBar:
         self.open_feature_vec_file_action = self.file_menu.addAction("Load feature vector file")
         self.save_edges_ply_action = self.file_menu.addAction("Save Edges ply")
         self.save_edges_ply_action = self.file_menu.addAction("Save current Segmentation txt")
+        self.open_label_txt_file_action = self.file_menu.addAction("Load Label txt file")
 
         # Create the compute Morse action and add it to the processing menu
         self.compute_Morse_action = self.processing_menu.addAction("Compute Morse")

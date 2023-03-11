@@ -21,12 +21,12 @@ class SideBar:
         self.sidebar_morse_seg = QGroupBox("Morse Segmentation:")
         self.sidebar_morse_seg_layout = QVBoxLayout()
         self.sidebar_morse_seg.setLayout(self.sidebar_morse_seg_layout)
-        self.sidebar_morse_seg.setMaximumSize(195, 150)
+        self.sidebar_morse_seg.setMaximumSize(195, 250)
 
         self.sidebar_cluster_seg = QGroupBox("Cluster Segmentation:")
         self.sidebar_cluster_seg_layout = QVBoxLayout()
         self.sidebar_cluster_seg.setLayout(self.sidebar_cluster_seg_layout)
-        self.sidebar_cluster_seg.setMaximumSize(195, 150)
+        self.sidebar_cluster_seg.setMaximumSize(195, 100)
 
         self.create_boxes(parameters)
 
@@ -66,7 +66,7 @@ class SideBar:
         self.sidebar = QGroupBox("Parameters:")
         self.sidebar_layout = QVBoxLayout()
         self.sidebar.setLayout(self.sidebar_layout)
-        self.sidebar.setMaximumSize(230, 1000)
+        self.sidebar.setMaximumSize(230, 1100)
         self.sidebar_layout.addWidget(self.sidebar_data_loading)
         self.sidebar_layout.addWidget(self.sidebar_edge_detection)
         self.sidebar_layout.addWidget(self.sidebar_adv_edge_detection)
@@ -151,8 +151,6 @@ class SideBar:
 
         self.sidebar_cluster_seg_layout.addWidget(QLabel("Cluster Seed number"))
         self.sidebar_cluster_seg_layout.addWidget(self.param3_input)
-        self.sidebar_cluster_seg_layout.addWidget(QLabel("Merge threshold"))
-        self.sidebar_cluster_seg_layout.addWidget(self.param2_input)
 
 
     def connect_update_boxes(self, parameters):

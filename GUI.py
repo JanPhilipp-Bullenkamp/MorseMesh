@@ -12,6 +12,8 @@ from gui.gui_menubar import MenuBar
 from gui.gui_sidebar import SideBar
 from gui.gui_window import Window
 
+from src.evaluation_and_conversion import label_txt_to_label_dict
+
 class PaintbrushInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
     def __init__(self):
         self.AddObserver("LeftButtonPressEvent", self.left_button_press_event)
@@ -112,6 +114,7 @@ class Application:
         self.menu_bar.open_feature_vec_file_action.triggered.connect(self.browse_feature_vector_file)
         self.menu_bar.save_edges_ply_action.triggered.connect(self.save_edges_ply_file)
         self.menu_bar.save_edges_ply_action.triggered.connect(self.save_segmentation_result)
+        self.menu_bar.open_label_txt_file_action.triggered.connect(self.browse_label_txt_file)
 
         # Create the compute Morse action and add it to the processing menu
         self.menu_bar.compute_Morse_action.triggered.connect(self.compute_morse)
@@ -170,25 +173,51 @@ class Application:
     def browse_feature_vector_file(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
-        file_name, _ = QFileDialog.getOpenFileName(None, "Select feature vector File", "", "Mat Files (*.mat)", options=options)
+        file_name, _ = QFileDialog.getOpenFileName(None, 
+                                                   "Select feature vector File", 
+                                                   "", 
+                                                   "Mat Files (*.mat)", 
+                                                   options=options)
         if file_name:
-            self.data.morse.load_new_funvals(file_name, operation=self.parameters.feature_vector_function)
+            self.data.morse.load_new_funvals(file_name, 
+                                             operation=self.parameters.feature_vector_function)
             self.color_funvals()
+
+    def browse_label_txt_file(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        file_name, _ = QFileDialog.getOpenFileName(None, 
+                                                   "Select label txt File", 
+                                                   "", 
+                                                   "Txt Files (*.txt)", 
+                                                   options=options)
+        if file_name:
+            self.data.current_segmentation = label_txt_to_label_dict(file_name)
+            self.color_segmentation(cell_structure=False)
 
     def save_edges_ply_file(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
-        filename, _ = QFileDialog.getSaveFileName(None, "Save Edges File (filename will be extended by _OverlayPoints)", 
-                                                  "", "Ply Files (*.ply)", options=options)
+        filename, _ = QFileDialog.getSaveFileName(None, 
+                                                  "Save Edges File (filename will be extended by _OverlayPoints)", 
+                                                  "", 
+                                                  "Ply Files (*.ply)", 
+                                                  options=options)
         if filename:
             # Save the edge ply file:
-            self.data.morse.plot_salient_edges_ply(filename, self.parameters.high_thresh, self.parameters.low_thresh, only_strong=True)
+            self.data.morse.plot_salient_edges_ply(filename, 
+                                                   self.parameters.high_thresh, 
+                                                   self.parameters.low_thresh, 
+                                                   only_strong=True)
 
     def save_segmentation_result(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
-        filename, _ = QFileDialog.getSaveFileName(None, "Save current Segmentation as .txt file.",
-                                                  "", "Txt Files (*.txt)", options=options)
+        filename, _ = QFileDialog.getSaveFileName(None, 
+                                                  "Save current Segmentation as .txt file.",
+                                                  "", 
+                                                  "Txt Files (*.txt)", 
+                                                  options=options)
 
         if filename:
             self.data.morse.plot_labels_txt(self.data.current_segmentation, filename)
@@ -212,8 +241,10 @@ class Application:
         color_dict = {1: self.data.color_points}
         self.window.update_mesh_color(color_dict, partial=True, cell_structure=False)
 
-    def color_segmentation(self, partial: bool = False):
-        self.window.update_mesh_color(self.data.current_segmentation, partial=partial)
+    def color_segmentation(self, partial: bool = False, cell_structure: bool = True):
+        self.window.update_mesh_color(self.data.current_segmentation, 
+                                      partial=partial, 
+                                      cell_structure=cell_structure)
 
     def cluster(self):
         self.data.current_segmentation = self.data.morse.seed_cluster_mesh(self.data.color_points, self.parameters.cluster_seed_number)

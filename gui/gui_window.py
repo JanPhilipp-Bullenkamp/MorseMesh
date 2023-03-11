@@ -37,7 +37,7 @@ class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
 class Window:
     def __init__(self):
         self.window = QWidget()
-        self.window.setGeometry(100,100,1200,1200)
+        self.window.setGeometry(100,100,1300,1300)
         self.window.setWindowTitle("MorseMesh")
         self.layout = QGridLayout()
 
