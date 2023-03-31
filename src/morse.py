@@ -35,8 +35,10 @@
 
 # import stuff
 from src.Algorithms.process_lower_stars import process_lower_stars
+from src.Algorithms.conforming_gradient import conforming_gradient
 from src.Algorithms.extract_morse_complex import extract_morse_complex
 from src.Algorithms.reduce_morse_complex import cancel_critical_pairs
+from src.Algorithms.reduce_morse_complex import cancel_critical_conforming_pairs
 from src.Algorithms.betti_numbers import betti_via_pair_cells
 
 from src.Algorithms.morse_cells import get_morse_cells
@@ -82,7 +84,7 @@ class Morse(Mesh):
     ''' MORSE THEORY'''
     
     @timed(False)
-    def process_lower_stars(self):
+    def process_lower_stars(self, conforming=False):
         """! @brief Runs the process_lower_stars algorithm to get a discrete 
         vector field representing the gradient of the discrete Morse function.
 
@@ -92,12 +94,21 @@ class Morse(Mesh):
         if self._flag_process_lower_stars:
             self.reset_morse()
             
-        process_lower_stars(self.Vertices, 
-                            self.Edges, 
-                            self.Faces, 
-                            self.C, 
-                            self.V12, 
-                            self.V23)
+        if conforming:
+            conforming_gradient(self.Vertices, 
+                                self.Edges, 
+                                self.Faces, 
+                                self.UserLabels,
+                                self.C, 
+                                self.V12, 
+                                self.V23)
+        else:
+            process_lower_stars(self.Vertices, 
+                                self.Edges, 
+                                self.Faces, 
+                                self.C, 
+                                self.V12, 
+                                self.V23)
         self._flag_process_lower_stars = True
         
     @timed(False)
@@ -124,7 +135,7 @@ class Morse(Mesh):
             self._flag_MorseComplex = True
         
     @timed(False)
-    def reduce_morse_complex(self, persistence: float):
+    def reduce_morse_complex(self, persistence: float, conforming = False):
         """! @brief Reduces the Morse complex up to the given persistence.
         @details Always cancels two critical simplices of consectutive dimensions 
         if their function values are closer than the given persistence. The 
@@ -143,7 +154,11 @@ class Morse(Mesh):
             print("This persistence has already been calculated!")
             print("You can access it via .reducedMorseComplexes[persistence] ") 
         else:
-            self.reducedMorseComplexes[persistence] = cancel_critical_pairs(self.MorseComplex, 
+            if conforming:
+                self.reducedMorseComplexes[persistence] = cancel_critical_conforming_pairs(self.MorseComplex, persistence, 
+                                                                              self.Vertices, self.Edges, self.Faces, self.UserLabels)
+            else:
+                self.reducedMorseComplexes[persistence] = cancel_critical_pairs(self.MorseComplex, 
                                                                             persistence, 
                                                                             self.Vertices, 
                                                                             self.Edges, 
@@ -293,16 +308,17 @@ class Morse(Mesh):
                      merge_threshold: float, 
                      minimum_labels: int = 3, 
                      size_threshold: int = 500,
-                     separatrix_type: str = "all"):
+                     separatrix_type: str = "all",
+                     conforming = False):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
-            self.reduce_morse_complex(persistence)
+            self.reduce_morse_complex(persistence, conforming=conforming)
         if self.reducedMorseComplexes[persistence]._flag_MorseCells == False:
             print("No Morse Cells computed for this persistence, computing now...")
             self.extract_morse_cells(persistence)
         if not self._flag_SalientEdge:
             print("Need maximally reduced complex for salient edges...")
-            self.reduce_morse_complex(self.range)
+            self.reduce_morse_complex(self.range, conforming=conforming)
             
         salient_edge_points = self.get_salient_ridges(thresh_large, 
                                                       thresh_small, 
@@ -313,7 +329,9 @@ class Morse(Mesh):
                                                                     thresh_small, 
                                                                     merge_threshold, 
                                                                     minimum_labels=minimum_labels, 
-                                                                    size_threshold=size_threshold)
+                                                                    size_threshold=size_threshold,
+                                                                    conforming=conforming, 
+                                                                    UserLabels=self.UserLabels)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 

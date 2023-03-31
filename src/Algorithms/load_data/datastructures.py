@@ -738,7 +738,8 @@ class MorseComplex:
                             thresh_small: float, 
                             merge_threshold: float, 
                             minimum_labels: int = 3, 
-                            size_threshold: int = 500):
+                            size_threshold: int = 500,
+                            conforming=False, UserLabels=None):
         """! @brief Creates a segmentation from this MorseComplex with 
         the given double edge threshold and the merging threshold.
         
@@ -769,7 +770,7 @@ class MorseComplex:
         
         SegmentationCells.segment(merge_threshold, 
                                   minimum_labels=minimum_labels, 
-                                  size_threshold=size_threshold)
+                                  size_threshold=size_threshold, conforming=conforming, UserLabels=UserLabels)
         
         if (thresh_large, thresh_small) not in self.Segmentations.keys():
             self.Segmentations[(thresh_large, thresh_small)] = {}
@@ -986,22 +987,42 @@ class MorseCells:
         self.Cells[label2].neighbors[label1].add(v1)
         self.Cells[label1].neighbors[label2].add(v2)
         
-    def calculate_all_weights(self):
+    def calculate_all_weights(self, conforming=False, UserLabels=None):
         """! @brief Calculate all weights between neighboring cells. """
         for label, cell in self.Cells.items():
             for nei_label, points_here in cell.neighbors.items():
                 # need points on both sides of the bopundary
                 points_there = self.Cells[nei_label].neighbors[label]
-                
-                weight = compute_weight_saledge(points_here.union(points_there), 
-                                                self.salient_edge_points)
+
+                if conforming:
+                    ulabels_here = cell.getUserLabels(UserLabels)
+                    ulabels_there = self.Cells[nei_label].getUserLabels(UserLabels)
+                    if ulabels_here['all'].isdisjoint(ulabels_there['all']):
+                        weight = float('inf')
+                    else:
+                        if ulabels_here['interior']:
+                            d_here = ulabels_here['interior']
+                        else:
+                            d_here = ulabels_here['boundary']
+
+                        if ulabels_there['interior']:
+                            d_there = ulabels_there['interior']
+                        else:
+                            d_there = ulabels_there['boundary']
+
+                        if max(d_here, key = d_here.get) == max(d_there, key = d_there.get) and max(d_here, key = d_here.get) in UserLabels['crit']:
+                            weight = float('-inf')
+                        elif max(d_here, key = d_here.get) != max(d_there, key = d_there.get):
+                            weight = float('inf')
+                        else:
+                            weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
+                else:
+                    weight = compute_weight_saledge(points_here.union(points_there), self.salient_edge_points)
                 # add weight to both cells
                 cell.neighbors_weights[nei_label] = weight
                 self.Cells[nei_label].neighbors_weights[label] = weight
                 
-    def calculate_weight_between_two_cells(self, 
-                                           label1: int, 
-                                           label2: int):
+    def calculate_weight_between_two_cells(self, label1, label2, conforming=False, UserLabels=None):
         """! @brief Calculate weights between two adjacent labels.
         
         @param label1 One of the neigboring labels.
@@ -1012,7 +1033,30 @@ class MorseCells:
         points1 = self.Cells[label1].neighbors[label2]
         points2 = self.Cells[label2].neighbors[label1]
         
-        weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
+        if conforming:
+            ulabels1 = self.Cells[label1].getUserLabels(UserLabels)
+            ulabels2 = self.Cells[label2].getUserLabels(UserLabels)
+            if ulabels1['all'].isdisjoint(ulabels2['all']):
+                weight = float('inf')
+            else:
+                if ulabels1['interior']:
+                    d_here = ulabels1['interior']
+                else:
+                    d_here = ulabels1['boundary']
+
+                if ulabels2['interior']:
+                    d_there = ulabels2['interior']
+                else:
+                    d_there = ulabels2['boundary']
+
+                if max(d_here, key = d_here.get) == max(d_there, key = d_there.get) and max(d_here, key = d_here.get) in UserLabels['crit']:
+                    weight = float('-inf')
+                elif max(d_here, key = d_here.get) != max(d_there, key = d_there.get):
+                    weight = float('inf')
+                else:
+                    weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
+        else:
+            weight = compute_weight_saledge(points1.union(points2), self.salient_edge_points)
         
         self.Cells[label1].neighbors_weights[label2] = weight
         self.Cells[label2].neighbors_weights[label1] = weight
@@ -1022,7 +1066,9 @@ class MorseCells:
     def merge_cells(self, 
                     label1: int, 
                     label2: int, 
-                    pop_label2: bool = True) -> list:
+                    pop_label2: bool = True, 
+                    conforming=False, 
+                    UserLabels=None) -> list:
         """! @brief Merges the label2 cell into the label1 cell and 
         updates the weights and surrounding adjacencies.
         
@@ -1072,7 +1118,7 @@ class MorseCells:
                 self.Cells[neighbor].neighbors_weights.pop(label2)
                 
                 # recompute weight:
-                new_weight = self.calculate_weight_between_two_cells(label1, neighbor)
+                new_weight = self.calculate_weight_between_two_cells(label1, neighbor, conforming=conforming, UserLabels=UserLabels)
                 
                 # fill updated_weights list for cancellation queue later
                 updated_weights.append(tuple((new_weight, label1, neighbor)))
@@ -1157,7 +1203,9 @@ class MorseCells:
     def segment(self, 
                 merge_threshold: float, 
                 minimum_labels: int, 
-                size_threshold: int = 500):
+                size_threshold: int = 500, 
+                conforming = False, 
+                UserLabels=None):
         """! @brief Makes this MorseCells object a Segmentation, based 
         on the salient edge points stored in this MorseCells object 
         and a given merge_threshold and minim_labels number.
@@ -1185,7 +1233,7 @@ class MorseCells:
                                  "order of functions somewhere.")
            
         # 1. calculate weights between cells
-        self.calculate_all_weights()
+        self.calculate_all_weights(conforming=conforming, UserLabels=UserLabels)
         '''
         # 2. create and fill Cancellation Queue
         queue = CancellationQueue()
@@ -1216,7 +1264,7 @@ class MorseCells:
                     if label2 in self.Cells[label1].neighbors.keys():
                         if weight == self.Cells[label1].neighbors_weights[label2]:
                             # can merge cells
-                            updated_weights = self.merge_cells(label1, label2)
+                            updated_weights = self.merge_cells(label1, label2, conforming=conforming, UserLabels=UserLabels)
             after = len(self.Cells)
             if before == after:
                 still_changing = False

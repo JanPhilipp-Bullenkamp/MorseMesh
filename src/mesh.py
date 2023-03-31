@@ -30,11 +30,15 @@
 from src.Algorithms.load_data.read_ply import read_ply
 
 from src.Algorithms.load_data.read_ply_test import load_ply
+
+from src.Evaluation.read_labels_txt import read_label_txt
+
 from src.Algorithms.load_data.anisotropic_diffusion import smooth_function_values
 from src.Algorithms.load_data.read_or_process_funvals import (read_funvals, 
                                                               apply_perona_malik_diffusion)
 
 from src.timer import timed
+from collections import Counter
 
 import os
 import numpy as np
@@ -120,6 +124,8 @@ class Mesh:
         self.Vertices = {}
         self.Edges = {}
         self.Faces = {}
+
+        self.InitialLabels = {}
         
 
     def reset_morse(self):
@@ -205,6 +211,28 @@ class Mesh:
         self.min = min_val
         self.max = max_val
         self.range = max_val - min_val
+
+    def load_labels(self, filename):
+        info = read_label_txt(filename)
+
+        c = Counter(info.values())
+        critLabels = c.most_common()[:0:-1]
+    
+        vertexLabels = info
+        edgeLabels = {}
+        faceLabels = {}
+
+        for key in self.Edges.keys():
+            edgeLabels[key] = set()
+            for i in self.Edges[key].indices:
+                edgeLabels[key].add(vertexLabels[i])
+
+        for key in self.Faces.keys():
+            faceLabels[key] = set()
+            for i in self.Faces[key].indices:
+                faceLabels[key].add(vertexLabels[i])
+
+        self.UserLabels = {'vertices': vertexLabels, 'edges': edgeLabels, 'faces': faceLabels, 'crit': set(a for (a, b) in critLabels)}
         
     @timed() 
     def load_new_funvals(self, filename: str, operation: str = "max"):
