@@ -31,7 +31,7 @@ from src.Algorithms.load_data.read_ply import read_ply
 
 from src.Algorithms.load_data.read_ply_test import load_ply
 
-from src.Evaluation.read_labels_txt import read_label_txt
+from src.Evaluation.read_labels_txt import read_labels_txt
 
 from src.Algorithms.load_data.anisotropic_diffusion import smooth_function_values
 from src.Algorithms.load_data.read_or_process_funvals import (read_funvals, 
@@ -213,7 +213,7 @@ class Mesh:
         self.range = max_val - min_val
 
     def load_labels(self, filename):
-        info = read_label_txt(filename)
+        info = read_labels_txt(filename)
 
         c = Counter(info.values())
         critLabels = c.most_common()[:0:-1]
