@@ -126,6 +126,7 @@ class Mesh:
         self.Faces = {}
 
         self.InitialLabels = {}
+        self.UserLabels = {}
         
 
     def reset_morse(self):
