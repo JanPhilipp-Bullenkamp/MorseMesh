@@ -1,6 +1,8 @@
-# Morse Theory Mesh Segmentation
+# MorseMesh
 
-Provides a discrete Morse theory framework for 3D mesh data. Work in progress...
+NOT UP TO DATE...
+
+Provides a discrete Morse theory framework for 3D mesh data and contains a mesh segmentation method and a graphical user interface. Work in progress...
 
 # Contents
 - [Discrete Morse Theory Introduction](#discrete-morse-theory-introduction)
