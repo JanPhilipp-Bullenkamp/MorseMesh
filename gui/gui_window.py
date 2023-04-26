@@ -45,7 +45,7 @@ class Window:
         self.vtkWidget = QVTKRenderWindowInteractor(self.window)
         self.layout.addWidget(self.vtkWidget, 0,0)
         ren = vtk.vtkRenderer()
-        ren.SetBackground(0.1, 0.1, 0.1)
+        ren.SetBackground(1, 1, 1)
         self.vtkWidget.GetRenderWindow().AddRenderer(ren)
         interactor = self.vtkWidget.GetRenderWindow().GetInteractor()
         style = CustomInteractorStyle()
