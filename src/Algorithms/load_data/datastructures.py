@@ -55,7 +55,7 @@ class Vertex:
     # Only used for computations.
     
     __slots__ = ("x", "y", "z", "quality", "fun_val", "index", 
-                 "star", "neighbors", "label", "boundary")
+                 "star", "neighbors", "label", "boundary", "ascend_label")
     
     def __init__(self, x: int = None, y: int = None, z: int = None,
                 quality: int = None, fun_val: int = None,
@@ -77,6 +77,9 @@ class Vertex:
         
         self.star = {"F": [], "E": []}
         self.neighbors = set() #set
+
+        #
+        self.ascend_label = None
         
         # needed for Morse Cells
         self.label = -1 #int
