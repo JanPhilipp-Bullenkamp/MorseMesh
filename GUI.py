@@ -32,71 +32,6 @@ from gui.gui_window import Window
 
 from src.evaluation_and_conversion import label_txt_to_label_dict
 
-class PaintbrushInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
-    def __init__(self):
-        self.AddObserver("LeftButtonPressEvent", self.left_button_press_event)
-        self.AddObserver("LeftButtonReleaseEvent", self.left_button_release_event)
-
-        self.paintbrush = vtk.vtkPolyData()
-        self.paintbrush_points = vtk.vtkPoints()
-        self.paintbrush_cells = vtk.vtkCellArray()
-
-        self.paintbrush.SetPoints(self.paintbrush_points)
-        self.paintbrush.SetVerts(self.paintbrush_cells)
-
-        self.paintbrush_mapper = vtk.vtkPolyDataMapper()
-        self.paintbrush_mapper.SetInputData(self.paintbrush)
-        self.paintbrush_actor = vtk.vtkActor()
-        self.paintbrush_actor.SetMapper(self.paintbrush_mapper)
-        self.paintbrush_actor.GetProperty().SetPointSize(10)
-        self.paintbrush_actor.GetProperty().SetColor(1, 0, 0)
-        
-        self.paint_radius = 10 # set the paint radius here
-
-    def left_button_press_event(self, obj, event):
-        self.OnLeftButtonDown()
-        self.paint_at_mouse_position()
-
-    def left_button_release_event(self, obj, event):
-        self.OnLeftButtonUp()
-
-    def paint_at_mouse_position(self):
-        # Get the mouse position in screen coordinates
-        screen_x, screen_y = self.GetInteractor().GetEventPosition()
-
-        # Convert the screen coordinates to world coordinates
-        picker = vtk.vtkPropPicker()
-        picker.Pick(screen_x, screen_y, 0, self.GetDefaultRenderer())
-        position = picker.GetPickPosition()
-
-        # Find all the points within the paint radius of the mouse position
-        point_ids = self.GetPointsWithinRadius(position)
-
-        # Add the points to the paintbrush
-        for point_id in point_ids:
-            self.paintbrush_points.InsertNextPoint(self.points.GetPoint(point_id))
-            self.paintbrush_cells.InsertNextCell(1)
-            self.paintbrush_cells.InsertCellPoint(self.paintbrush_points.GetNumberOfPoints() - 1)
-
-        # Update the paintbrush actor
-        self.paintbrush_points.Modified()
-        self.paintbrush_cells.Modified()
-        self.paintbrush_actor.Modified()
-        self.GetDefaultRenderer().AddActor(self.paintbrush_actor)
-
-    def GetPointsWithinRadius(self, position):
-        point_ids = []
-        radius_squared = self.paint_radius * self.paint_radius
-
-        for i in range(self.points.GetNumberOfPoints()):
-            point = self.points.GetPoint(i)
-            distance_squared = vtk.vtkMath.Distance2BetweenPoints(point, position)
-            if distance_squared <= radius_squared:
-                point_ids.append(i)
-
-        return point_ids
-
-
 class Application:
     def __init__(self):
         self.data = Data()
@@ -153,7 +88,6 @@ class Application:
         self.menu_bar.show_funvals_action.triggered.connect(self.color_funvals)
 
         self.menu_bar.cluster_neighbors_action.triggered.connect(self.cluster_boundary_to_other_clusters)
-        self.menu_bar.paintbrush_action.triggered.connect(self.paint_test)
 
     def line_connected_components(self):
         box = self.data.morse.get_bounding_box()
@@ -169,11 +103,6 @@ class Application:
         self.menu_bar.compute_Morse_action.setEnabled(True if self.flags.flag_loaded_data else False)
         self.menu_bar.save_edges_ply_action.setEnabled(True if self.flags.flag_morse_computations else False)
         self.menu_bar.segment_action.setEnabled(True if self.flags.flag_morse_computations else False)
-
-    def paint_test(self):
-        # set the interactor style to the paintbrush style
-        paintbrush_style = PaintbrushInteractorStyle()
-        self.window.vtkWidget.SetInteractorStyle(paintbrush_style)
 
     def browse_file(self):
         options = QFileDialog.Options()

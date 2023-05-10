@@ -1,7 +1,7 @@
 import numpy as np
 
 import vtk
-from PyQt5.QtWidgets import QGridLayout, QWidget
+from PyQt5.QtWidgets import QGridLayout, QWidget, QSizePolicy
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 color_list = [[255,0,0],  #red
@@ -37,7 +37,7 @@ class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
 class Window:
     def __init__(self):
         self.window = QWidget()
-        self.window.setGeometry(100,100,1300,1300)
+        #self.window.setGeometry(100,100,1300,1300)
         self.window.setWindowTitle("MorseMesh")
         self.layout = QGridLayout()
 
@@ -51,6 +51,10 @@ class Window:
         style = CustomInteractorStyle()
         interactor.SetInteractorStyle(style)
         self.window.setLayout(self.layout)
+        self.window.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding
+        )
+        self.window.setMinimumSize(800,800)
         self.window.show()
 
     def print_vertex_info(self, points):

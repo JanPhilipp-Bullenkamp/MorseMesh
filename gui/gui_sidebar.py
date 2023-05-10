@@ -1,9 +1,44 @@
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QLineEdit, QCheckBox
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QLineEdit, QCheckBox, QGridLayout, QWidget, QToolButton, QHBoxLayout
+from PyQt5.QtCore import Qt
+
+class CollapsibleGroupBox(QGroupBox):
+    def __init__(self, title):
+        super().__init__(title)
+        
+        self.setCheckable(True)
+        self.setChecked(True)
+        
+        self.layout = QGridLayout()
+        self.content_area = QWidget()
+        self.content_area.setVisible(True)
+        self.content_area.setLayout(self.layout)
+        
+        self.toggle_button = QToolButton()
+        self.toggle_button.setArrowType(Qt.RightArrow)
+        self.toggle_button.clicked.connect(self.toggle_collapsed)
+        
+        title_layout = QHBoxLayout()
+        title_layout.addWidget(self.toggle_button)
+        title_layout.addWidget(QLabel(title))
+        title_layout.addStretch()
+        
+        self.setLayout(QVBoxLayout())
+        self.layout.addLayout(title_layout, 0, 0, 1, 2)
+        self.layout.addWidget(self.content_area, 1, 0, 1, 2)
+        
+    def toggle_collapsed(self):
+        if self.content_area.isVisible():
+            self.content_area.setVisible(False)
+            self.toggle_button.setArrowType(Qt.DownArrow)
+        else:
+            self.content_area.setVisible(True)
+            self.toggle_button.setArrowType(Qt.RightArrow)
+
 
 class SideBar:
     def __init__(self, layout, parameters):
         # Create the sidebar group box
-        self.sidebar_data_loading = QGroupBox("Data loading:")
+        self.sidebar_data_loading = CollapsibleGroupBox("Data loading:")
         self.sidebar_data_loading_layout = QVBoxLayout()
         self.sidebar_data_loading.setLayout(self.sidebar_data_loading_layout)
         self.sidebar_data_loading.setMaximumSize(195, 100)
