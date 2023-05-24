@@ -182,21 +182,24 @@ def compare_result_dict_to_groundtruth_label_dict(result_dict: str, gt_label_dic
     return correctness
 
 @timed()
-def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 0):
+def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 10, connected_components = False):
     """! @brief Takes a colored .ply file and returns a labels .txt file based on those colors.
     @param filename The colored .ply filename and location.
     @param outfilename The .txt labels filename that will be created.
     @param clean_thresh (Optional) Threshold that gives the minimum number of vertices each label should have.
     If one color has fewer than this vertices, they are merged into the surrounding larger labels. Default
-    is 0 (so no removal of any small labels). 
+    is 10 (so no very little removal of too small labels). 
 
     @return labels Returns a label dictionary of the labels that were written to the output file.
     """
-    labels = clean_and_read_labels_from_color_ply(filename, outfilename, threshold=clean_thresh)
+    labels = clean_and_read_labels_from_color_ply(filename, 
+                                                  outfilename, 
+                                                  threshold=clean_thresh, 
+                                                  connected_components=connected_components)
     return labels
 
 @timed()
-def painted_ply_to_label_dict(filename, clean_thresh = 0):
+def painted_ply_to_label_dict(filename, clean_thresh = 0, connected_components = False):
     """! @brief Takes a colored .ply file and returns a labels dict based on those colors.
     @param filename The colored .ply filename and location.
     @param clean_thresh (Optional) Threshold that gives the minimum number of vertices each label should have.
@@ -205,7 +208,9 @@ def painted_ply_to_label_dict(filename, clean_thresh = 0):
 
     @return labels Returns a label dictionary.
     """
-    labels = clean_and_read_labels_from_color_ply(filename, threshold=clean_thresh)
+    labels = clean_and_read_labels_from_color_ply(filename, 
+                                                  threshold=clean_thresh,
+                                                  connected_components=connected_components)
     return labels
     
 @timed()
