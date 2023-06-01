@@ -8,4 +8,5 @@ Algorithms/.ipynb_checkpoints/
 plot_data/__pycache__/
 plot_data/.ipynb_checkpoints/
 
+doxygen/html/
 *.ply
