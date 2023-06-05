@@ -33,8 +33,9 @@ class Flags:
         self.reset()
 
     def reset(self):
-        self.flag_morse_computations = False
         self.flag_loaded_data = False
+        self.flag_morse_computations = False
+        self.flag_current_segmentation = False
         self.flag_sliders_shown = False
 
 class Data:

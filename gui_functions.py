@@ -197,6 +197,53 @@ class Gui_Window(Ui_MainWindow):
         self.action_cluster.triggered.connect(self.cluster)
         self.action_cluster_segmentation_method.triggered.connect(self.merge_cluster)
 
+        self.add_slider_functionality()
+
+    def enable_disable_menu_actions(self):
+        # buttons for loaded data
+        self.action_compute_morse_complex.setEnabled(self.flags.flag_loaded_data)
+        self.action_load_feature_vector_file.setEnabled(self.flags.flag_loaded_data)
+        self.action_load_label_txt.setEnabled(self.flags.flag_loaded_data)
+
+        # buttons for computed morse complex
+        self.action_morse_cells_persistence.setEnabled(self.flags.flag_morse_computations)
+        self.action_cluster.setEnabled(self.flags.flag_morse_computations)
+        self.action_cluster_segmentation_method.setEnabled(self.flags.flag_morse_computations)
+        self.action_morse_segementation_ridge_first.setEnabled(self.flags.flag_morse_computations)
+        self.action_segmentation_method.setEnabled(self.flags.flag_morse_computations)
+        self.frame_bottom.setHidden(not self.flags.flag_morse_computations)
+        self.frame_bottom.setEnabled(self.flags.flag_morse_computations)
+
+        # buttons for computed segmentation
+        self.action_save_segmentation_label_txt.setEnabled(self.flags.flag_current_segmentation)
+
+        if self.flags.flag_sliders_shown:
+            do=0
+
+    def add_slider_functionality(self):
+        # make 0.5% steps, so range from 0,200 (percent *2)
+        self.high_thresh_slider.setRange(0,200)
+        self.low_thresh_slider.setRange(0,200)
+
+        self.high_thresh_slider.setValue(self.parameters.high_percent*2)
+        self.low_thresh_slider.setValue(self.parameters.low_percent*2)
+
+        self.high_thresh_slider.valueChanged.connect(lambda value: self.update_high_thresh(value))
+        self.low_thresh_slider.valueChanged.connect(lambda value: self.update_low_thresh(value))
+
+    def update_high_thresh(self, value):
+        self.parameters.high_percent = value*0.5
+        self.parameters.high_thresh = ((self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)
+                                        *self.parameters.high_percent/100 + self.data.morse.min_separatrix_persistence)
+        
+        self.high_thresh_text.setText("High thresh: "+"{:.5f}".format(self.parameters.high_thresh)+"  ("+str(self.parameters.high_percent)+"%)")
+
+    def update_low_thresh(self, value):
+        self.parameters.low_percent = value*0.5
+        self.parameters.low_thresh = ((self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)
+                                        *self.parameters.low_percent/100 + self.data.morse.min_separatrix_persistence)
+
+        self.low_thresh_text.setText("Low thresh: "+"{:.5f}".format(self.parameters.low_thresh)+"  ("+str(self.parameters.low_percent)+"%)")
 
     def load_ply(self):
         options = QtWidgets.QFileDialog.Options()
@@ -210,6 +257,8 @@ class Gui_Window(Ui_MainWindow):
             self.reset_data()
             self.data.morse.load_mesh_new(file_name, morse_function="quality", inverted=True)
             self.update_mesh()
+            self.flags.flag_loaded_data = True
+            self.enable_disable_menu_actions()
 
     def load_feature_vector_file(self):
         options = QtWidgets.QFileDialog.Options()
@@ -235,6 +284,8 @@ class Gui_Window(Ui_MainWindow):
         if file_name:
             self.data.current_segmentation = label_txt_to_label_dict(file_name)
             self.color_segmentation(cell_structure=False)
+            self.flags.flag_current_segmentation = True
+            self.enable_disable_menu_actions()
 
     """Currently not used!"""
     #def save_edges_ply_file(self):
@@ -359,6 +410,8 @@ class Gui_Window(Ui_MainWindow):
         self.update_mesh_color(self.data.current_segmentation, 
                                partial=partial, 
                                cell_structure=cell_structure)
+        self.flags.flag_current_segmentation = True
+        self.enable_disable_menu_actions()
 
     def compute_morse(self):
         self.data.morse.process_lower_stars()
@@ -370,8 +423,9 @@ class Gui_Window(Ui_MainWindow):
         self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, 
                                                                     self.parameters.low_thresh,
                                                                     separatrix_type=self.parameters.separatrix_type)
-        self.flags.flag_morse_computations = True
         self.update_edge_color()
+        self.flags.flag_morse_computations = True
+        self.enable_disable_menu_actions()
 
     def compute_persistent_morse_cells(self):
         self.data.morse.reduce_morse_complex(self.parameters.persistence)
