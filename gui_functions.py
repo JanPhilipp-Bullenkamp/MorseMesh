@@ -7,6 +7,7 @@ import qdarkstyle
 import numpy as np
 
 from gui_data import Data, Flags, Parameters
+from collapsible_boxes import CollapsibleDialog
 
 from src.evaluation_and_conversion import label_txt_to_label_dict
 
@@ -163,6 +164,8 @@ class Gui_Window(Ui_MainWindow):
         self.setup_data()
         # connect buttons
         self.connect_buttons_to_functions()
+        # add sidebar
+        self.add_sidebar()
 
     def setupVtk(self):
         # vtk setup
@@ -235,15 +238,29 @@ class Gui_Window(Ui_MainWindow):
         self.parameters.high_percent = value*0.5
         self.parameters.high_thresh = ((self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)
                                         *self.parameters.high_percent/100 + self.data.morse.min_separatrix_persistence)
-        
+        self.update_edge_color()
+
         self.high_thresh_text.setText("High thresh: "+"{:.5f}".format(self.parameters.high_thresh)+"  ("+str(self.parameters.high_percent)+"%)")
 
     def update_low_thresh(self, value):
         self.parameters.low_percent = value*0.5
         self.parameters.low_thresh = ((self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)
                                         *self.parameters.low_percent/100 + self.data.morse.min_separatrix_persistence)
-
+        self.update_edge_color()
+        
         self.low_thresh_text.setText("Low thresh: "+"{:.5f}".format(self.parameters.low_thresh)+"  ("+str(self.parameters.low_percent)+"%)")
+
+    def add_sidebar(self):
+        self.sidebar = CollapsibleDialog(self.parameters)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sidebar.sizePolicy().hasHeightForWidth())
+        self.sidebar.setSizePolicy(sizePolicy)
+        self.sidebar.setMinimumSize(QtCore.QSize(250, 400))
+        self.sidebar.setMaximumSize(QtCore.QSize(250, 16777215))
+        self.sidebar.setObjectName("sidebar")
+        self.sidebar_layout.addWidget(self.sidebar, 0, 0, 1, 1)
 
     def load_ply(self):
         options = QtWidgets.QFileDialog.Options()
