@@ -19,6 +19,7 @@ class Parameters:
         self.persistence = 0.04
         self.merge_threshold = 0.3
         self.cluster_seed_number = 150
+        self.merge_threshold_cluster = 0.3
 
         self.size_threshold = 500
 

@@ -30,7 +30,9 @@ class CollapsibleDialog(QDialog):
         super().__init__()
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
+        header = QLabel("Parameter Settings:")
         layout = QVBoxLayout()
+        layout.addWidget(header)
         layout.addWidget(self.tree)
         self.setLayout(layout)
         self.tree.setIndentation(0)
@@ -120,6 +122,7 @@ class CollapsibleDialog(QDialog):
         self.persistence_input.editingFinished.connect(lambda: self.parameters.update(float(self.persistence_input.text()), "persistence"))
         self.merge_threshold_input.editingFinished.connect(lambda: self.parameters.update(float(self.merge_threshold_input.text()), "merge_threshold"))
         self.cluster_seed_input.editingFinished.connect(lambda: self.parameters.update(int(self.cluster_seed_input.text()), "cluster_seed_number"))
+        self.merge_threshold_cluster_input.editingFinished.connect(lambda: self.parameters.update(float(self.merge_threshold_cluster_input.text()), "merge_threshold_cluster"))
         self.label_size_thresh_input.editingFinished.connect(lambda: self.parameters.update(int(self.label_size_thresh_input.text()), "size_threshold"))
         self.min_sepa_length_input.editingFinished.connect(lambda: self.parameters.update(int(self.min_sepa_length_input.text()), "min_length"))
         self.max_sepa_length_input.editingFinished.connect(lambda: self.parameters.update(int(self.max_sepa_length_input.text()), "max_length"))
@@ -138,6 +141,19 @@ class CollapsibleDialog(QDialog):
                                            self.check_boxes(state, 
                                                             checkbox, 
                                                             self.parameters))
+        # connect the stateChanged signal of the boxes to a slot
+        self.box_all.stateChanged.connect(lambda state, checkbox=self.box_all: 
+                                          self.check_sepa_boxes(state, 
+                                                                checkbox, 
+                                                                self.parameters))
+        self.box_cutoff.stateChanged.connect(lambda state, checkbox=self.box_cutoff: 
+                                             self.check_sepa_boxes(state, 
+                                                                   checkbox, 
+                                                                   self.parameters))
+        self.box_reversed.stateChanged.connect(lambda state, checkbox=self.box_reversed: 
+                                               self.check_sepa_boxes(state, 
+                                                                     checkbox, 
+                                                                     self.parameters))
 
     def check_boxes(self, state, checkbox, parameters):
         boxes = [self.box_ridge, self.box_valley, self.box_both]
