@@ -166,6 +166,8 @@ class Gui_Window(Ui_MainWindow):
         self.connect_buttons_to_functions()
         # add sidebar
         self.add_sidebar()
+        # add tooltips
+        self.add_tooltips()
 
     def setupVtk(self):
         # vtk setup
@@ -240,7 +242,8 @@ class Gui_Window(Ui_MainWindow):
                                         *self.parameters.high_percent/100 + self.data.morse.min_separatrix_persistence)
         self.update_edge_color()
 
-        self.high_thresh_text.setText("High thresh: "+"{:.5f}".format(self.parameters.high_thresh)+"  ("+str(self.parameters.high_percent)+"%)")
+        self.high_thresh_text.setText("High thresh: "+"{:.5f}".format(self.parameters.high_thresh)
+                                      +"  ("+str(self.parameters.high_percent)+"%)")
 
     def update_low_thresh(self, value):
         self.parameters.low_percent = value*0.5
@@ -248,7 +251,8 @@ class Gui_Window(Ui_MainWindow):
                                         *self.parameters.low_percent/100 + self.data.morse.min_separatrix_persistence)
         self.update_edge_color()
         
-        self.low_thresh_text.setText("Low thresh: "+"{:.5f}".format(self.parameters.low_thresh)+"  ("+str(self.parameters.low_percent)+"%)")
+        self.low_thresh_text.setText("Low thresh: "+"{:.5f}".format(self.parameters.low_thresh)
+                                     +"  ("+str(self.parameters.low_percent)+"%)")
 
     def add_sidebar(self):
         self.sidebar = CollapsibleDialog(self.parameters)
@@ -272,7 +276,9 @@ class Gui_Window(Ui_MainWindow):
                                                              options=options)
         if file_name:
             self.reset_data()
-            self.data.morse.load_mesh_new(file_name, morse_function="quality", inverted=True)
+            self.data.morse.load_mesh_new(file_name, 
+                                          morse_function="quality", 
+                                          inverted=True)
             self.update_mesh()
             self.flags.flag_loaded_data = True
             self.enable_disable_menu_actions()
@@ -435,8 +441,14 @@ class Gui_Window(Ui_MainWindow):
         self.data.morse.extract_morse_complex()
         self.data.morse.reduce_morse_complex(self.data.morse.range)
 
-        self.parameters.high_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.high_percent/100 + self.data.morse.min_separatrix_persistence
-        self.parameters.low_thresh = (self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)*self.parameters.low_percent/100 + self.data.morse.min_separatrix_persistence
+        self.parameters.high_thresh = ((self.data.morse.max_separatrix_persistence
+                                        -self.data.morse.min_separatrix_persistence)
+                                        *self.parameters.high_percent/100 
+                                        + self.data.morse.min_separatrix_persistence)
+        self.parameters.low_thresh = ((self.data.morse.max_separatrix_persistence
+                                       -self.data.morse.min_separatrix_persistence)
+                                       *self.parameters.low_percent/100 
+                                       + self.data.morse.min_separatrix_persistence)
         self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, 
                                                                     self.parameters.low_thresh,
                                                                     separatrix_type=self.parameters.separatrix_type)
@@ -454,30 +466,122 @@ class Gui_Window(Ui_MainWindow):
         if self.parameters.persistence not in self.data.morse.reducedMorseComplexes.keys():
             self.data.morse.reduce_morse_complex(self.parameters.persistence)
         if (self.parameters.high_thresh, self.parameters.low_thresh) not in self.data.morse.reducedMorseComplexes[self.parameters.persistence].Segmentations.keys():
-            self.data.morse.segmentation(self.parameters.persistence, self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.merge_threshold, size_threshold=self.parameters.size_threshold)    
+            self.data.morse.segmentation(self.parameters.persistence, 
+                                         self.parameters.high_thresh, 
+                                         self.parameters.low_thresh, 
+                                         self.parameters.merge_threshold, 
+                                         size_threshold=self.parameters.size_threshold)    
         else:
             if self.parameters.merge_threshold not in self.data.morse.reducedMorseComplexes[self.parameters.persistence].Segmentations[(self.parameters.high_thresh, self.parameters.low_thresh)].keys():
-                self.data.morse.segmentation(self.parameters.persistence, self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.merge_threshold, size_threshold=self.parameters.size_threshold)
+                self.data.morse.segmentation(self.parameters.persistence, 
+                                             self.parameters.high_thresh, 
+                                             self.parameters.low_thresh, 
+                                             self.parameters.merge_threshold, 
+                                             size_threshold=self.parameters.size_threshold)
                 
-        self.data.current_segmentation_params = np.array([self.parameters.persistence, self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.merge_threshold])
+        self.data.current_segmentation_params = np.array([self.parameters.persistence, 
+                                                          self.parameters.high_thresh, 
+                                                          self.parameters.low_thresh, 
+                                                          self.parameters.merge_threshold])
         self.data.current_segmentation = self.data.morse.reducedMorseComplexes[self.data.current_segmentation_params[0]].Segmentations[(self.data.current_segmentation_params[1], self.data.current_segmentation_params[2])][self.data.current_segmentation_params[3]].Cells
 
         self.color_segmentation()
 
     def compute_segmentation_new(self): 
-        self.data.morse.segmentation_salient_reduction(self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.merge_threshold, self.parameters.persistence)
-        self.data.current_segmentation_params = np.array([self.parameters.persistence, self.parameters.high_thresh, self.parameters.low_thresh, self.parameters.merge_threshold])
-        self.data.current_segmentation = self.data.morse.salient_reduced_morse_complexes[(self.data.current_segmentation_params[0],self.data.current_segmentation_params[1],self.data.current_segmentation_params[2])].Segmentations[(self.data.current_segmentation_params[1], self.data.current_segmentation_params[2])][self.data.current_segmentation_params[3]].Cells
+        self.data.morse.segmentation_salient_reduction(self.parameters.high_thresh, 
+                                                       self.parameters.low_thresh, 
+                                                       self.parameters.merge_threshold, 
+                                                       self.parameters.persistence)
+        self.data.current_segmentation_params = np.array([self.parameters.persistence, 
+                                                          self.parameters.high_thresh, 
+                                                          self.parameters.low_thresh, 
+                                                          self.parameters.merge_threshold])
+        self.data.current_segmentation = self.data.morse.salient_reduced_morse_complexes[(self.data.current_segmentation_params[0],
+                                                                                          self.data.current_segmentation_params[1],
+                                                                                          self.data.current_segmentation_params[2])].Segmentations[(self.data.current_segmentation_params[1], 
+                                                                                                                                                    self.data.current_segmentation_params[2])][self.data.current_segmentation_params[3]].Cells
         self.color_segmentation()
 
     def cluster(self):
-        self.data.current_segmentation = self.data.morse.seed_cluster_mesh(self.data.color_points, self.parameters.cluster_seed_number)
+        self.data.current_segmentation = self.data.morse.seed_cluster_mesh(self.data.color_points, 
+                                                                           self.parameters.cluster_seed_number)
         self.color_segmentation()
 
     def merge_cluster(self):
-        clust  = self.data.morse.seed_cluster_mesh(self.data.color_points, self.parameters.cluster_seed_number)
-        self.data.current_segmentation = self.data.morse.cluster_segmentation(clust, self.data.color_points, self.parameters.merge_threshold)
+        clust  = self.data.morse.seed_cluster_mesh(self.data.color_points, 
+                                                   self.parameters.cluster_seed_number)
+        self.data.current_segmentation = self.data.morse.cluster_segmentation(clust, 
+                                                                              self.data.color_points, 
+                                                                              self.parameters.merge_threshold)
         self.color_segmentation()
+
+    def add_tooltips(self):
+        QtWidgets.QToolTip.setFont(QtGui.QFont('Georgia', 11))
+        palette = QtGui.QPalette()
+        palette.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(255, 0, 0))
+        palette.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(0, 255, 0))
+        QtWidgets.QToolTip.setPalette(palette)
+        QtGui.QGuiApplication.setPalette(palette)
+
+        self.menu_file.setToolTipsVisible(True)
+        self.menu_compute.setToolTipsVisible(True)
+        self.menu_segmentations.setToolTipsVisible(True)
+        self.menu_help.setToolTipsVisible(True)
+        self.action_load_ply.setToolTip("<span class=nobr>Load a .ply file")
+        self.action_load_feature_vector_file.setToolTip("<span class=nobr>Load a .mat "
+                                                        "feature vector file "
+                                                        "generated by GigaMesh for the "
+                                                        "loaded mesh</span>")
+        self.action_load_label_txt.setToolTip("<span class=nobr>Load a segmentation "
+                                              ".txt file with index - label rows</span>")
+        self.action_save_segmentation_label_txt.setToolTip("<span class=nobr>Save the "
+                                                           "segmentation as .txt file "
+                                                           "with index - label "
+                                                           "rows</span>")
+        self.action_compute_morse_complex.setToolTip("<span class=nobr>Computes a "
+                                                     "Morse-Smale Complex for "
+                                                     "the loaded mesh and already stores "
+                                                     "a maximally reduced complex for "
+                                                     "edge detection as well</span>")
+        self.action_morse_cells_persistence.setToolTip("<span class=nobr>Calculates "
+                                                       "the Morse cells at a "
+                                                       "given persistence and visualizes "
+                                                       "them in different colors on the "
+                                                       "mesh</span>")
+        self.action_cluster.setToolTip("<span class=nobr>Splits the mesh into "
+                                       "at lest the given number of "
+                                       "clusters, respecting the calculated edges. "
+                                       "Creates additional clusters if there are patches "
+                                       "left enclosed by edges that do not have "
+                                       "an initial seed.</span>")
+        self.action_cluster_segmentation_method.setToolTip("<span class=nobr>Segments "
+                                                           "the mesh based on "
+                                                           "an initial clustering into "
+                                                           "a given number of clusters "
+                                                           "(respecting the calculated "
+                                                           "edges) and then merging them "
+                                                           "up until there are no more "
+                                                           "neighboring clusters with "
+                                                           "less than a merging threshold "
+                                                           "percentage of edge separating "
+                                                           "them.</span>")
+        self.action_morse_segementation_ridge_first.setToolTip("<span class=nobr>Segment "
+                                                               "the mesh with a Morse "
+                                                               "cell based method, that "
+                                                               "makes sure that no ridges "
+                                                               "are merged during Morse "
+                                                               "complex simplification "
+                                                               "with persistence</span>")
+        self.action_segmentation_method.setToolTip("<span class=nobr>Segment the mesh "
+                                                   "with a Morse cell based method, "
+                                                   "simplifying the MS complex first "
+                                                   "with a given persistence, using the "
+                                                   "calculated edges to merge the initial "
+                                                   "oversegmentation up to the given "
+                                                   "merge threshold. So all adjacent "
+                                                   "cells will have at least the merge "
+                                                   "threshold percent of edge between "
+                                                   "them.</span>")
 
 if __name__ == "__main__":
     import sys
