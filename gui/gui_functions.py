@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from base_gui import Ui_MainWindow
+from gui.base_gui import Ui_MainWindow
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -24,8 +24,8 @@ import vtk
 import qdarkstyle
 import numpy as np
 
-from gui_data import Data, Flags, Parameters
-from collapsible_boxes import CollapsibleDialog
+from gui.gui_data import Data, Flags, Parameters
+from gui.collapsible_boxes import CollapsibleDialog
 
 from src.evaluation_and_conversion import label_txt_to_label_dict
 
