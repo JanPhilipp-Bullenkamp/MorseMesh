@@ -19,6 +19,7 @@ class Parameters:
         self.persistence = 0.04
         self.merge_threshold = 0.3
         self.cluster_seed_number = 150
+        self.merge_threshold_cluster = 0.3
 
         self.size_threshold = 500
 
@@ -33,8 +34,9 @@ class Flags:
         self.reset()
 
     def reset(self):
-        self.flag_morse_computations = False
         self.flag_loaded_data = False
+        self.flag_morse_computations = False
+        self.flag_current_segmentation = False
         self.flag_sliders_shown = False
 
 class Data:

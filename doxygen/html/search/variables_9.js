@@ -1,5 +1,0 @@
-var searchData=
-[
-  ['neighbors_618',['neighbors',['../classMorseTheory_1_1src_1_1Algorithms_1_1cluster_1_1Component.html#a7b7308a0a82ed8a26cb1054a776e785b',1,'MorseTheory.src.Algorithms.cluster.Component.neighbors()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1Datastructure_1_1Vertex.html#a7b7308a0a82ed8a26cb1054a776e785b',1,'MorseTheory.src.Algorithms.load_data.Datastructure.Vertex.neighbors()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1Datastructure_1_1Cell.html#a7b7308a0a82ed8a26cb1054a776e785b',1,'MorseTheory.src.Algorithms.load_data.Datastructure.Cell.neighbors()']]],
-  ['neighbors_5fweights_619',['neighbors_weights',['../classMorseTheory_1_1src_1_1Algorithms_1_1cluster_1_1Component.html#ab19bac174bd2ce124a1d701602527157',1,'MorseTheory.src.Algorithms.cluster.Component.neighbors_weights()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1Datastructure_1_1Cell.html#ab19bac174bd2ce124a1d701602527157',1,'MorseTheory.src.Algorithms.load_data.Datastructure.Cell.neighbors_weights()']]]
-];

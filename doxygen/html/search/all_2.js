@@ -1,7 +1,0 @@
-var searchData=
-[
-  ['betti_5fnumbers_2epy_27',['betti_numbers.py',['../betti__numbers_8py.html',1,'']]],
-  ['betti_5fvia_5fpair_5fcells_28',['betti_via_pair_cells',['../namespaceMorseTheory_1_1src_1_1Algorithms_1_1betti__numbers.html#a7d1aa38f3846a47904eb0a203200b934',1,'MorseTheory::src::Algorithms::betti_numbers']]],
-  ['bettinumbers_29',['BettiNumbers',['../classMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1Datastructure_1_1MorseComplex.html#abaa4dd0b585265c1c97ff6576f63fce7',1,'MorseTheory.src.Algorithms.load_data.Datastructure.MorseComplex.BettiNumbers()'],['../classMorseTheory_1_1src_1_1mesh_1_1Mesh.html#abaa4dd0b585265c1c97ff6576f63fce7',1,'MorseTheory.src.mesh.Mesh.BettiNumbers()'],['../classMorseTheory_1_1src_1_1morse_1_1Morse.html#abaa4dd0b585265c1c97ff6576f63fce7',1,'MorseTheory.src.morse.Morse.BettiNumbers()']]],
-  ['boundary_30',['boundary',['../classMorseTheory_1_1src_1_1Algorithms_1_1cluster_1_1Component.html#a23d35531b04e26bcae25360217ac8229',1,'MorseTheory.src.Algorithms.cluster.Component.boundary()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1Datastructure_1_1Vertex.html#a23d35531b04e26bcae25360217ac8229',1,'MorseTheory.src.Algorithms.load_data.Datastructure.Vertex.boundary()'],['../classMorseTheory_1_1src_1_1Algorithms_1_1load__data_1_1Datastructure_1_1Cell.html#a23d35531b04e26bcae25360217ac8229',1,'MorseTheory.src.Algorithms.load_data.Datastructure.Cell.boundary()']]]
-];

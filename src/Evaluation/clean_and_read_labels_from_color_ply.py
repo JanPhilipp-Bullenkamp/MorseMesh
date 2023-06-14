@@ -15,14 +15,8 @@ class Mesh:
         self.Vertices = {}
         
 class Vertex:
-    def __init__(self, 
-                 x: float = None, 
-                 y: float = None, 
-                 z: float = None,
+    def __init__(self,
                  label: int = None):
-        self.x = x
-        self.y = y
-        self.z = z
         self.label=label
         self.star = set()
         
@@ -35,7 +29,8 @@ def neighbor_labels(vert_dict: dict, ind: int) -> list:
         
 def clean_and_read_labels_from_color_ply(mesh_filename: str, 
                                          label_filename: str = None, 
-                                         threshold: int = 10):
+                                         threshold: int = 10,
+                                         connected_components: bool = False):
     rawdata = PlyData.read(mesh_filename)
     
     data = Mesh(mesh_filename)
@@ -43,24 +38,21 @@ def clean_and_read_labels_from_color_ply(mesh_filename: str,
     labels = {}
     conversion = {}
     
-    label = 0
+    label_counter = 0
     for ind, pt in enumerate(rawdata['vertex']):
         if tuple((pt['red'], pt['green'], pt['blue'])) not in conversion.keys():
-            conversion[ tuple((pt['red'], pt['green'], pt['blue'])) ] = label
-            labels[label] = set()
-            labels[label].add(ind)
+            conversion[ tuple((pt['red'], pt['green'], pt['blue'])) ] = label_counter
+            labels[label_counter] = set()
+            labels[label_counter].add(ind)
             
-            vert = Vertex(pt['x'], pt['y'], pt['z'], label)
+            vert = Vertex(label_counter)
             data.Vertices[ind] = vert
             
-            label+=1
+            label_counter+=1
         else:
             labels[conversion[ tuple((pt['red'], pt['green'], pt['blue'])) ]].add(ind)
             
-            vert = Vertex(pt['x'], 
-                          pt['y'], 
-                          pt['z'], 
-                          conversion[tuple((pt['red'], 
+            vert = Vertex(conversion[tuple((pt['red'], 
                                             pt['green'], 
                                             pt['blue']))])
             data.Vertices[ind] = vert
@@ -70,44 +62,51 @@ def clean_and_read_labels_from_color_ply(mesh_filename: str,
         for elt in indices:
             data.Vertices[elt].star.update(indices)
             
-    new_it = []
+    no_neighbor_list = []
     delkeys = set()
+    new_labels = {}
     for label, ptset in labels.items():
         if len(ptset) < threshold:
+            no_neighbor_list += ptset
             for pt in ptset:
-                counts = Counter(neighbor_labels(data.Vertices, pt))
-                if len(counts) > 0:
-                    most_common = counts.most_common(1)[0][0]
-                    if most_common != None and len(labels[most_common]) >= threshold:
-                        labels[most_common].add(pt)
-                        data.Vertices[pt].label=most_common
-                    else:
-                        data.Vertices[pt].label=None
-                        new_it.append(pt)
-                else:
-                    data.Vertices[pt].label=None
-                    new_it.append(pt)
-            
+                data.Vertices[pt].label = None
             delkeys.add(label) 
+        elif len(ptset) >= threshold and connected_components: # connected_components is flag
+            comp = get_connected_components(label, ptset, data)
+            if len(comp.keys()) > 1:
+                for key, component in comp.items():
+                    if len(component) < threshold:
+                        no_neighbor_list += component
+                        for pt in component:
+                            data.Vertices[pt].label=None
+                    else:
+                        new_labels[label_counter] = component
+                        for pt in component:
+                            data.Vertices[pt].label = label_counter
+                        label_counter+=1
+                delkeys.add(label)
+
     for key in delkeys:
-        del labels[key]
-                    
+        labels.pop(key,None)
+    labels.update(new_labels)
+
     it = 0
-    while len(new_it) != 0:
-        pt = new_it.pop(0)
-        counts = Counter(neighbor_labels(data.Vertices, pt))
-        if len(counts) > 0:
-            most_common = counts.most_common(1)[0][0]
-            if len(labels[most_common]) >= threshold and most_common != None:
-                labels[most_common].add(pt)
-                data.Vertices[pt].label=most_common
-            else:
-                new_it.append(pt)
-        else:
-            new_it.append(pt)
+    while len(no_neighbor_list) != 0:
+        pt = no_neighbor_list.pop(0)
+        add_point_to_neighborlabel(pt, labels, data, threshold, no_neighbor_list)
         it+=1
         if it%50000==0:
             break
+    
+    """
+    for label, pts in labels.items():
+        comp = get_connected_components(label, pts, data)
+        if len(comp.keys()) > 1:
+                print("Label", label, " has more than one CC")
+                lengths = [len(pts) for pts in comp.values()]
+                print("Has", len(comp.keys()), " different components with lengths")
+                print(lengths)
+    """
               
     if label_filename != None:    
         with open(label_filename +".txt", "w") as f:
@@ -121,3 +120,50 @@ def clean_and_read_labels_from_color_ply(mesh_filename: str,
                     f.write(str(index) + " " + str(label) + "\n")
                 
     return labels
+
+
+def get_connected_components(label, pts, data):
+    comp = {}
+    iterated = set()
+    l=0
+    for pt in pts:
+        if pt not in iterated:
+            if len(data.Vertices[pt].star.intersection(iterated)) == 0:
+                comp[l] = set()
+                comp[l].add(pt)
+                iterated.add(pt)
+                neighbors = set()
+                for neig in data.Vertices[pt].star:
+                    if data.Vertices[neig].label == label:
+                        neighbors.add(neig) 
+
+                while len(neighbors) != 0:
+                    point = neighbors.pop()
+                    if data.Vertices[point].label == label:
+                        comp[l].add(point)
+                        iterated.add(point)
+                        for nei in data.Vertices[point].star:
+                            if data.Vertices[nei].label == label and nei not in iterated:
+                                neighbors.add(nei)
+                    else:
+                        iterated.add(point)
+                l+=1
+            else:
+                for label, pset in comp.items():
+                    if len(data.Vertices[pt].star.intersection(pset)) != 0:
+                        comp[label].add(pt)
+    return comp
+
+def add_point_to_neighborlabel(pt, labels, data, threshold, no_neighbor_list):
+    counts = Counter(neighbor_labels(data.Vertices, pt))
+    if len(counts) > 0:
+        most_common = counts.most_common(1)[0][0]
+        if most_common != None and len(labels[most_common]) >= threshold:
+            labels[most_common].add(pt)
+            data.Vertices[pt].label=most_common
+        else:
+            data.Vertices[pt].label=None
+            no_neighbor_list.append(pt)
+    else:
+        data.Vertices[pt].label=None
+        no_neighbor_list.append(pt)
