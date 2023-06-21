@@ -17,6 +17,7 @@
 """
 
 from gui.base_gui import Ui_MainWindow
+from gui.help_files import QuickGuide
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -219,6 +220,9 @@ class Gui_Window(Ui_MainWindow):
         self.action_morse_segementation_ridge_first.triggered.connect(self.compute_segmentation_new)
         self.action_cluster.triggered.connect(self.cluster)
         self.action_cluster_segmentation_method.triggered.connect(self.merge_cluster)
+
+        self.action_quick_guide.triggered.connect(self.quick_guide)
+        self.action_info_contact.triggered.connect(self.info_contact)
 
         self.add_slider_functionality()
 
@@ -532,6 +536,13 @@ class Gui_Window(Ui_MainWindow):
                                                                               self.data.color_points, 
                                                                               self.parameters.merge_threshold_cluster)
         self.color_segmentation()
+
+    def quick_guide(self):
+        self.w = QuickGuide()
+        self.w.show()
+
+    def info_contact(self):
+        do=0
 
     def add_tooltips(self):
         QtWidgets.QToolTip.setFont(QtGui.QFont('Georgia', 11))

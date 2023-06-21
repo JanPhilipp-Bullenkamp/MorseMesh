@@ -8,8 +8,8 @@ class Parameters:
         self.feature_vector_function = "maxabs"
         self.high_thresh = None
         self.low_thresh = None
-        self.mode = "ridge"
-        self.separatrix_type = "all"
+        self.mode = "ridge" # options: "ridge", "valley" or "both" 
+        self.separatrix_type = "reverse" # options: "all", "reverse" or "cutoff"
         self.min_length = 1
         self.max_length = float('inf')
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'base_gui.ui'
+# Form implementation generated from reading ui file 'base_gui_2.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -161,6 +161,10 @@ class Ui_MainWindow(object):
         self.action_morse_segementation_ridge_first = QtWidgets.QAction(MainWindow)
         self.action_morse_segementation_ridge_first.setEnabled(False)
         self.action_morse_segementation_ridge_first.setObjectName("action_morse_segementation_ridge_first")
+        self.action_quick_guide = QtWidgets.QAction(MainWindow)
+        self.action_quick_guide.setObjectName("action_quick_guide")
+        self.action_info_contact = QtWidgets.QAction(MainWindow)
+        self.action_info_contact.setObjectName("action_info_contact")
         self.menu_file.addAction(self.action_load_ply)
         self.menu_file.addAction(self.action_load_feature_vector_file)
         self.menu_file.addAction(self.action_save_segmentation_label_txt)
@@ -171,6 +175,8 @@ class Ui_MainWindow(object):
         self.menu_segmentations.addAction(self.action_segmentation_method)
         self.menu_segmentations.addAction(self.action_morse_segementation_ridge_first)
         self.menu_segmentations.addAction(self.action_cluster_segmentation_method)
+        self.menu_help.addAction(self.action_quick_guide)
+        self.menu_help.addAction(self.action_info_contact)
         self.menubar.addAction(self.menu_file.menuAction())
         self.menubar.addAction(self.menu_compute.menuAction())
         self.menubar.addAction(self.menu_segmentations.menuAction())
@@ -199,4 +205,5 @@ class Ui_MainWindow(object):
         self.action_segmentation_method.setText(_translate("MainWindow", "Morse segmentation method"))
         self.action_cluster_segmentation_method.setText(_translate("MainWindow", "Cluster segmentation method"))
         self.action_morse_segementation_ridge_first.setText(_translate("MainWindow", "Morse segementation (ridge first)"))
-
+        self.action_quick_guide.setText(_translate("MainWindow", "Quick Guide"))
+        self.action_info_contact.setText(_translate("MainWindow", "Info/Contact"))
