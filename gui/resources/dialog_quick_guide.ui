@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>dialog_quickguide</class>
+ <widget class="QDialog" name="dialog_quickguide">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>978</width>
+    <height>576</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Ignored" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1149</width>
+    <height>693</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Quick Guide</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTextBrowser" name="textBrowser">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="acceptDrops">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:transparent</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;h2 align=&quot;center&quot; style=&quot; margin-top:16px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;quick-guide&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:x-large; font-weight:600;&quot;&gt;Q&lt;/span&gt;&lt;span style=&quot; font-size:x-large; font-weight:600;&quot;&gt;uick Guide&lt;/span&gt;&lt;/h2&gt;
+&lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;-1-load-ply-file-&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;. Load ply file&lt;/span&gt;&lt;/h3&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Select &lt;span style=&quot; font-style:italic;&quot;&gt;Load ply&lt;/span&gt; under the &lt;span style=&quot; font-style:italic;&quot;&gt;File&lt;/span&gt; menu. Note that you need a .ply file that contains a function value under &lt;span style=&quot; font-weight:600;&quot;&gt;quality&lt;/span&gt;. &lt;/p&gt;
+&lt;h4 style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;-comments-on-the-mesh-&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:medium; font-weight:600;&quot;&gt;C&lt;/span&gt;&lt;span style=&quot; font-size:medium; font-weight:600;&quot;&gt;omments on the mesh:&lt;/span&gt;&lt;/h4&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Please make sure that your mesh has a manifold-like structure, i.e. especially there should be no edges with more than 2 adjacent triangles. Holes or boundaries in the mesh are no problem algorithmically, but depending on the application it might make sense to fill them. To do mesh preprocessing we recommend using e.g. &lt;a href=&quot;https://gigamesh.eu/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;GigaMesh&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;-2-compute-morse-complex-&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;. Compute Morse Complex&lt;/span&gt;&lt;/h3&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Compute the Morse complex for a loaded mesh in the &lt;span style=&quot; font-style:italic;&quot;&gt;Compute&lt;/span&gt; menu under &lt;span style=&quot; font-style:italic;&quot;&gt;Compute Morse complex&lt;/span&gt;.&lt;/p&gt;
+&lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;-3-determine-edges-&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;3&lt;/span&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;. Determine edges&lt;/span&gt;&lt;/h3&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You can now use the two sliders in the bottom to determine the edges correctly. Just move them and the mesh will update automatically. &lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The upper slider determines a &lt;span style=&quot; font-weight:600;&quot;&gt;strong threshold&lt;/span&gt; which includes all edges surpassing this threshold, while the lower slider determines the &lt;span style=&quot; font-weight:600;&quot;&gt;weak threshold&lt;/span&gt; which adds only edges that are below the strong threshold, but above the weak threshold, therefore refining the result a bit.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Under &lt;span style=&quot; font-style:italic;&quot;&gt;advanced edge detection&lt;/span&gt; in the sidebar you can choose more edge settings, the only ones that might be interesting though are the &amp;quot;Separatrix density&lt;span style=&quot; font-style:italic;&quot;&gt; which could be ticked to &lt;/span&gt;All&lt;span style=&quot; font-style:italic;&quot;&gt; or the &lt;/span&gt;Extremal line type&lt;span style=&quot; font-style:italic;&quot;&gt;, which can be switched between &lt;/span&gt;ridges&lt;span style=&quot; font-style:italic;&quot;&gt; and &lt;/span&gt;valleys*. &lt;/p&gt;
+&lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;-4-segmentation-&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;4&lt;/span&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;. Segmentation&lt;/span&gt;&lt;/h3&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use the &lt;span style=&quot; font-weight:600;&quot;&gt;Morse segmentation method&lt;/span&gt; or the &lt;span style=&quot; font-weight:600;&quot;&gt;Cluster segmentation method&lt;/span&gt; in the &lt;span style=&quot; font-style:italic;&quot;&gt;Segmentations&lt;/span&gt; menu. &lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You can change parameters of the segmentation in the sidebar under &lt;span style=&quot; font-style:italic;&quot;&gt;Morse segmentation&lt;/span&gt; or &lt;span style=&quot; font-style:italic;&quot;&gt;Cluster segmentation&lt;/span&gt;.&lt;/p&gt;
+&lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;-5-save-result-&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;5&lt;/span&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;. Save result&lt;/span&gt;&lt;/h3&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You can rerun the segmentations until you have a sufficient result. The segmentation can be saved as a label.txt file in the &lt;span style=&quot; font-style:italic;&quot;&gt;File&lt;/span&gt; menu. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+     <property name="openLinks">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>80</height>
+      </size>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::RightToLeft</enum>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>dialog_quickguide</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>dialog_quickguide</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

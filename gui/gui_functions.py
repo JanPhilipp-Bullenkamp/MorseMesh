@@ -17,7 +17,7 @@
 """
 
 from gui.base_gui import Ui_MainWindow
-from gui.help_files import QuickGuide
+from gui.help_files import QuickGuide, InfoContact
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -542,7 +542,8 @@ class Gui_Window(Ui_MainWindow):
         self.w.show()
 
     def info_contact(self):
-        do=0
+        self.w = InfoContact()
+        self.w.show()
 
     def add_tooltips(self):
         QtWidgets.QToolTip.setFont(QtGui.QFont('Georgia', 11))
