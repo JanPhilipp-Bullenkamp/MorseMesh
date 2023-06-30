@@ -2,7 +2,7 @@
 
 NOT UP TO DATE...
 
-Allows to work with discrete Morse theory on 3D meshes. Provides functions for Morse computations and segmentation methods as well as a graphical user interface to see the impact on a mesh directly. Work in progress...
+This repo provides code for working with discrete Morse theory on meshes. It contains functions for Morse theory based edge detection and segmentation, a cluster based segmentation using only the edges as well as a graphical user interface to use the methods.
 
 # Contents
 - [Quick and Easy Usage](#quick-and-easy-usage)
@@ -21,11 +21,6 @@ Allows to work with discrete Morse theory on 3D meshes. Provides functions for M
 3. Use sliders to get visually well recognized edges
 4. Press ***Segmentation Morse*** or ***Segmentation cluster*** under **Visualization**
 5. ***Save segmentation*** under file or run again with different parameters
-
-# Segmentation Method
-Method described as in our Paper .... \TODO explain
-
-<img src="./pictures/DMT_Segmentation_Pipeline_art_31.png"  width="500">
 
 # Dependencies
 
@@ -47,4 +42,4 @@ The MorseMesh source is published under the [GPL License](https://www.gnu.org/li
 
 # Contact
 
-Jan Philipp Bullenkamp (jan-philipp.bullenkamp (at) informatik.uni-halle.de)
+Jan Philipp Bullenkamp: jan-philipp.bullenkamp (at) informatik.uni-halle.de

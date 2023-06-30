@@ -48,10 +48,11 @@ color_list_old = [[255,0,0],  #red
              ]
 
 # new colors from color brewer
-color_list = [[141,211,199], # turquoise
+color_list = [
+              [141,211,199], # turquoise
+              [251,128,114], # red
               [255,255,179], # light yellow
               [190,186,218], # light purple
-              [251,128,114], # red
               [128,177,211], # blue
               [253,180,98], # orange
               [179,222,105], # green
