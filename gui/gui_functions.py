@@ -32,7 +32,7 @@ from src.evaluation_and_conversion import label_txt_to_label_dict
 
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
-color_list = [[255,0,0],  #red
+color_list_old = [[255,0,0],  #red
               [0,0,255], # blue
               [0,255,0], #lime
               [255,255,0], # yellow
@@ -46,6 +46,18 @@ color_list = [[255,0,0],  #red
               [0,128,128], #teal
               [0,0,128] #navy
              ]
+
+# new colors from color brewer
+color_list = [[141,211,199], # turquoise
+              [255,255,179], # light yellow
+              [190,186,218], # light purple
+              [251,128,114], # red
+              [128,177,211], # blue
+              [253,180,98], # orange
+              [179,222,105], # green
+              [252,205,229], #light pink
+              [217,217,217] # grey
+              ] 
 
 class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
     def __init__(self):

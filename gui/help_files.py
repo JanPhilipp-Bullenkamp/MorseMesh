@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 
-from quick_guide import Ui_dialog_quickguide
-from info_contact import Ui_dialog_info_contact
+from .quick_guide import Ui_dialog_quickguide
+from .info_contact import Ui_dialog_info_contact
 
 
 class QuickGuide(QtWidgets.QMainWindow):
