@@ -1,38 +1,87 @@
 # MorseMesh
 
-NOT UP TO DATE...
-
 This repo provides code for working with discrete Morse theory on meshes. It contains functions for Morse theory based edge detection and segmentation, a cluster based segmentation using only the edges as well as a graphical user interface to use the methods.
 
 # Contents
+- [Requirements](#requirements)
 - [Quick and Easy Usage](#quick-and-easy-usage)
-- [Segmentation Method](#segmentation-method)
-- [Dependencies](#dependencies)
 - [Visualization](#visualization)
 - [License](#license)
 - [Contact](#contact)
 
-# Quick and Easy Usage
-
-**You need:** A manifold like mesh (ply file) with a scalar function given in the quality property of the vertices. (E.g. curvature values)
-
-1. Open GUI Tool and load mesh
-2. Press ***Compute Morse*** under **Processing**
-3. Use sliders to get visually well recognized edges
-4. Press ***Segmentation Morse*** or ***Segmentation cluster*** under **Visualization**
-5. ***Save segmentation*** under file or run again with different parameters
-
-# Dependencies
+# Requirements
 
 - Python 3.x (3.9 definitely works, probably also before)
-- plyfile (run pip install plyfile or: https://github.com/dranjan/python-plyfile)
+- plyfile (pip install plyfile or: https://github.com/dranjan/python-plyfile)
+- pyqt5 
+- (Optional) qdarkstyle 
+
+
+# Quick and Easy Usage
+
+Run
+
+```
+$ python3 gui.py
+```
+to start the GUI Tool.
+
+**You need:** A manifold like mesh (ply file) with a scalar function given in the quality 
+property of the vertices. (E.g. curvature values)
+
+1. Open GUI Tool and load mesh under **File**
+2. Press ***Compute Morse complex*** under **Compute**
+3. Use sliders to get visually well recognized edges
+4. Press ***Morse Segmentation Method*** or ***Cluster Segmentation Method*** 
+under **Segmentations**
+5. ***Save segmentation (label txt)*** under **File** or run again with different 
+parameters
+
+### **1. Load ply file**
+
+Select *Load ply* under the *File* menu. Note that you need a .ply file that contains 
+a function value under **quality**.
+Please make sure that your mesh has a manifold-like structure, i.e. especially there 
+should be no edges with more than 2 adjacent triangles. Holes or boundaries in the
+mesh are no problem algorithmically, but depending on the application it might make 
+sense to fill them.
+To do mesh preprocessing we recommend using e.g. [GigaMesh](https://gigamesh.eu/).
+
+### **2. Compute Morse Complex**
+
+Compute the Morse complex for a loaded mesh in the *Compute* menu under 
+*Compute Morse complex*.
+
+### **3. Determine edges**
+
+You can now use the two sliders in the bottom to determine the edges correctly. Just
+move them and the mesh will update automatically. 
+
+The upper slider determines a **strong threshold** which includes all edges surpassing this 
+threshold, while the lower slider determines the **weak threshold** which adds only edges 
+that are below the strong threshold, but above the weak threshold, therefore refining 
+the result a bit.
+
+Under *advanced edge detection* in the sidebar you can choose more edge settings, the 
+only ones that might be interesting though are the "Separatrix density* which could be 
+ticked to *All* or *Reversed* and the *Extremal line type*, which can be switched 
+between *ridges* and *valleys*. 
+### **4. Segmentation**
+
+Use the **Morse segmentation method** or the **Cluster segmentation method** in the 
+*Segmentations* menu. 
+
+You can change parameters of the segmentation in the sidebar under *Morse segmentation* 
+or *Cluster segmentation*.
+
+### **5. Save result**
+
+You can rerun the segmentations until you have a sufficient result. The segmentation 
+can be saved as a label.txt file in the *File* menu.
 
 # Visualization
 We offer different ways to visualize what's going on: 
 1. Label .txt files to be visualized in the GUI tool or imported by GigaMesh.
-2. (Overlay .ply files to be loaded on top of the original mesh.)
-
-The first option are .ply files that contain colored points. Loading the original mesh with e.g. MeshLab and than importing the overlay file, allows to visualize (interim) results by enlarging the point size of the overlay file.
 
 The second option is only suitable for Morse cell or segmentation result visualization, but offers a better looking result in these cases. Therefore the original mesh needs to be loaded in GigaMesh and the according labels .txt file should be imported under **File - Import - Import Labels** (confirm YES when asked whether the vertex is in the first column and choose **Labels-Connected Comp.** on the right to see the results.)
 

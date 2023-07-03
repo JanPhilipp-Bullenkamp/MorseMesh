@@ -19,12 +19,19 @@
 from gui.gui_functions import Gui_Window
 
 from PyQt5 import QtWidgets
-import qdarkstyle
 import sys
+
+darkstyle_import = True
+try:
+    import qdarkstyle
+except ImportError:
+    darkstyle_import = False
+    pass
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+    if darkstyle_import:
+        app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     MainWindow = QtWidgets.QMainWindow()
     ui = Gui_Window()
     ui.setup(MainWindow)

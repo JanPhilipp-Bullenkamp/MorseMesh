@@ -1,9 +1,7 @@
 from .PriorityQueue import PriorityQueue
 from .process_lower_stars import lower_star
 
-import numpy as np
 import timeit
-from collections import Counter, deque
 
 
 def num_unpaired_conforming_faces(Findex, face, PQzero, labels):
