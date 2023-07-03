@@ -16,6 +16,10 @@ class QuickGuide(QtWidgets.QMainWindow):
         self.ui = Ui_dialog_quickguide()
         self.ui.setupUi(self.dialog_quickguide)
         self.setCentralWidget(self.dialog_quickguide)
+        self.ui.buttonBox.clicked.connect(self.close_window)
+
+    def close_window(self):
+        self.close()
 
 
 class InfoContact(QtWidgets.QMainWindow):
@@ -30,3 +34,7 @@ class InfoContact(QtWidgets.QMainWindow):
         self.ui = Ui_dialog_info_contact()
         self.ui.setupUi(self.dialog_quickguide)
         self.setCentralWidget(self.dialog_quickguide)
+        self.ui.buttonBox.clicked.connect(self.close_window)
+
+    def close_window(self):
+        self.close()

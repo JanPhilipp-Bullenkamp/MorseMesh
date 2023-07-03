@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'base_gui_2.ui'
+# Form implementation generated from reading ui file 'mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -10,6 +10,7 @@
 
 from PyQt5 import QtCore, QtWidgets
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -165,16 +166,25 @@ class Ui_MainWindow(object):
         self.action_quick_guide.setObjectName("action_quick_guide")
         self.action_info_contact = QtWidgets.QAction(MainWindow)
         self.action_info_contact.setObjectName("action_info_contact")
+        self.action_morse_segmentation_conforming = QtWidgets.QAction(MainWindow)
+        self.action_morse_segmentation_conforming.setCheckable(False)
+        self.action_morse_segmentation_conforming.setEnabled(False)
+        self.action_morse_segmentation_conforming.setObjectName("action_morse_segmentation_conforming")
+        self.action_load_conforming_labels_label_txt = QtWidgets.QAction(MainWindow)
+        self.action_load_conforming_labels_label_txt.setEnabled(False)
+        self.action_load_conforming_labels_label_txt.setObjectName("action_load_conforming_labels_label_txt")
         self.menu_file.addAction(self.action_load_ply)
         self.menu_file.addAction(self.action_load_feature_vector_file)
         self.menu_file.addAction(self.action_save_segmentation_label_txt)
         self.menu_file.addAction(self.action_load_label_txt)
+        self.menu_file.addAction(self.action_load_conforming_labels_label_txt)
         self.menu_compute.addAction(self.action_compute_morse_complex)
+        self.menu_segmentations.addAction(self.action_segmentation_method)
+        self.menu_segmentations.addAction(self.action_cluster_segmentation_method)
         self.menu_segmentations.addAction(self.action_morse_cells_persistence)
         self.menu_segmentations.addAction(self.action_cluster)
-        self.menu_segmentations.addAction(self.action_segmentation_method)
         self.menu_segmentations.addAction(self.action_morse_segementation_ridge_first)
-        self.menu_segmentations.addAction(self.action_cluster_segmentation_method)
+        self.menu_segmentations.addAction(self.action_morse_segmentation_conforming)
         self.menu_help.addAction(self.action_quick_guide)
         self.menu_help.addAction(self.action_info_contact)
         self.menubar.addAction(self.menu_file.menuAction())
@@ -207,3 +217,5 @@ class Ui_MainWindow(object):
         self.action_morse_segementation_ridge_first.setText(_translate("MainWindow", "Morse segementation (ridge first)"))
         self.action_quick_guide.setText(_translate("MainWindow", "Quick Guide"))
         self.action_info_contact.setText(_translate("MainWindow", "Info/Contact"))
+        self.action_morse_segmentation_conforming.setText(_translate("MainWindow", "Morse segmentation (conforming)"))
+        self.action_load_conforming_labels_label_txt.setText(_translate("MainWindow", "Load conforming labels (label txt)"))

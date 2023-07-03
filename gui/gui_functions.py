@@ -225,6 +225,7 @@ class Gui_Window(Ui_MainWindow):
         self.action_load_feature_vector_file.triggered.connect(self.load_feature_vector_file)
         self.action_load_label_txt.triggered.connect(self.load_label_txt_file)
         self.action_save_segmentation_label_txt.triggered.connect(self.save_segmentation_result)
+        self.action_load_conforming_labels_label_txt.triggered.connect(self.load_conforming_labels)
 
         self.action_compute_morse_complex.triggered.connect(self.compute_morse)
 
@@ -233,6 +234,7 @@ class Gui_Window(Ui_MainWindow):
         self.action_morse_segementation_ridge_first.triggered.connect(self.compute_segmentation_new)
         self.action_cluster.triggered.connect(self.cluster)
         self.action_cluster_segmentation_method.triggered.connect(self.merge_cluster)
+        self.action_morse_segmentation_conforming.triggered.connect(self.compute_confoming_segmentation)
 
         self.action_quick_guide.triggered.connect(self.quick_guide)
         self.action_info_contact.triggered.connect(self.info_contact)
@@ -244,6 +246,7 @@ class Gui_Window(Ui_MainWindow):
         self.action_compute_morse_complex.setEnabled(self.flags.flag_loaded_data)
         self.action_load_feature_vector_file.setEnabled(self.flags.flag_loaded_data)
         self.action_load_label_txt.setEnabled(self.flags.flag_loaded_data)
+        self.action_load_conforming_labels_label_txt.setEnabled(self.flags.flag_loaded_data)
 
         # buttons for computed morse complex
         self.action_morse_cells_persistence.setEnabled(self.flags.flag_morse_computations)
@@ -256,6 +259,9 @@ class Gui_Window(Ui_MainWindow):
 
         # buttons for computed segmentation
         self.action_save_segmentation_label_txt.setEnabled(self.flags.flag_current_segmentation)
+
+        # buttons for conforming input loaded
+        self.action_morse_segmentation_conforming.setEnabled(self.flags.flag_conforming_input)
 
         if self.flags.flag_sliders_shown:
             do=0
@@ -343,6 +349,19 @@ class Gui_Window(Ui_MainWindow):
             self.data.current_segmentation = label_txt_to_label_dict(file_name)
             self.color_segmentation(cell_structure=False)
             self.flags.flag_current_segmentation = True
+            self.enable_disable_menu_actions()
+
+    def load_conforming_labels(self):
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.ReadOnly
+        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(None, 
+                                                   "Select conforming label txt File", 
+                                                   "", 
+                                                   "Txt Files (*.txt)", 
+                                                   options=options)
+        if file_name:
+            self.data.morse.load_labels(file_name)
+            self.flags.flag_conforming_input = True
             self.enable_disable_menu_actions()
 
     """Currently not used!"""
@@ -472,9 +491,10 @@ class Gui_Window(Ui_MainWindow):
         self.enable_disable_menu_actions()
 
     def compute_morse(self):
-        self.data.morse.process_lower_stars()
+        self.data.morse.process_lower_stars(conforming=self.flags.flag_conforming_input)
         self.data.morse.extract_morse_complex()
-        self.data.morse.reduce_morse_complex(self.data.morse.range)
+        self.data.morse.reduce_morse_complex(self.data.morse.range, 
+                                             conforming=self.flags.flag_conforming_input)
 
         self.parameters.high_thresh = ((self.data.morse.max_separatrix_persistence
                                         -self.data.morse.min_separatrix_persistence)
@@ -488,7 +508,10 @@ class Gui_Window(Ui_MainWindow):
                                                                     self.parameters.low_thresh,
                                                                     separatrix_type=self.parameters.separatrix_type)
         self.update_edge_color()
-        self.flags.flag_morse_computations = True
+        if self.flags.flag_conforming_input:
+            self.flags.flag_conforming_morse = True
+        else:
+            self.flags.flag_morse_computations = True
         self.enable_disable_menu_actions()
 
     def compute_persistent_morse_cells(self):
@@ -550,6 +573,34 @@ class Gui_Window(Ui_MainWindow):
                                                                               self.parameters.merge_threshold_cluster)
         self.color_segmentation()
 
+    def compute_confoming_segmentation(self):
+        if self.parameters.persistence not in self.data.morse.reducedMorseComplexes.keys():
+            self.data.morse.reduce_morse_complex(self.parameters.persistence,
+                                                 conforming=True)
+        if (self.parameters.high_thresh, self.parameters.low_thresh) not in self.data.morse.reducedMorseComplexes[self.parameters.persistence].Segmentations.keys():
+            self.data.morse.segmentation(self.parameters.persistence, 
+                                         self.parameters.high_thresh, 
+                                         self.parameters.low_thresh, 
+                                         self.parameters.merge_threshold, 
+                                         size_threshold=self.parameters.size_threshold,
+                                         conforming=True)    
+        else:
+            if self.parameters.merge_threshold not in self.data.morse.reducedMorseComplexes[self.parameters.persistence].Segmentations[(self.parameters.high_thresh, self.parameters.low_thresh)].keys():
+                self.data.morse.segmentation(self.parameters.persistence, 
+                                             self.parameters.high_thresh, 
+                                             self.parameters.low_thresh, 
+                                             self.parameters.merge_threshold, 
+                                             size_threshold=self.parameters.size_threshold,
+                                             conforming=True)
+                
+        self.data.current_segmentation_params = np.array([self.parameters.persistence, 
+                                                          self.parameters.high_thresh, 
+                                                          self.parameters.low_thresh, 
+                                                          self.parameters.merge_threshold])
+        self.data.current_segmentation = self.data.morse.reducedMorseComplexes[self.data.current_segmentation_params[0]].Segmentations[(self.data.current_segmentation_params[1], self.data.current_segmentation_params[2])][self.data.current_segmentation_params[3]].Cells
+
+        self.color_segmentation()
+
     def quick_guide(self):
         self.w = QuickGuide()
         self.w.show()
@@ -560,11 +611,6 @@ class Gui_Window(Ui_MainWindow):
 
     def add_tooltips(self):
         QtWidgets.QToolTip.setFont(QtGui.QFont('Georgia', 11))
-        palette = QtGui.QPalette()
-        palette.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(255, 0, 0))
-        palette.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(0, 255, 0))
-        QtWidgets.QToolTip.setPalette(palette)
-        QtGui.QGuiApplication.setPalette(palette)
 
         self.menu_file.setToolTipsVisible(True)
         self.menu_compute.setToolTipsVisible(True)
@@ -577,6 +623,9 @@ class Gui_Window(Ui_MainWindow):
                                                         "loaded mesh</span>")
         self.action_load_label_txt.setToolTip("<span class=nobr>Load a segmentation "
                                               ".txt file with index - label rows</span>")
+        self.action_load_conforming_labels_label_txt.setToolTip("<span class=nobr>Load "
+                                                                "labels for conforming "
+                                                                "method.</span>")
         self.action_save_segmentation_label_txt.setToolTip("<span class=nobr>Save the "
                                                            "segmentation as .txt file "
                                                            "with index - label "
@@ -625,6 +674,10 @@ class Gui_Window(Ui_MainWindow):
                                                    "cells will have at least the merge "
                                                    "threshold percent of edge between "
                                                    "them.</span>")
+        self.action_morse_segmentation_conforming.setToolTip("<span class=nobr>Segment "
+                                                             "mesh using the conforming "
+                                                             "input loaded previously. "
+                                                             "</span>")
 
 if __name__ == "__main__":
     import sys

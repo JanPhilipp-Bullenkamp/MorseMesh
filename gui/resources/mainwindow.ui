@@ -272,6 +272,7 @@
     <addaction name="action_load_feature_vector_file"/>
     <addaction name="action_save_segmentation_label_txt"/>
     <addaction name="action_load_label_txt"/>
+    <addaction name="action_load_conforming_labels_label_txt"/>
    </widget>
    <widget class="QMenu" name="menu_compute">
     <property name="title">
@@ -283,11 +284,12 @@
     <property name="title">
      <string>Segmentations</string>
     </property>
+    <addaction name="action_segmentation_method"/>
+    <addaction name="action_cluster_segmentation_method"/>
     <addaction name="action_morse_cells_persistence"/>
     <addaction name="action_cluster"/>
-    <addaction name="action_segmentation_method"/>
     <addaction name="action_morse_segementation_ridge_first"/>
-    <addaction name="action_cluster_segmentation_method"/>
+    <addaction name="action_morse_segmentation_conforming"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
@@ -387,6 +389,25 @@
   <action name="action_info_contact">
    <property name="text">
     <string>Info/Contact</string>
+   </property>
+  </action>
+  <action name="action_morse_segmentation_conforming">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Morse segmentation (conforming)</string>
+   </property>
+  </action>
+  <action name="action_load_conforming_labels_label_txt">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Load conforming labels (label txt)</string>
    </property>
   </action>
  </widget>

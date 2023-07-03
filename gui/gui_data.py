@@ -38,6 +38,8 @@ class Flags:
         self.flag_morse_computations = False
         self.flag_current_segmentation = False
         self.flag_sliders_shown = False
+        self.flag_conforming_input = False
+        self.flag_conforming_morse = False
 
 class Data:
     def __init__(self):
