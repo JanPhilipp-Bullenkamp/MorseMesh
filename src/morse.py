@@ -561,7 +561,6 @@ class Morse(Mesh):
     def pipeline(self, 
                  infilename: str, 
                  outfilename: str, 
-                 quality_index: int, 
                  inverted: bool, 
                  persistence: float, 
                  high_thresh: float, 
@@ -570,7 +569,7 @@ class Morse(Mesh):
         
         with open(outfilename+"_timings.txt", "w") as f:
             t1 = timeit.default_timer()
-            self.load_mesh_ply(infilename, quality_index, inverted)
+            self.load_mesh_new(infilename, morse_function="quality", inverted=inverted)
             t2 = timeit.default_timer()
             f.write("ReadData: "+str(t2-t1)+"\n")
             self.process_lower_stars()
@@ -617,7 +616,8 @@ class Morse(Mesh):
                                       inverted: bool,
                                       high_threshs: list[float], 
                                       low_threshs: list[float], 
-                                      merge_thresholds: list[float]):
+                                      merge_thresholds: list[float],
+                                      separatrix_type: str = "all"):
         
         with open(outfilename+"_timings.txt", "w") as f:
             t1 = timeit.default_timer()
@@ -637,8 +637,8 @@ class Morse(Mesh):
             f.write("\tSegmentation (high,low,merge): time\n")
             for high, low in list(itertools.product(high_threshs, low_threshs)):
                 t6 = timeit.default_timer()
-                bd_points = self.get_salient_ridges(high, low)
-                cluster = self.seed_cluster_mesh(bd_points, 200)
+                bd_points = self.get_salient_ridges(high, low, separatrix_type=separatrix_type)
+                cluster = self.seed_cluster_mesh(bd_points, 350)
                 t7 = timeit.default_timer()
                 f.write("Bd points and cluster: "+str(t7-t6)+"\n")
 

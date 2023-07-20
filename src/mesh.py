@@ -206,7 +206,6 @@ class Mesh:
                                     self.Faces, 
                                     morse_function=morse_function, 
                                     inverted=inverted)
-
         self.filename = os.path.splitext(filename)[0]
         self.min = min_val
         self.max = max_val
