@@ -64,16 +64,13 @@ from src.Algorithms.edge_detection import ridge_detection, valley_detection
 
 from src.Algorithms.cluster import cluster_mesh, merge_cluster
 
-from src.Algorithms.roughness_test import variance_heat_map, extremal_points_ratio
-
 from src.plot_data.persistence_diagram import persistence_diagram
 from src.plot_data.write_overlay_ply_files import (write_MSComplex_overlay_ply_file, 
                                                    write_MSComplex_detailed_overlay_ply_file, 
                                                    write_Cell_labels_overlay_ply_file, 
                                                    write_SalientEdge_overlay_ply_file)
 from src.plot_data.write_labels_txt import (write_Cell_labels_txt_file, 
-                                            write_funval_thresh_labels_txt_file, 
-                                            write_variance_heat_map_labels_txt_file)
+                                            write_funval_thresh_labels_txt_file)
 from src.plot_data.statistics import (fun_val_statistics, 
                                       critical_fun_val_statistics, 
                                       salient_edge_statistics)
@@ -707,34 +704,8 @@ class Morse(Mesh):
                                                   low_thresh, 
                                                   merge, 
                                                   outfilename)
-
-    ''' SURFACE ROUGHNESS'''
-    @timed(False)
-    def get_variance(self, n: int):
-        fun_vals = [v.fun_val for v in self.Vertices.values()]
-        mean_fun_val = np.mean(fun_vals)
-        return variance_heat_map(self.Vertices, mean_fun_val, n)
-
-    @timed(False)
-    def get_extremal_point_ratio(self, pers: float, n: int):
-        self.reduce_morse_complex(pers)
-        extremal_points = set()
-        for ind in self.reducedMorseComplexes[pers].CritVertices.keys():
-            extremal_points.add(ind)
-        for edge_ind in self.reducedMorseComplexes[pers].CritEdges.keys():
-            extremal_points.add(self.Edges[edge_ind].get_max_fun_val_index())
-        for face_ind in self.reducedMorseComplexes[pers].CritFaces.keys():
-            extremal_points.add(self.Faces[face_ind].get_max_fun_val_index())
-        return extremal_points_ratio(self.Vertices, extremal_points, n)
     
     ''' PLOTTING'''
-    @timed()
-    def write_variance_heat_map_labels(self, 
-                                       variance: dict, 
-                                       thresh1: float, 
-                                       thresh2: float, 
-                                       filename: str):
-        write_variance_heat_map_labels_txt_file(variance, thresh1, thresh2, filename)
     
     @timed()
     def write_funval_thresh_labels(self, thresh: float, filename: str):

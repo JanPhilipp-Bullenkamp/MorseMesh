@@ -51,9 +51,7 @@ from src.Algorithms.load_data.read_ply_test import load_ply
 
 from src.Evaluation.read_labels_txt import read_labels_txt
 
-from src.Algorithms.load_data.anisotropic_diffusion import smooth_function_values
-from src.Algorithms.load_data.read_or_process_funvals import (read_funvals, 
-                                                              apply_perona_malik_diffusion)
+from src.Algorithms.load_data.read_or_process_funvals import read_funvals
 
 from src.timer import timed
 from collections import Counter
@@ -279,23 +277,6 @@ class Mesh:
     def get_area(self):
         area = sum([face.compute_area(self.Vertices) for face in self.Faces.values()])
         return area
-
-    @timed()
-    def smooth_fun_vals(self, n_neighboorhood: int = 1):
-        smooth_function_values(self.Vertices, n_neighboorhood)
-
-    @timed()
-    def apply_perona_malik(self, iterations: int, lamb: float, k: float):
-        min_val, max_val = apply_perona_malik_diffusion(self.Vertices, 
-                                                        self.Edges, 
-                                                        self.Faces, 
-                                                        iterations, 
-                                                        lamb, 
-                                                        k)
-        self.min = min_val
-        self.max = max_val
-        self.range = max_val - min_val
-        self.reset_morse()
 
     def __repr__(self):
         """! @brief Prints out Mesh information.
