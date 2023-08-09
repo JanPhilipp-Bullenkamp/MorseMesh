@@ -1,6 +1,6 @@
 """
     MorseMesh
-    Copyright (C) 2023  Jan Philipp Bullenkamp
+    Copyright (C) 2023  Jan Philipp Bullenkamp, Theresa Häberle
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

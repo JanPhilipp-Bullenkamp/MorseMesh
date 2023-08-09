@@ -1,6 +1,6 @@
 """
     MorseMesh
-    Copyright (C) 2023  Jan Philipp Bullenkamp
+    Copyright (C) 2023  Jan Philipp Bullenkamp, Theresa Häberle
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -233,10 +233,14 @@ class Mesh:
     def load_labels(self, filename):
         info = read_labels_txt(filename)
 
-        c = Counter(info.values())
+        vertexLabels = {}
+        for lab, verts in info.items():
+            for vert in verts:
+                vertexLabels[vert] = lab
+
+        c = Counter(vertexLabels.values())
         critLabels = c.most_common()[:0:-1]
     
-        vertexLabels = info
         edgeLabels = {}
         faceLabels = {}
 

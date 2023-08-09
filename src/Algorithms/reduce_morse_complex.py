@@ -1,3 +1,21 @@
+"""
+    MorseMesh
+    Copyright (C) 2023  Jan Philipp Bullenkamp
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
 from collections import Counter
 from copy import deepcopy
 
@@ -498,7 +516,13 @@ def cancel_critical_pairs(MorseComplex,
     return redMorseComplex
     
 
-def get_closest_conforming_extremum(crit_edge, crit_faces_dict, vert_dict, edge_dict, face_dict, labels, salient_edge_pts=None):
+def get_closest_conforming_extremum(crit_edge, 
+                                    crit_faces_dict, 
+                                    vert_dict, 
+                                    edge_dict, 
+                                    face_dict, 
+                                    labels, 
+                                    salient_edge_pts=None):
     distances = []
     
     # first add distances to all maxima
@@ -545,7 +569,13 @@ def get_closest_conforming_extremum(crit_edge, crit_faces_dict, vert_dict, edge_
 
 
 
-def cancel_critical_conforming_pairs(MorseComplex, threshold, vert_dict, edge_dict, face_dict, labels, salient_edge_pts=None):
+def cancel_critical_conforming_pairs(MorseComplex, 
+                                     threshold, 
+                                     vert_dict, 
+                                     edge_dict, 
+                                     face_dict, 
+                                     labels, 
+                                     salient_edge_pts=None):
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     

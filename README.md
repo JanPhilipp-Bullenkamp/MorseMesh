@@ -1,6 +1,6 @@
 # MorseMesh
 
-This repo provides code for working with discrete Morse theory on meshes. It contains functions for Morse theory based edge detection and segmentation, a cluster based segmentation using only the edges as well as a graphical user interface to use the methods.
+This repo provides code for working with discrete Morse theory on meshes. It contains functions for Morse theory based edge detection and segmentation, a cluster based segmentation using the Morse theory based edges as well as a graphical user interface to use the methods.
 
 # Contents
 - [Requirements](#requirements)
@@ -80,10 +80,9 @@ You can rerun the segmentations until you have a sufficient result. The segmenta
 can be saved as a label.txt file in the *File* menu.
 
 # Visualization
-We offer different ways to visualize what's going on: 
-1. Label .txt files to be visualized in the GUI tool or imported by GigaMesh.
-
-The second option is only suitable for Morse cell or segmentation result visualization, but offers a better looking result in these cases. Therefore the original mesh needs to be loaded in GigaMesh and the according labels .txt file should be imported under **File - Import - Import Labels** (confirm YES when asked whether the vertex is in the first column and choose **Labels-Connected Comp.** on the right to see the results.)
+We offer different ways to visualize the label txt files: 
+1. Label .txt files can be visualized in the GUI tool using the **Load labels txt** function in the *File* menu
+2. Label .txt files can be visualized by GigaMesh under **File - Import - Import Labels** (confirm YES when asked whether the vertex is in the first column and choose **Labels-Connected Comp.** on the right to see the results.)
 
 # License
 
