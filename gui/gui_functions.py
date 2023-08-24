@@ -495,15 +495,10 @@ class Gui_Window(Ui_MainWindow):
         self.data.morse.extract_morse_complex()
         self.data.morse.reduce_morse_complex(self.data.morse.range, 
                                              conforming=self.flags.flag_conforming_input)
-
-        self.parameters.high_thresh = ((self.data.morse.max_separatrix_persistence
-                                        -self.data.morse.min_separatrix_persistence)
-                                        *self.parameters.high_percent/100 
-                                        + self.data.morse.min_separatrix_persistence)
-        self.parameters.low_thresh = ((self.data.morse.max_separatrix_persistence
-                                       -self.data.morse.min_separatrix_persistence)
-                                       *self.parameters.low_percent/100 
-                                       + self.data.morse.min_separatrix_persistence)
+        
+        self.update_high_thresh(self.parameters.high_percent*2) # need *2 because goes in 0.5% steps, so need to scale here
+        self.update_low_thresh(self.parameters.low_percent*2) # need *2 because goes in 0.5% steps, so need to scale here
+        
         self.data.color_points = self.data.morse.get_salient_ridges(self.parameters.high_thresh, 
                                                                     self.parameters.low_thresh,
                                                                     separatrix_type=self.parameters.separatrix_type)
