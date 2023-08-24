@@ -1,12 +1,5 @@
-Data/
 .ipynb_checkpoints/
+.pytest_cache/
 __pycache__/
-Algorithms/load_data/__pycache__/
-Algorithms/load_data/.ipynb_checkpoints/
-Algorithms/__pycache__/
-Algorithms/.ipynb_checkpoints/
-plot_data/__pycache__/
-plot_data/.ipynb_checkpoints/
 
 doxygen/html/
-*.ply
