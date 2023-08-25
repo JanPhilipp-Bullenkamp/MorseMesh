@@ -4,9 +4,10 @@ This repo provides code for working with discrete Morse theory on meshes. It con
 
 # Contents
 - [Requirements](#requirements)
-- [Quick and Easy Usage](#quick-and-easy-usage)
+- [Quick Guide](#quick-guide)
 - [Visualization](#visualization)
 - [License](#license)
+- [Authors](#authors)
 - [Contact](#contact)
 
 # Requirements
@@ -17,7 +18,7 @@ This repo provides code for working with discrete Morse theory on meshes. It con
 - (Optional) qdarkstyle 
 
 
-# Quick and Easy Usage
+# Quick Guide
 
 Run
 
@@ -87,6 +88,12 @@ We offer different ways to visualize the label txt files:
 # License
 
 The MorseMesh source is published under the [GPL License](https://www.gnu.org/licenses/gpl-3.0.de.html)
+
+# Authors
+
+Developed by Jan Philipp Bullenkamp.
+
+Conforming Morse Complexes by Theresa Häberle.
 
 # Contact
 
