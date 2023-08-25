@@ -67,6 +67,9 @@ Under *advanced edge detection* in the sidebar you can choose more edge settings
 only ones that might be interesting though are the "Separatrix density* which could be 
 ticked to *All* or *Reversed* and the *Extremal line type*, which can be switched 
 between *ridges* and *valleys*. 
+
+![Edge Detection](images/gui_screenshot.png)
+
 ### **4. Segmentation**
 
 Use the **Morse segmentation method** or the **Cluster segmentation method** in the 
@@ -74,6 +77,8 @@ Use the **Morse segmentation method** or the **Cluster segmentation method** in 
 
 You can change parameters of the segmentation in the sidebar under *Morse segmentation* 
 or *Cluster segmentation*.
+
+![Segmentation](images/gui_segmentation_screenshot.png)
 
 ### **5. Save result**
 
