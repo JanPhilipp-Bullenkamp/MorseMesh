@@ -594,7 +594,13 @@ def cancel_critical_conforming_pairs(MorseComplex,
     
     # fill queue
     for crit_edge in redMorseComplex.CritEdges.values():
-        closest_extremum = get_closest_conforming_extremum(crit_edge, redMorseComplex.CritFaces, vert_dict, edge_dict, face_dict, labels, salient_edge_pts=salient_edge_pts)
+        closest_extremum = get_closest_conforming_extremum(crit_edge, 
+                                                           redMorseComplex.CritFaces, 
+                                                           vert_dict, 
+                                                           edge_dict, 
+                                                           face_dict, 
+                                                           labels, 
+                                                           salient_edge_pts=salient_edge_pts)
         if closest_extremum != None:
             index, dim, dist = closest_extremum
             if dist < threshold:
@@ -603,14 +609,30 @@ def cancel_critical_conforming_pairs(MorseComplex,
     # work down queue
     while CancelPairs.notEmpty():
         prio, obj_id, saddle = CancelPairs.pop_front()
-        check = get_closest_conforming_extremum(saddle, redMorseComplex.CritFaces, vert_dict, edge_dict, face_dict, labels, salient_edge_pts=salient_edge_pts)
+        check = get_closest_conforming_extremum(saddle, 
+                                                redMorseComplex.CritFaces, 
+                                                vert_dict, 
+                                                edge_dict, 
+                                                face_dict, 
+                                                labels, 
+                                                salient_edge_pts=salient_edge_pts)
         if check != None:
             closest, dim, dist = check
             if dist <= CancelPairs.check_distance():
                 if dim == 0:
-                    redMorseComplex = cancel_one_critical_pair_min(saddle, redMorseComplex.CritVertices[closest], redMorseComplex, vert_dict, edge_dict)
+                    redMorseComplex = cancel_one_critical_pair_min(saddle, 
+                                                                   redMorseComplex.CritVertices[closest], 
+                                                                   redMorseComplex, 
+                                                                   vert_dict, 
+                                                                   edge_dict,
+                                                                   face_dict)
                 elif dim == 2:
-                    redMorseComplex = cancel_one_critical_pair_max(saddle, redMorseComplex.CritFaces[closest], redMorseComplex, edge_dict, face_dict)
+                    redMorseComplex = cancel_one_critical_pair_max(saddle, 
+                                                                   redMorseComplex.CritFaces[closest], 
+                                                                   redMorseComplex, 
+                                                                   vert_dict,
+                                                                   edge_dict, 
+                                                                   face_dict)
             else:
                 CancelPairs.insert(tuple((dist, obj_id, saddle)))
     return redMorseComplex

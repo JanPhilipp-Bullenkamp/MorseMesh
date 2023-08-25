@@ -877,6 +877,21 @@ class Cell:
         
         self.neighbors = {}
         self.neighbors_weights = {}
+
+    def getUserLabels(self, UserLabels):
+        labels = {'interior': {}, 'boundary': {}, 'all': set()}
+        for v in self.vertices:
+            label = UserLabels['vertices'][v]
+            labels['all'].add(label)
+            if v not in self.boundary:
+                if label not in labels['interior'].keys():
+                    labels['interior'][label] = 0
+                labels['interior'][label] += 1
+            else:
+                if label not in labels['boundary'].keys():
+                    labels['boundary'][label] = 0
+                labels['boundary'][label] += 1
+        return labels
         
     def __repr__(self) -> str:
         """! @brief Gives info on this Cell.

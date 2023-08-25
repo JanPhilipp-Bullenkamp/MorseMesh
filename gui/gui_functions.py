@@ -569,6 +569,7 @@ class Gui_Window(Ui_MainWindow):
         self.color_segmentation()
 
     def compute_confoming_segmentation(self):
+        self.compute_morse()
         if self.parameters.persistence not in self.data.morse.reducedMorseComplexes.keys():
             self.data.morse.reduce_morse_complex(self.parameters.persistence,
                                                  conforming=True)
