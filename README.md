@@ -46,7 +46,7 @@ Please ensure that your mesh has a manifold-like structure, i.e. especially ther
 should be no edges with more than 2 adjacent triangles. Holes or boundaries in the
 mesh are no problem algorithmically, but depending on the application it might make 
 sense to fill them.
-For mesh preprocessing, we recommend using [GigaMesh](https://gigamesh.eu/), for example.
+For mesh preprocessing, it is recommended using [GigaMesh](https://gigamesh.eu/).
 
 ### **2. Compute Morse Complex**
 
@@ -86,7 +86,7 @@ You can repeat the segmentation until you get a satisfactory result. The segment
 can be saved as a label.txt file in the *File* menu.
 
 # Visualization
-We offer different ways to visualize the label txt files: 
+There are different ways to visualize the label txt files: 
 1. Label .txt files can be visualized in the GUI tool using the **Load labels txt** function from the *File* menu
 2. Label .txt files can be visualized in GigaMesh using **File - Import - Import Labels** (confirm YES when asked if the vertex is in the first column and select **Labels-Connected Comp.** on the right to see the results.)
 
