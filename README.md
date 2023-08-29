@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/484001066.svg)](https://zenodo.org/badge/latestdoi/484001066)
+
 # MorseMesh
 
 This repo provides code for working with discrete Morse theory on meshes. It contains functions for Morse theory based edge detection and segmentation, a cluster based segmentation using the Morse theory based edges as well as a graphical user interface to use the methods.
