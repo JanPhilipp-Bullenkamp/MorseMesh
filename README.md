@@ -14,9 +14,9 @@ This repo provides code for working with discrete Morse theory on meshes. It con
 
 - Python 3.x (3.9 definitely works, probably also before)
 - plyfile (pip install plyfile or: https://github.com/dranjan/python-plyfile)
-- pyqt5 
-- (Optional) qdarkstyle
-- (optional) vtk
+- (required for gui) pyqt5 
+- (required for gui) vtk
+- (optional for gui) qdarkstyle
 
 
 # Quick Guide
