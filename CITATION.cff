@@ -1,0 +1,11 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Bullenkamp
+    given-names: Jan Philipp
+    orcid: https://orcid.org/0000-0001-6580-8885
+title: MorseMesh
+version: v0.1
+doi: 10.5281/zenodo.8297368
+license: GPL
+date-released: 2023-08-29
