@@ -1,6 +1,7 @@
 # MorseMesh
 
 This repo provides code for working with discrete Morse theory on meshes. It contains functions for Morse theory based edge detection and segmentation, a cluster based segmentation using the Morse theory based edges as well as a graphical user interface to use the methods.
+Jupyter notebooks are provided for pipelining many parameter combinations. The cluster segmentation is recommended for the graphical user interface, while the Morse segmentation is recommended for the pipline approach.
 
 # Contents
 - [Requirements](#requirements)
@@ -14,7 +15,7 @@ This repo provides code for working with discrete Morse theory on meshes. It con
 
 - Python 3.x (3.9 definitely works, probably also before)
 - plyfile (pip install plyfile or: https://github.com/dranjan/python-plyfile)
-- (required for gui) pyqt5 
+- (required for gui) pyqt5
 - (required for gui) vtk
 - (optional for gui) qdarkstyle
 
@@ -34,7 +35,7 @@ property of the vertices (e.g. curvature values).
 1. Open GUI Tool and  load the mesh under **File** in
 2. Press ***Compute Morse complex*** under **Compute**
 3. Use sliders to get visually well recognized edges
-4. Press ***Morse Segmentation Method*** or ***Cluster Segmentation Method*** 
+4. Press ***Morse Segmentation Method*** (recommended for pipline) or ***Cluster Segmentation Method*** (recommended for GUI)
 under **Segmentations**
 5. ***Save segmentation (label txt)*** under **File** or re-run with different 
 parameters
@@ -74,7 +75,7 @@ between *ridges* and *valleys*.
 ### **4. Segmentation**
 
 Use the **Morse segmentation method** or the **Cluster segmentation method** in the 
-*Segmentations* menu. 
+*Segmentations* menu. The cluster segmentation is recommended for the GUI, while the Morse segmentation is recommended for the pipeline.
 
 You can change the segmentation parameters in the sidebar under *Morse segmentation* 
 or *Cluster segmentation*.
