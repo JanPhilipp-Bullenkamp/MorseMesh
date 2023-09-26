@@ -129,9 +129,9 @@ def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_
     """    
     comp_label = read_labels_txt(result_filename, params=False)
 
-    high = float(result_filename.split("/")[-1].split("_")[-3][:-1])
-    low = float(result_filename.split("/")[-1].split("_")[-2][:-1])
-    merge = float(result_filename.split("/")[-1].split("_")[-1][:-5])
+    high = str(result_filename.split("/")[-1].split("_")[-3][:-1])
+    low = str(result_filename.split("/")[-1].split("_")[-2][:-1])
+    merge = str(result_filename.split("/")[-1].split("_")[-1][:-4])
     
     if metric == "IoU":
         IoU = compute_IoU(gt_label_dict, comp_label)

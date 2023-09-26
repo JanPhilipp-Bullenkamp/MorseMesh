@@ -543,7 +543,7 @@ class Morse(Mesh):
                                                            merge_thresh)):
                 if high > low:
                     t9 = timeit.default_timer()
-                    self.Segmentation_SalientReduction(high, 
+                    self.segmentation_salient_reduction(high, 
                                                        low, 
                                                        merge, 
                                                        minimum_labels=5)
@@ -593,7 +593,7 @@ class Morse(Mesh):
                                                                merge_thresh)):
                     if high > low:
                         t9 = timeit.default_timer()
-                        self.Segmentation(pers, 
+                        self.segmentation(pers, 
                                           high, 
                                           low, 
                                           merge, 
@@ -647,63 +647,6 @@ class Morse(Mesh):
                             +": "+str(t10-t9)+"\n")
                     self.plot_labels_txt(segmented_dict, 
                                          outfilename+"_"+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
-     
-    @timed(False)
-    def pipeline_semi_auto(self, 
-                           infilename: str, 
-                           outfilename: str, 
-                           quality_index: int, 
-                           inverted: bool, 
-                           merge_thresh: float):
-        with open(outfilename+"_timings.txt", "w") as f:
-            t1 = timeit.default_timer()
-            self.load_mesh_ply(infilename, quality_index, inverted)
-            t2 = timeit.default_timer()
-            f.write("ReadData: "+str(t2-t1)+"\n")
-            self.process_lower_stars()
-            t3 = timeit.default_timer()
-            f.write("process_lower_stars: "+str(t3-t2)+"\n")
-            self.extract_morse_complex()
-            t4 = timeit.default_timer()
-            f.write("extract_morse_complex: "+str(t4-t3)+"\n")
-            self.reduce_morse_complex(self.range)
-            t5 = timeit.default_timer()
-            f.write("ReduceMaximally: "+str(t5-t4)+"\n")
-            
-            # automated threshold finding (parameters might need changes)
-            stats = self.plot_funval_histogram(nb_bins = 3, show = False)
-            sorted_funvals = sorted(stats['fun_vals'])
-            newlen_pers=int(0.08*len(sorted_funvals))
-            newlen_high_thresh=int(0.065*len(sorted_funvals))
-            newlen_low_thresh=int(0.09*len(sorted_funvals))
-            
-            pers = sorted_funvals[-newlen_pers]
-            high_thresh = sorted_funvals[-newlen_high_thresh]
-            low_thresh = sorted_funvals[-newlen_low_thresh]
-
-            t6 = timeit.default_timer()
-            self.reduce_morse_complex(pers)
-            t7 = timeit.default_timer()
-            f.write("\tReduce "+str(pers)+": "+str(t7-t6)+"\n")
-            self.extract_morse_cells(pers)
-            t8 = timeit.default_timer()
-            f.write("\tMorseCells "+str(pers)+": "+str(t8-t7)+"\n")
-
-            f.write("\t\tSegmentation (high,low,merge): time\n")
-            for merge in merge_thresh:
-                t9 = timeit.default_timer()
-                self.SalientEdgeSegmentation_DualThresh(pers, 
-                                                        high_thresh, 
-                                                        low_thresh, 
-                                                        merge)
-                t10 = timeit.default_timer()
-                f.write("\t\t"+str(high_thresh)+" "
-                        +str(low_thresh)+" "+str(merge)+": "+str(t10-t9)+"\n")
-                self.write_DualSegmentationLabels(pers, 
-                                                  high_thresh, 
-                                                  low_thresh, 
-                                                  merge, 
-                                                  outfilename)
     
     ''' PLOTTING'''
     
