@@ -237,7 +237,7 @@ def label_dict_to_label_txt(labels, filename):
     @param labels A label dictionary with key=label_id and value=set of vertex indices.
     @filename The filename of the labels .txt file to be written. (.txt will be added automatically)
     """
-    write_Cell_labels_txt_file(labels, filename, cell_structure=False)
+    write_Cell_labels_txt_file(labels, filename, cell_structure=False, enum=False)
 
 @timed()
 def label_txt_to_sorted_label_txt(filename, outfilename):

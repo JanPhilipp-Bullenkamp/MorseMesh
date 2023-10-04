@@ -38,7 +38,8 @@ def write_header_params(file, pers, thr_high, thr_low, merge_thr):
 def write_Cell_labels_txt_file(label_dict: dict, 
                                target_file: str, 
                                params = None, 
-                               cell_structure: bool = True):
+                               cell_structure: bool = True,
+                               enum: bool = True):
     with open(target_file + ".txt", "w") as f:
         if params == None:
             write_header(f)
@@ -49,15 +50,25 @@ def write_Cell_labels_txt_file(label_dict: dict,
             raise ValueError("The params variable needs the 4 "
                              "parameters: pers, thr_high, thr_low, merge_thr!")
 
-        # write labels
-        if cell_structure:
-            for label, indices in enumerate(label_dict.values(), start=1):
-                for index in indices.vertices:
-                    f.write(str(index) + " " + str(label) + "\n")
-        else:
-            for label, indices in enumerate(label_dict.values(), start=1):
-                for index in indices:
-                    f.write(str(index) + " " + str(label) + "\n")
+        # write labels enumerated
+        if enum:
+            if cell_structure:
+                for label, indices in enumerate(label_dict.values(), start=1):
+                    for index in indices.vertices:
+                        f.write(str(index) + " " + str(label) + "\n")
+            else:
+                for label, indices in enumerate(label_dict.values(), start=1):
+                    for index in indices:
+                        f.write(str(index) + " " + str(label) + "\n")
+        else: # not enumerated but key as label
+            if cell_structure:
+                for label, indices in label_dict.items():
+                    for index in indices.vertices:
+                        f.write(str(index) + " " + str(label) + "\n")
+            else:
+                for label, indices in label_dict.items():
+                    for index in indices:
+                        f.write(str(index) + " " + str(label) + "\n")
     
 def write_funval_thresh_labels_txt_file(vert_dict: dict, 
                                         thresh: float, 
