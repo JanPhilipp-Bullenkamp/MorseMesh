@@ -324,7 +324,8 @@ class Morse(Mesh):
                      minimum_labels: int = 3, 
                      size_threshold: int = 500,
                      separatrix_type: str = "all",
-                     conforming = False):
+                     conforming = False,
+                     plotting=False):
         if persistence not in self.reducedMorseComplexes.keys():
             print("Need to reduce Morse complex to this persistence first...")
             self.reduce_morse_complex(persistence, conforming=conforming)
@@ -346,7 +347,8 @@ class Morse(Mesh):
                                                                     minimum_labels=minimum_labels, 
                                                                     size_threshold=size_threshold,
                                                                     conforming=conforming, 
-                                                                    UserLabels=self.UserLabels)
+                                                                    UserLabels=self.UserLabels,
+                                                                    plotting=plotting)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
@@ -649,6 +651,27 @@ class Morse(Mesh):
                                          outfilename+"_"+str(high)+"H_"+str(low)+"L_"+str(merge)+"M")
     
     ''' PLOTTING'''
+
+    @timed()
+    def plot_segmentation_steps(self,
+                                filename: str,
+                                persistence: float, 
+                                thresh_large: float, 
+                                thresh_small: float, 
+                                merge_threshold: float):
+        self.load_mesh_new(filename, morse_function="quality")
+        self.process_lower_stars()
+        self.extract_morse_complex()
+        self.reduce_morse_complex(self.range)
+        self.reduce_morse_complex(persistence)
+        self.extract_morse_cells(persistence)
+        self.segmentation(persistence, 
+                          thresh_large, 
+                          thresh_small, 
+                          merge_threshold, 
+                          minimum_labels=5,
+                          plotting=True)
+        
     
     @timed()
     def write_funval_thresh_labels(self, thresh: float, filename: str):

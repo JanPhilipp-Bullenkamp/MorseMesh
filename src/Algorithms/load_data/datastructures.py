@@ -757,7 +757,9 @@ class MorseComplex:
                             merge_threshold: float, 
                             minimum_labels: int = 3, 
                             size_threshold: int = 500,
-                            conforming=False, UserLabels=None):
+                            conforming=False, 
+                            UserLabels=None,
+                            plotting=False):
         """! @brief Creates a segmentation from this MorseComplex with 
         the given double edge threshold and the merging threshold.
         
@@ -788,7 +790,10 @@ class MorseComplex:
         
         SegmentationCells.segment(merge_threshold, 
                                   minimum_labels=minimum_labels, 
-                                  size_threshold=size_threshold, conforming=conforming, UserLabels=UserLabels)
+                                  size_threshold=size_threshold, 
+                                  conforming=conforming, 
+                                  UserLabels=UserLabels,
+                                  plotting=plotting)
         
         if (thresh_large, thresh_small) not in self.Segmentations.keys():
             self.Segmentations[(thresh_large, thresh_small)] = {}
@@ -1238,7 +1243,8 @@ class MorseCells:
                 minimum_labels: int, 
                 size_threshold: int = 500, 
                 conforming = False, 
-                UserLabels=None):
+                UserLabels=None,
+                plotting=False):
         """! @brief Makes this MorseCells object a Segmentation, based 
         on the salient edge points stored in this MorseCells object 
         and a given merge_threshold and minim_labels number.
@@ -1267,18 +1273,11 @@ class MorseCells:
            
         # 1. calculate weights between cells
         self.calculate_all_weights(conforming=conforming, UserLabels=UserLabels)
-        '''
-        # 2. create and fill Cancellation Queue
-        queue = CancellationQueue()
-        
-        for label, cell in self.Cells.items():
-            for neighbor, weight in cell.neighbors_weights.items():
-                if weight < merge_threshold:
-                    queue.insert(tuple((weight,label, neighbor)))
-               '''     
+
         still_changing = True
         # pop from queue until no more elements are below the merge threshold 
         # or we reach the minimum number of labels
+        step_counter = 0
         while len(self.Cells) > minimum_labels and still_changing:
             # 2. create and fill Cancellation Queue
             queue = CancellationQueue()
@@ -1298,11 +1297,37 @@ class MorseCells:
                         if weight == self.Cells[label1].neighbors_weights[label2]:
                             # can merge cells
                             updated_weights = self.merge_cells(label1, label2, conforming=conforming, UserLabels=UserLabels)
+                            if plotting:
+                                if step_counter % 50 == 0:
+                                    write_labels_txt_file(self.Cells, "./test_plot/step_"+str(step_counter))
+                            step_counter+=1 # add 1 after check to include step 0
             after = len(self.Cells)
             if before == after:
                 still_changing = False
-                        
+
+        if plotting:
+            write_labels_txt_file(self.Cells, "./test_plot/step_last_it")    
         # remove small patches
         self.remove_small_patches(size_threshold=size_threshold)    
+        if plotting:
+            write_labels_txt_file(self.Cells, "./test_plot/step_small_patches")
         # remove small enclosures
         self.remove_small_enclosures(size_threshold=size_threshold)   
+        if plotting:
+            write_labels_txt_file(self.Cells, "./test_plot/step_enclosures")
+
+
+def write_header(file):
+    file.write("# +-----------------------------------------------------+\n")
+    file.write("# | txt file with labels                                |\n")
+    file.write("# +-----------------------------------------------------+\n")
+    file.write("# | Format: index label                                 |\n")
+    file.write("# +-----------------------------------------------------+\n")
+    
+def write_labels_txt_file(label_dict: dict, 
+                          target_file: str):
+    with open(target_file + ".txt", "w") as f:
+        write_header(f)
+        for label, indices in label_dict.items():
+            for index in indices.vertices:
+                f.write(str(index) + " " + str(label) + "\n")
