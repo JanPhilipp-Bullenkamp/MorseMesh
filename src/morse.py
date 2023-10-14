@@ -659,7 +659,7 @@ class Morse(Mesh):
                                 thresh_large: float, 
                                 thresh_small: float, 
                                 merge_threshold: float):
-        self.load_mesh_new(filename, morse_function="quality")
+        self.load_mesh_new(filename, morse_function="quality", inverted=True)
         self.process_lower_stars()
         self.extract_morse_complex()
         self.reduce_morse_complex(self.range)

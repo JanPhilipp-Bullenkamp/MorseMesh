@@ -23,12 +23,12 @@
 
 from src.morse import Morse
 
-filename = "../../Data/fumane/curvature/31/31_GMOCF_r1.00_n4_v256.volume.ply"
+filename = "../../Data/messer_florian/curvature/messer/Messer_ohneNachv_GMOCF_r1.50_n4_v256.volume.ply"
 
-persistence = 0.06
-thresh_high = 0.07
-thresh_low = 0.06
-merge_thresh = 0.2
+persistence = 0.08
+thresh_high = 0.13
+thresh_low = 0.125
+merge_thresh = 0.5
 
 data = Morse()
 data.plot_segmentation_steps(filename, persistence, thresh_high, thresh_low, merge_thresh)
