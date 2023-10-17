@@ -24,6 +24,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import vtk
 import qdarkstyle
 import numpy as np
+import os
 
 from gui.gui_data import Data, Flags, Parameters
 from gui.collapsible_boxes import CollapsibleDialog
@@ -363,6 +364,18 @@ class Gui_Window(Ui_MainWindow):
             self.data.morse.load_labels(file_name)
             self.flags.flag_conforming_input = True
             self.enable_disable_menu_actions()
+
+    def load_plotted_labels_steps(self):
+        dir_name = QtWidgets.QFileDialog.getExistingDirectory(
+                                            self,
+                                            "Select a folder",
+                                            "",
+                                            QtGui.QFileDialog.ShowDirsOnly
+                                            )
+        if dir_name:
+            files = [f for f in os.listdir() if os.path.isfile(dir_name)]
+            for file_name in dir_name:
+                labels = label_txt_to_label_dict(file_name, sort_enum=False)
 
     """Currently not used!"""
     #def save_edges_ply_file(self):
