@@ -298,9 +298,16 @@
     <addaction name="action_quick_guide"/>
     <addaction name="action_info_contact"/>
    </widget>
+   <widget class="QMenu" name="menu_visualizations">
+    <property name="title">
+     <string>Visualizations</string>
+    </property>
+    <addaction name="action_merging_steps"/>
+   </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_compute"/>
    <addaction name="menu_segmentations"/>
+   <addaction name="menu_visualizations"/>
    <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -408,6 +415,14 @@
    </property>
    <property name="text">
     <string>Load conforming labels (label txt)</string>
+   </property>
+  </action>
+  <action name="action_merging_steps">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Merging Steps (Beta)</string>
    </property>
   </action>
  </widget>

@@ -1306,16 +1306,17 @@ class MorseCells:
                 still_changing = False
 
         if plotting:
-            write_labels_txt_file(self.Cells, "./test_plot/step_last_it")    
+            write_labels_txt_file(self.Cells, "./test_plot/step_"+str(step_counter))
+            step_counter+=1 # add 1  
         # remove small patches
         self.remove_small_patches(size_threshold=size_threshold)    
         if plotting:
-            write_labels_txt_file(self.Cells, "./test_plot/step_small_patches")
+            write_labels_txt_file(self.Cells, "./test_plot/step_"+str(step_counter))
+            step_counter+=1 # add 1
         # remove small enclosures
         self.remove_small_enclosures(size_threshold=size_threshold)   
         if plotting:
-            write_labels_txt_file(self.Cells, "./test_plot/step_enclosures")
-
+            write_labels_txt_file(self.Cells, "./test_plot/step_"+str(step_counter))
 
 def write_header(file):
     file.write("# +-----------------------------------------------------+\n")

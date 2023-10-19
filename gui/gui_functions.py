@@ -25,6 +25,7 @@ import vtk
 import qdarkstyle
 import numpy as np
 import os
+import time
 
 from gui.gui_data import Data, Flags, Parameters
 from gui.collapsible_boxes import CollapsibleDialog
@@ -237,6 +238,8 @@ class Gui_Window(Ui_MainWindow):
         self.action_cluster_segmentation_method.triggered.connect(self.merge_cluster)
         self.action_morse_segmentation_conforming.triggered.connect(self.compute_confoming_segmentation)
 
+        self.action_merging_steps.triggered.connect(self.load_plotted_labels_steps)
+
         self.action_quick_guide.triggered.connect(self.quick_guide)
         self.action_info_contact.triggered.connect(self.info_contact)
 
@@ -248,6 +251,7 @@ class Gui_Window(Ui_MainWindow):
         self.action_load_feature_vector_file.setEnabled(self.flags.flag_loaded_data)
         self.action_load_label_txt.setEnabled(self.flags.flag_loaded_data)
         self.action_load_conforming_labels_label_txt.setEnabled(self.flags.flag_loaded_data)
+        self.action_merging_steps.setEnabled(self.flags.flag_loaded_data)
 
         # buttons for computed morse complex
         self.action_morse_cells_persistence.setEnabled(self.flags.flag_morse_computations)
@@ -367,15 +371,22 @@ class Gui_Window(Ui_MainWindow):
 
     def load_plotted_labels_steps(self):
         dir_name = QtWidgets.QFileDialog.getExistingDirectory(
-                                            self,
+                                            None,
                                             "Select a folder",
                                             "",
-                                            QtGui.QFileDialog.ShowDirsOnly
+                                            QtWidgets.QFileDialog.ShowDirsOnly
                                             )
+        
+        def stepnumber(x):
+            return int(x.split(".txt")[0].split("_")[-1])
         if dir_name:
-            files = [f for f in os.listdir() if os.path.isfile(dir_name)]
-            for file_name in dir_name:
-                labels = label_txt_to_label_dict(file_name, sort_enum=False)
+            files = [f for f in os.listdir(dir_name) if f.split(".")[-1] == "txt"]
+            files = sorted(files, key=stepnumber)
+            print(files)
+            for file_name in files:
+                time.sleep(1) # sleep 2s
+                labels = label_txt_to_label_dict(dir_name + "/" + file_name, sort_enum=False)
+                self.update_mesh_color(labels, cell_structure=False)
 
     """Currently not used!"""
     #def save_edges_ply_file(self):
