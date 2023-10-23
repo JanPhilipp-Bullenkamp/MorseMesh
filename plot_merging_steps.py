@@ -30,5 +30,6 @@ thresh_high = 0.13
 thresh_low = 0.125
 merge_thresh = 0.5
 
-data = Morse()
-data.plot_segmentation_steps(filename, persistence, thresh_high, thresh_low, merge_thresh)
+if __name__ == '__main__':
+    data = Morse()
+    data.plot_segmentation_steps(filename, persistence, thresh_high, thresh_low, merge_thresh)
