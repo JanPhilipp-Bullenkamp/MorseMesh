@@ -34,8 +34,6 @@ from .Evaluation.artifact3D_conversions import artifact3D_to_labels, artifact3D_
 
 from .timer import timed
 
-import os
-
 @timed()
 def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename, metric = "IoU"):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a colored .ply file.

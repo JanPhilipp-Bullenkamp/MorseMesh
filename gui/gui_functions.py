@@ -30,7 +30,7 @@ import time
 from gui.gui_data import Data, Flags, Parameters
 from gui.collapsible_boxes import CollapsibleDialog
 
-from src.evaluation_and_conversion import label_txt_to_label_dict
+from src.plot_data.labels_read_write import Labels
 
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
@@ -356,7 +356,9 @@ class Gui_Window(Ui_MainWindow):
                                                    "Txt Files (*.txt)", 
                                                    options=options)
         if file_name:
-            self.data.current_segmentation = label_txt_to_label_dict(file_name)
+            labels = Labels()
+            labels.load_from_txt(file_name)
+            self.data.current_segmentation = labels.labels
             self.color_segmentation(cell_structure=False)
             self.flags.flag_current_segmentation = True
             self.enable_disable_menu_actions()
@@ -390,8 +392,9 @@ class Gui_Window(Ui_MainWindow):
             print(files)
             for file_name in files:
                 time.sleep(1) # sleep 2s
-                labels = label_txt_to_label_dict(dir_name + "/" + file_name, sort_enum=False)
-                self.update_mesh_color(labels, cell_structure=False)
+                labels = Labels()
+                labels.load_from_txt(dir_name + "/" + file_name)
+                self.update_mesh_color(labels.labels, cell_structure=False)
                 
     def load_pca_txt_values(self):
         options = QtWidgets.QFileDialog.Options()

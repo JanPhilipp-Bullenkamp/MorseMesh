@@ -49,6 +49,6 @@ def process_file(filepath):
 
 if __name__ == '__main__':
     # process folder:
-    #process_folder(folder)
-    # process single file
+    # process_folder(folder)
+    # process single file:
     process_file(file)
