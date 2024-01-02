@@ -32,7 +32,7 @@ from .Evaluation.evaluate_metrics import compute_IoU, compute_F1_Score, get_corr
 from .Evaluation.read_labels_txt import read_labels_txt
 from .Evaluation.read_labels_from_color_ply import read_labels_from_color_ply
 from .Evaluation.write_correctness_mask_txt import write_correctness_mask_txt
-from .plot_data.write_labels_txt import write_Cell_labels_txt_file
+from .plot_data.labels_read_write import Labels, write_Cell_labels_txt_file
 from .Evaluation.clean_and_read_labels_from_color_ply import clean_and_read_labels_from_color_ply
 from .Evaluation.artifact3D_conversions import artifact3D_to_labels, artifact3D_get_trafo
 
@@ -182,7 +182,13 @@ def compare_result_dict_to_groundtruth_label_dict(result_dict: str, gt_label_dic
     return correctness
 
 @timed()
-def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 10, connected_components = False):
+def painted_ply_to_label_txt(filename, 
+                             outfilename = None, 
+                             clean_thresh = 10, 
+                             connected_components = False,
+                             sorted = False,
+                             enumerated = False,
+                             enum_start = 1):
     """! @brief Takes a colored .ply file and returns a labels .txt file based on those colors.
     @param filename The colored .ply filename and location.
     @param outfilename The .txt labels filename that will be created.
@@ -192,29 +198,23 @@ def painted_ply_to_label_txt(filename, outfilename, clean_thresh = 10, connected
 
     @return labels Returns a label dictionary of the labels that were written to the output file.
     """
-    labels = clean_and_read_labels_from_color_ply(filename, 
-                                                  outfilename, 
-                                                  threshold=clean_thresh, 
-                                                  connected_components=connected_components)
-    return labels
-
-@timed()
-def painted_ply_to_label_dict(filename, clean_thresh = 0, connected_components = False):
-    """! @brief Takes a colored .ply file and returns a labels dict based on those colors.
-    @param filename The colored .ply filename and location.
-    @param clean_thresh (Optional) Threshold that gives the minimum number of vertices each label should have.
-    If one color has fewer than this vertices, they are merged into the surrounding larger labels. Default
-    is 0 (so no removal of any small labels). 
-
-    @return labels Returns a label dictionary.
-    """
-    labels = clean_and_read_labels_from_color_ply(filename, 
-                                                  threshold=clean_thresh,
-                                                  connected_components=connected_components)
-    return labels
+    # initiate and pass settings
+    labels = Labels(sorted=sorted, enumerated=enumerated, enumerated_start= enum_start)
+    labels.plyread.connected_components = connected_components
+    labels.plyread.size_threshold = clean_thresh
+    # read labels from ply
+    labels.load_from_ply(filename)
+    # write label txt
+    if outfilename != None:
+        labels.write_labels_txt(outfilename)
+    return labels.labels
     
 @timed()
-def label_txt_to_label_dict(filename, sort_enum = True):
+def label_txt_to_label_txt(filename, 
+                           outfilename = None, 
+                           sorted = False,
+                           enumerated = False,
+                           enum_start = 1):
     """! @brief Takes a labels .txt file and returns a label dictionary.
     @param filename The labels .txt file to be read.
     @param sort_enum (Optional) Boolean whether to sort and enumerate the labels, so that the largest label 
@@ -222,32 +222,25 @@ def label_txt_to_label_dict(filename, sort_enum = True):
 
     @return labels Returns a label dictionary of the labels with key=label_id and value=set of vertex indices.
     """
-    labels = read_labels_txt(filename, params = False)
-    
-    if sort_enum:
-        sort_enum_labels = {}
-        for label_enum, indices in enumerate(sorted(labels.values(), key=lambda kv: len(kv), reverse=True)):
-            sort_enum_labels[label_enum] = indices 
-        labels = sort_enum_labels
-    return labels
+    labels = Labels(sorted=sorted, enumerated=enumerated, enumerated_start=enum_start)
+    labels.load_from_txt(filename)
+    if outfilename != None:
+        labels.write_labels_txt(outfilename)
+    return labels.labels
 
 @timed()
-def label_dict_to_label_txt(labels, filename):
+def label_dict_to_label_txt(labels,
+                            outfilename, 
+                            sorted = False,
+                            enumerated = False,
+                            enum_start = 1):
     """! @brief Takes a label dictionary and writes a corresponding labels .txt file.
     @param labels A label dictionary with key=label_id and value=set of vertex indices.
     @filename The filename of the labels .txt file to be written. (.txt will be added automatically)
     """
-    write_Cell_labels_txt_file(labels, filename, cell_structure=False, enum=False)
-
-@timed()
-def label_txt_to_sorted_label_txt(filename, outfilename):
-    """! @brief Takes a labels .txt file and writes another labels .txt file with the labels being sorted and enumerated.
-    @param filename The labels .txt file to be read.
-    @param outfilename The labels .txt file to be written (sorted and enumerated).
-    """
-    sorted_labels = label_txt_to_label_dict(filename, sort_enum = True)
-    label_dict_to_label_txt(sorted_labels, outfilename)
-    return sorted_labels
+    labels = Labels(sorted=sorted, enumerated=enumerated, enumerated_start=enum_start)
+    labels.load_from_dict(labels)
+    labels.write_labels_txt(outfilename)
 
 @timed()
 def artifact3D_to_label_dict(filename, scarfilename, sort_enum = True, get_trafo = False):

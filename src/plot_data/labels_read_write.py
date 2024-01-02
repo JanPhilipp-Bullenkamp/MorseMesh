@@ -111,8 +111,16 @@ class Labels:
         elif self.enumerated:
             self.enum_labels()
             
-    def load_from_Cells(self, Cells_dict):
-        self.labels = Cells_dict
+    def load_from_dict(self, label_dict):
+        self.labels = label_dict
+        if self.sorted:
+            self.sort_labels()
+        elif self.enumerated:
+            self.enum_labels()
+            
+    def load_from_cells(self, cells):
+        for cell in cells.values():
+            self.labels[cell.label] = cell.vertices
         if self.sorted:
             self.sort_labels()
         elif self.enumerated:
@@ -121,6 +129,18 @@ class Labels:
     def load_parameters(self, pers, high_thr, low_thr, merge_thr):
         self.parameters_stored = True
         self.parameters = Parameters(pers, high_thr, low_thr, merge_thr)
+        
+    def get_parameters(self):
+        return (self.parameters.pers, 
+                self.parameters.high_thr, 
+                self.parameters.low_thr, 
+                self.parameters.merge_thr)
+    
+    def get_vertex_number(self):
+        num = 0
+        for indices in self.labels.values():
+            num += len(indices)
+        return num 
             
     def write_labels_txt(self, filepath):
         # check if filepath is .txt and add if necessary

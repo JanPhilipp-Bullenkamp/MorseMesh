@@ -67,7 +67,7 @@ from src.plot_data.write_overlay_ply_files import (write_MSComplex_overlay_ply_f
                                                    write_MSComplex_detailed_overlay_ply_file, 
                                                    write_Cell_labels_overlay_ply_file, 
                                                    write_SalientEdge_overlay_ply_file)
-from src.plot_data.write_labels_txt import Labels # (write_Cell_labels_txt_file), 
+from src.plot_data.labels_read_write import Labels # (write_Cell_labels_txt_file), 
 
 from src.mesh import Mesh
 
@@ -710,7 +710,7 @@ class Morse(Mesh):
                              "complex with this persistence!")
         else:
             labels = Labels()
-            labels.load_from_Cells(self.reducedMorseComplexes[persistence].MorseCells.Cells)
+            labels.load_from_cells(self.reducedMorseComplexes[persistence].MorseCells.Cells)
             labels.write_labels_txt(filename)
             #write_Cell_labels_txt_file(self.reducedMorseComplexes[persistence].MorseCells.Cells, 
             #                           filename)
@@ -747,7 +747,7 @@ class Morse(Mesh):
                              "threshold has not been calculated!")
         else:
             labels = Labels()
-            labels.load_from_Cells(self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, 
+            labels.load_from_cells(self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, 
                                                                                               thresh_small)][merge_threshold].Cells)
             labels.load_parameters(persistence, thresh_large, thresh_small, merge_threshold)
             labels.write_labels_txt(filename+ "_" + str(persistence) + "P_" + str(thresh_large) + "-" + str(thresh_small) 
@@ -766,7 +766,7 @@ class Morse(Mesh):
                                                  merge_threshold: float, 
                                                  filename: str):
         labels = Labels()
-        labels.load_from_Cells(self.salient_reduced_morse_complexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells)
+        labels.load_from_cells(self.salient_reduced_morse_complexes[(thresh_large,thresh_small)].Segmentations[(thresh_large, thresh_small)][merge_threshold].Cells)
         labels.load_parameters(None, thresh_large, thresh_small, merge_threshold)
         labels.write_labels_txt(filename)
             
@@ -778,10 +778,9 @@ class Morse(Mesh):
     @timed()
     def plot_labels_txt(self, 
                         label_dict: dict, 
-                        filename: str, 
-                        cell_structure: bool = True):
+                        filename: str):
         labels = Labels()
-        labels.load_from_Cells(label_dict)
+        labels.load_from_cells(label_dict)
         labels.write_labels_txt(filename)
         #write_Cell_labels_txt_file(label_dict, filename, cell_structure=cell_structure)
     
