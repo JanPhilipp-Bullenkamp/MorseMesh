@@ -303,6 +303,8 @@
      <string>Visualizations</string>
     </property>
     <addaction name="action_merging_steps"/>
+    <addaction name="action_load_Txt_Funvals"/>
+    <addaction name="action_cluster_edges"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_compute"/>
@@ -423,6 +425,22 @@
    </property>
    <property name="text">
     <string>Merging Steps (Beta)</string>
+   </property>
+  </action>
+  <action name="action_load_Txt_Funvals">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>load Txt Funvals</string>
+   </property>
+  </action>
+  <action name="action_cluster_edges">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>cluster around edges</string>
    </property>
   </action>
  </widget>

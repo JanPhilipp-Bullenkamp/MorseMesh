@@ -34,9 +34,7 @@
 # - _flag_process_lower_stars
 # - _flag_MorseComplex
 # - _flag_SalientEdge
-# - _flag_BettiNumbers
 # - partners
-# - BettiNumbers
 # - V12
 # - V23
 # - C
@@ -44,14 +42,11 @@
 # - reducedMorseComplexes
 # - maximalReducedComplex
 
-
-from src.Algorithms.load_data.read_ply import read_ply
-
-from src.Algorithms.load_data.read_ply_test import load_ply
+from src.Algorithms.read_ply import load_ply
 
 from src.Evaluation.read_labels_txt import read_labels_txt
 
-from src.Algorithms.load_data.read_or_process_funvals import read_funvals
+from src.Algorithms.read_or_process_funvals import read_funvals
 
 from src.timer import timed
 from collections import Counter
@@ -104,12 +99,6 @@ class Mesh:
     ## @var _flag_SalientEdge
     # Boolean whether a maximally reduced Morse complex has been calculated 
     # for salient edge extraction.
-    ## @var _flag_BettiNumbers
-    # Boolean whether the Betti numbers have been calculated.
-    ## @var partners
-    # Filled from Betti number calculation; needed for persistence diagram plotting.
-    ## @var BettiNumbers
-    # The Betti numbers stored as an array.
     ## @var V12
     # Discrete vectors/ pairings dictionary between vertices and edges.
     ## @var V23
@@ -153,9 +142,6 @@ class Mesh:
         self._flag_process_lower_stars = False
         self._flag_MorseComplex = False
         self._flag_SalientEdge = False
-        self._flag_BettiNumbers = False
-        
-        self.BettiNumbers = None
 
         self.V12 = {}
         self.V23 = {}
@@ -204,25 +190,6 @@ class Mesh:
                                     self.Faces, 
                                     morse_function=morse_function, 
                                     inverted=inverted)
-        self.filename = os.path.splitext(filename)[0]
-        self.min = min_val
-        self.max = max_val
-        self.range = max_val - min_val
-    
-    @timed()
-    def load_mesh_ply(self, filename: str, quality_index: int, inverted: bool = False):
-        """! @brief Loads a .ply file with a Morse function taken from the given index.
-
-        @param filename The location and filename of the ply file that should be loaded.
-        @param quality_index The index position where the Morse function should 
-               be taken from in the vertices.
-        @param inverted (Optional) Boolean, whether the Morse function should be 
-               inverted or not (multiplied with -1).
-        """
-        # Reset previously loaded data if necessary
-        self.reset()
-        min_val, max_val = read_ply(filename, quality_index, self.Vertices, 
-                                    self.Edges, self.Faces, inverted=inverted)
         self.filename = os.path.splitext(filename)[0]
         self.min = min_val
         self.max = max_val
@@ -277,7 +244,14 @@ class Mesh:
     def get_area(self):
         area = sum([face.compute_area(self.Vertices) for face in self.Faces.values()])
         return area
-
+    
+    def threshold_funval(self, threshold: float):
+        below = set()
+        for vert in self.Vertices.values():
+            if vert.fun_val < threshold:
+                below.add(vert.index)
+        return below
+        
     def __repr__(self):
         """! @brief Prints out Mesh information.
         @return A string that gives information on the loaded mesh.
@@ -294,6 +268,5 @@ class Mesh:
         "+-------------------------------------------------------\n"
         "| Euler characteristic: " + str(len(self.Vertices) 
                                          + len(self.Faces) -len(self.Edges)) + "\n"
-        "| Betti numbers: " + str(self.BettiNumbers) + "\n" 
         "+-------------------------------------------------------")
         

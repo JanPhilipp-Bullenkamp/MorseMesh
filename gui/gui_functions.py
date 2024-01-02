@@ -239,11 +239,14 @@ class Gui_Window(Ui_MainWindow):
         self.action_morse_segmentation_conforming.triggered.connect(self.compute_confoming_segmentation)
 
         self.action_merging_steps.triggered.connect(self.load_plotted_labels_steps)
+        self.action_load_Txt_Funvals.triggered.connect(self.load_pca_txt_values)
+        self.action_cluster_edges.triggered.connect(self.cluster_around_edges)
 
         self.action_quick_guide.triggered.connect(self.quick_guide)
         self.action_info_contact.triggered.connect(self.info_contact)
 
         self.add_slider_functionality()
+        #self.add_slider_functionality_funval()
 
     def enable_disable_menu_actions(self):
         # buttons for loaded data
@@ -252,6 +255,8 @@ class Gui_Window(Ui_MainWindow):
         self.action_load_label_txt.setEnabled(self.flags.flag_loaded_data)
         self.action_load_conforming_labels_label_txt.setEnabled(self.flags.flag_loaded_data)
         self.action_merging_steps.setEnabled(self.flags.flag_loaded_data)
+        self.action_load_Txt_Funvals.setEnabled(self.flags.flag_loaded_data)
+        self.action_cluster_edges.setEnabled(self.flags.flag_loaded_data)
 
         # buttons for computed morse complex
         self.action_morse_cells_persistence.setEnabled(self.flags.flag_morse_computations)
@@ -387,6 +392,56 @@ class Gui_Window(Ui_MainWindow):
                 time.sleep(1) # sleep 2s
                 labels = label_txt_to_label_dict(dir_name + "/" + file_name, sort_enum=False)
                 self.update_mesh_color(labels, cell_structure=False)
+                
+    def load_pca_txt_values(self):
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.ReadOnly
+        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(None, 
+                                                   "Select feature vector File", 
+                                                   "", 
+                                                   "Txt Files (*.txt)", 
+                                                   options=options)
+        if file_name:
+            self.data.morse.load_new_funvals(file_name, 
+                                             operation=self.parameters.feature_vector_function)
+            self.update_fun_val_color(self.data.morse.Vertices,
+                                      self.data.morse.range,
+                                      self.data.morse.min)
+            self.flags.flag_sliders_shown = True
+            self.enable_disable_menu_actions()
+            
+    def threshold_funval_edges(self):
+        do=0
+        self.data.color_points
+        
+    def add_slider_functionality_funval(self):
+        # make 0.5% steps, so range from 0,200 (percent *2)
+        self.high_thresh_slider.setRange(0,200)
+        self.high_thresh_slider.setValue(self.parameters.high_percent*2)
+
+        self.high_thresh_slider.valueChanged.connect(lambda value: self.update_thresh_funval(value))
+
+    def update_thresh_funval(self, value):
+        self.parameters.high_percent = value*0.5
+        self.parameters.high_thresh = ((self.data.morse.max_separatrix_persistence-self.data.morse.min_separatrix_persistence)
+                                        *self.parameters.high_percent/100 + self.data.morse.min_separatrix_persistence)
+        self.update_edge_funval()
+
+        self.high_thresh_text.setText("High thresh: "+"{:.5f}".format(self.parameters.high_thresh)
+                                      +"  ("+str(self.parameters.high_percent)+"%)")
+        
+    def update_edge_funval(self):
+        self.data.color_points = self.data.morse.threshold_funval(self.parameters.high_thresh)
+        color_dict = {1: self.data.color_points}
+        self.update_mesh_color(color_dict, partial=True, cell_structure=False)
+
+    def cluster_around_edges(self):
+        clust  = self.data.morse.seed_cluster_mesh(self.data.color_points, 
+                                                   self.parameters.cluster_seed_number)
+        self.data.current_segmentation = self.data.morse.cluster_segmentation(clust, 
+                                                                              self.data.color_points, 
+                                                                              self.parameters.merge_threshold_cluster)
+        self.color_segmentation()
 
     """Currently not used!"""
     #def save_edges_ply_file(self):
@@ -506,6 +561,30 @@ class Gui_Window(Ui_MainWindow):
                                                                          self.parameters.separatrix_type)
         color_dict = {1: self.data.color_points}
         self.update_mesh_color(color_dict, partial=True, cell_structure=False)
+        
+    def update_fun_val_color(self, vert_dict: dict, value_range: float, min_value: float):
+        # Get the renderer and mesh actor
+        ren = self.vtkWidget.GetRenderWindow().GetRenderers().GetFirstRenderer()
+        actor = ren.GetActors().GetLastActor()
+
+        # Get the mapper and the mesh data
+        mapper = actor.GetMapper()
+        mesh = mapper.GetInput()
+
+        # Set the color of the points in the mesh
+        point_data = mesh.GetPointData()
+        color_array = vtk.vtkUnsignedCharArray()
+        color_array.SetNumberOfComponents(3)
+        color_array.SetName("Colors")
+        for ind, vert in vert_dict.items():
+            lamb = (vert.fun_val-min_value)/value_range
+            color = int(lamb*255) 
+            color_array.InsertTypedTuple(ind, (color,color,color))
+        point_data.SetScalars(color_array)
+
+        # Update the mapper and render the window
+        mapper.Update()
+        self.vtkWidget.GetRenderWindow().Render()
 
     def color_segmentation(self, partial: bool = False, cell_structure: bool = True):
         self.update_mesh_color(self.data.current_segmentation, 

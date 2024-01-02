@@ -20,7 +20,7 @@ from collections import Counter
 from copy import deepcopy
 
 from .cancellation_queue import CancellationQueue
-from .load_data.datastructures import Separatrix, MorseCells
+from .datastructures import Separatrix, MorseCells
 
 def get_closest_extremum(crit_edge, 
                          crit_faces_dict: dict, 

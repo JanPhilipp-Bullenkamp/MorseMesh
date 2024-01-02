@@ -31,7 +31,7 @@
 
 from .tree import Tree, Node
 
-from .load_data.datastructures import CritEdge, CritFace, MorseComplex
+from .datastructures import CritEdge, CritFace, MorseComplex
 
 def potential_cells(p: int, 
                     cell, #: CritEdge | CritFace 

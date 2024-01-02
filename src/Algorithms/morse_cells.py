@@ -18,7 +18,7 @@
 
 from collections import Counter
 
-from .load_data.datastructures import Cell, MorseCells
+from .datastructures import Cell, MorseCells
 
 def get_boundary(MorseComplex, vert_dict, edge_dict, face_dict):
     bd_points = set()
