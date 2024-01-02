@@ -29,11 +29,7 @@
 
 # imports
 from .Evaluation.evaluate_metrics import compute_IoU, compute_F1_Score, get_correct_points
-from .Evaluation.read_labels_txt import read_labels_txt
-from .Evaluation.read_labels_from_color_ply import read_labels_from_color_ply
-from .Evaluation.write_correctness_mask_txt import write_correctness_mask_txt
-from .plot_data.labels_read_write import Labels, write_Cell_labels_txt_file
-from .Evaluation.clean_and_read_labels_from_color_ply import clean_and_read_labels_from_color_ply
+from .plot_data.labels_read_write import Labels
 from .Evaluation.artifact3D_conversions import artifact3D_to_labels, artifact3D_get_trafo
 
 from .timer import timed
@@ -41,7 +37,7 @@ from .timer import timed
 import os
 
 @timed()
-def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename, metric = "IoU", plot_correctness_mask = False):
+def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename, metric = "IoU"):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a colored .ply file.
     @param result_filename The result .txt filename and location.
     @param groundtruth_filename The colored .ply groundtruth filename and location.
@@ -53,9 +49,15 @@ def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename,
     @return correctness The percentage of correctly labelled vertices in the result file 
     compared to the groundtruth file.
     """    
-    comp_label, pers, high_thr, low_thr, merge_thr = read_labels_txt(result_filename, params=True)
+    comp_label_class = Labels(parameters_stored=True)
+    comp_label_class.load_from_txt(result_filename)
+    pers, high_thr, low_thr, merge_thr = comp_label_class.get_parameters()
+    comp_label = comp_label_class.labels
     
-    gt_label, total_points = read_labels_from_color_ply(groundtruth_filename)
+    gt_labels_class = Labels()
+    gt_labels_class.load_from_ply(groundtruth_filename)
+    gt_label = gt_labels_class.labels
+    total_points = gt_labels_class.get_vertex_number()
     
     if metric == "IoU":
         IoU = compute_IoU(gt_label, comp_label)
@@ -70,15 +72,12 @@ def compare_result_txt_to_groundtruth_ply(result_filename, groundtruth_filename,
     for pts in gt_label.values():
         total_points += len(pts)
     
-    if plot_correctness_mask:
-        write_correctness_mask_txt(total_points, correct_points, groundtruth_filename, os.path.splitext(result_filename)[0]+"_correct")
-    
     correctness = len(correct_points)/total_points*100
     
     return correctness, pers, high_thr, low_thr, merge_thr
 
 @timed()
-def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename, metric = "IoU", plot_correctness_mask = False):
+def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename, metric = "IoU"):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a labels .txt file.
     @param result_filename The result .txt filename and location.
     @param groundtruth_filename The labels .txt groundtruth filename and location.
@@ -90,9 +89,15 @@ def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename,
     @return correctness The percentage of correctly labelled vertices in the result file 
     compared to the groundtruth file.
     """    
-    comp_label, pers, high_thr, low_thr, merge_thr = read_labels_txt(result_filename, params=True)
+    comp_label_class = Labels(parameters_stored=True)
+    comp_label_class.load_from_txt(result_filename)
+    pers, high_thr, low_thr, merge_thr = comp_label_class.get_parameters()
+    comp_label = comp_label_class.labels
     
-    gt_label = read_labels_txt(groundtruth_filename, params = False)
+    gt_labels_class = Labels()
+    gt_labels_class.load_from_txt(groundtruth_filename)
+    gt_label = gt_labels_class.labels
+    total_points = gt_labels_class.get_vertex_number()
     
     if metric == "IoU":
         IoU = compute_IoU(gt_label, comp_label)
@@ -103,19 +108,12 @@ def compare_result_txt_to_groundtruth_txt(result_filename, groundtruth_filename,
     else:
         raise ValueError("Currently only IoU and F1 metrics are implemented...")
     
-    total_points = 0
-    for pts in gt_label.values():
-        total_points += len(pts)
-    
-    if plot_correctness_mask:
-        write_correctness_mask_txt(total_points, correct_points, groundtruth_filename, os.path.splitext(result_filename)[0]+"_correct")
-    
     correctness = len(correct_points)/total_points*100
     
     return correctness, pers, high_thr, low_thr, merge_thr
 
 @timed()
-def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_dict: dict, metric: str = "IoU", plot_correctness_mask: bool = False):
+def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_dict: dict, metric: str = "IoU"):
     """! @brief Takes a result .txt labels file and compares to a groundtruth given as a labels .txt file.
     @param result_filename The result .txt filename and location.
     @param groundtruth_filename The labels .txt groundtruth filename and location.
@@ -127,7 +125,11 @@ def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_
     @return correctness The percentage of correctly labelled vertices in the result file 
     compared to the groundtruth file.
     """    
-    comp_label = read_labels_txt(result_filename, params=False)
+    
+    comp_labels_class = Labels()
+    comp_labels_class.load_from_txt(result_filename)
+    comp_label = comp_labels_class.labels
+    total_points = comp_labels_class.get_vertex_number()
 
     high = str(result_filename.split("/")[-1].split("_")[-3][:-1])
     low = str(result_filename.split("/")[-1].split("_")[-2][:-1])
@@ -141,13 +143,6 @@ def compare_result_txt_to_groundtruth_label_dict(result_filename: str, gt_label_
         correct_points = get_correct_points(gt_label_dict, comp_label, F1)
     else:
         raise ValueError("Currently only IoU and F1 metrics are implemented...")
-    
-    total_points = 0
-    for pts in gt_label_dict.values():
-        total_points += len(pts)
-    
-    if plot_correctness_mask:
-        write_correctness_mask_txt(total_points, correct_points, "groundtruth_label_dict", os.path.splitext(result_filename)[0]+"_correct")
     
     correctness = len(correct_points)/total_points*100
     

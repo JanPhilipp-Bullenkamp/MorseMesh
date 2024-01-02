@@ -44,7 +44,7 @@
 
 from src.Algorithms.read_ply import load_ply
 
-from src.Evaluation.read_labels_txt import read_labels_txt
+from src.plot_data.labels_read_write import Labels
 
 from src.Algorithms.read_or_process_funvals import read_funvals
 
@@ -196,10 +196,11 @@ class Mesh:
         self.range = max_val - min_val
 
     def load_labels(self, filename):
-        info = read_labels_txt(filename)
+        info = Labels()
+        info.load_from_txt(filename)
 
         vertexLabels = {}
-        for lab, verts in info.items():
+        for lab, verts in info.labels.items():
             for vert in verts:
                 vertexLabels[vert] = lab
 
