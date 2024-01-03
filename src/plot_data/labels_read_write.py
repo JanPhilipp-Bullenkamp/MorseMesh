@@ -70,6 +70,8 @@ class Labels:
         self.labels = new_dict
         
     def load_from_ply(self, filepath):
+        if filepath.split(".")[-1] != "ply":
+            raise ValueError("Expected ply file to read labels from")
         self.labels = clean_and_read_labels_from_color_ply(filepath, 
                                                            self.plyread.size_threshold,
                                                            self.plyread.connected_components)
@@ -79,6 +81,8 @@ class Labels:
             self.enum_labels()
         
     def load_from_txt(self, filepath):
+        if filepath.split(".")[-1] != "txt":
+            raise ValueError("Expected txt file to read labels from")
         with open(filepath, "r") as f:
             ind = 0
             for line in f:
@@ -112,6 +116,8 @@ class Labels:
             self.enum_labels()
             
     def load_from_dict(self, label_dict):
+        if type(label_dict) != dict:
+            raise ValueError("Expected label dictionary")
         self.labels = label_dict
         if self.sorted:
             self.sort_labels()
