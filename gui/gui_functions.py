@@ -30,7 +30,7 @@ import time
 from gui.gui_data import Data, Flags, Parameters
 from gui.collapsible_boxes import CollapsibleDialog
 
-from src.plot_data.labels_read_write import Labels
+from src.evaluation_and_labels.labels_read_write import Labels
 
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 

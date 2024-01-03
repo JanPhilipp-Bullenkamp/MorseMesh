@@ -28,9 +28,9 @@
 # - various local imports....
 
 # imports
-from .Evaluation.evaluate_metrics import compute_IoU, compute_F1_Score, get_correct_points
-from .plot_data.labels_read_write import Labels
-from .Evaluation.artifact3D_conversions import artifact3D_to_labels, artifact3D_get_trafo
+from .evaluation_and_labels.evaluate_metrics import compute_IoU, compute_F1_Score, get_correct_points
+from .evaluation_and_labels.labels_read_write import Labels
+from .evaluation_and_labels.artifact3D_conversions import artifact3D_to_labels, artifact3D_get_trafo
 
 from .timer import timed
 

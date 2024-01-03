@@ -42,11 +42,11 @@
 # - reducedMorseComplexes
 # - maximalReducedComplex
 
-from src.Algorithms.read_ply import load_ply
+from src.algorithms.read_ply import load_ply
 
-from src.plot_data.labels_read_write import Labels
+from src.evaluation_and_labels.labels_read_write import Labels
 
-from src.Algorithms.read_or_process_funvals import read_funvals
+from src.algorithms.read_or_process_funvals import read_funvals
 
 from src.timer import timed
 from collections import Counter

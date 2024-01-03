@@ -5,7 +5,7 @@ from copy import deepcopy
 import sys
 sys.path.append("..") # Adds higher directory to python modules path.
 
-from src.Algorithms.datastructures import Simplex
+from src.algorithms.datastructures import Simplex
 from src.morse import Morse
 
 def test_changed_vertex_order():

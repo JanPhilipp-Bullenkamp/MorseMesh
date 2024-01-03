@@ -52,17 +52,17 @@
 
 
 # import stuff
-from src.Algorithms.process_lower_stars import process_lower_stars
-from src.Algorithms.conforming_gradient import conforming_gradient
-from src.Algorithms.extract_morse_complex import extract_morse_complex
-from src.Algorithms.reduce_morse_complex import cancel_critical_pairs
-from src.Algorithms.reduce_morse_complex import cancel_critical_conforming_pairs
+from src.algorithms.process_lower_stars import process_lower_stars
+from src.algorithms.conforming_gradient import conforming_gradient
+from src.algorithms.extract_morse_complex import extract_morse_complex
+from src.algorithms.reduce_morse_complex import cancel_critical_pairs
+from src.algorithms.reduce_morse_complex import cancel_critical_conforming_pairs
 
-from src.Algorithms.morse_cells import get_morse_cells
-from src.Algorithms.edge_detection import ridge_detection, valley_detection
+from src.algorithms.morse_cells import get_morse_cells
+from src.algorithms.edge_detection import ridge_detection, valley_detection
 
-from src.Algorithms.cluster import cluster_mesh, merge_cluster
-from src.plot_data.labels_read_write import Labels 
+from src.algorithms.cluster import cluster_mesh, merge_cluster
+from src.evaluation_and_labels.labels_read_write import Labels 
 
 from src.mesh import Mesh
 

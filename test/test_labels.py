@@ -2,7 +2,7 @@ import pytest
 import sys
 sys.path.append("..") # Adds higher directory to python modules path.
 
-from src.plot_data.labels_read_write import Labels
+from src.evaluation_and_labels.labels_read_write import Labels
 
 LABELS_DICT = {1 : {1,2,4},
                2 : {3,5,6,7,8},
