@@ -57,6 +57,7 @@ from src.algorithms.conforming_gradient import conforming_gradient
 from src.algorithms.extract_morse_complex import extract_morse_complex
 from src.algorithms.reduce_morse_complex import cancel_critical_pairs
 from src.algorithms.reduce_morse_complex import cancel_critical_conforming_pairs
+from src.algorithms.segmentation import create_segmentation
 
 from src.algorithms.morse_cells import get_morse_cells
 from src.algorithms.edge_detection import ridge_detection, valley_detection
@@ -293,15 +294,16 @@ class Morse(Mesh):
                                                       thresh_small, 
                                                       separatrix_type=separatrix_type)
         
-        self.reducedMorseComplexes[persistence].create_segmentation(salient_edge_points, 
-                                                                    thresh_large, 
-                                                                    thresh_small, 
-                                                                    merge_threshold, 
-                                                                    minimum_labels=minimum_labels, 
-                                                                    size_threshold=size_threshold,
-                                                                    conforming=conforming, 
-                                                                    UserLabels=self.UserLabels,
-                                                                    plotting=plotting)
+        create_segmentation(self.reducedMorseComplexes[persistence],
+                            salient_edge_points, 
+                            thresh_large, 
+                            thresh_small, 
+                            merge_threshold, 
+                            minimum_labels=minimum_labels, 
+                            size_threshold=size_threshold,
+                            conforming=conforming, 
+                            UserLabels=self.UserLabels,
+                            plotting=plotting)
         
         return self.reducedMorseComplexes[persistence].Segmentations[(thresh_large, thresh_small)][merge_threshold]
 
@@ -319,12 +321,12 @@ class Morse(Mesh):
                                                    thresh_small, 
                                                    salient_edge_points)
             self.extract_cells_salient_complex(thresh_large, thresh_small)
-            self.salient_reduced_morse_complexes[(thresh_large,
-                                                  thresh_small)].create_segmentation(salient_edge_points, 
-                                                                                     thresh_large, 
-                                                                                     thresh_small,
-                                                                                     merge_threshold, 
-                                                                                     minimum_labels)
+            create_segmentation(self.salient_reduced_morse_complexes[(thresh_large,thresh_small)],
+                                salient_edge_points, 
+                                thresh_large, 
+                                thresh_small,
+                                merge_threshold, 
+                                minimum_labels)
             return self.salient_reduced_morse_complexes[(thresh_large,
                                                          thresh_small)].Segmentations[(thresh_large, 
                                                                                        thresh_small)][merge_threshold]
@@ -336,41 +338,18 @@ class Morse(Mesh):
             self.extract_cells_salient_complex(thresh_large, 
                                                thresh_small, 
                                                persistence)
-            self.salient_reduced_morse_complexes[(persistence,
+            create_segmentation(self.salient_reduced_morse_complexes[(persistence,
                                                   thresh_large,
-                                                  thresh_small)].create_segmentation(salient_edge_points, 
-                                                                                     thresh_large, 
-                                                                                     thresh_small,
-                                                                                     merge_threshold, 
-                                                                                     minimum_labels)
+                                                  thresh_small)],
+                                salient_edge_points, 
+                                thresh_large, 
+                                thresh_small,
+                                merge_threshold, 
+                                minimum_labels)
             return self.salient_reduced_morse_complexes[(persistence,
                                                          thresh_large,
                                                          thresh_small)].Segmentations[(thresh_large, 
                                                                                        thresh_small)][merge_threshold]
-    
-    @timed(False)
-    def segmentation_no_pers(self, 
-                             thresh_large: float, 
-                             thresh_small: float, 
-                             merge_threshold: float, 
-                             minimum_labels: int = 3):
-        if self.MorseComplex._flag_MorseCells == False:
-            print("No Morse Cells computed for initial complex, computing now...")
-            self.extract_morse_cells(0)
-        if not self._flag_SalientEdge:
-            print("Need maximally reduced complex for salient edges...")
-            self.reduce_morse_complex(self.range)
-            
-        salient_edge_points = self.get_salient_ridges(thresh_large, thresh_small)
-        
-        self.MorseComplex.create_segmentation(salient_edge_points, 
-                                              thresh_large, 
-                                              thresh_small, 
-                                              merge_threshold, 
-                                              minimum_labels=minimum_labels)
-        
-        return self.MorseComplex.Segmentations[(thresh_large, 
-                                                thresh_small)][merge_threshold]
     
     @timed(False)
     def get_salient_ridges(self, 
@@ -421,52 +400,6 @@ class Morse(Mesh):
                                    max_length=max_length,
                                    separatrix_type=separatrix_type)
         return valleys
-
-    @timed(False)
-    def clean_lines(self, line_points: set):
-        print("Pts before cleaning",len(line_points))
-        cleaned_lines = set()
-        for pt in line_points:
-            #print(len(self.Vertices[pt].neighbors.intersection(line_points)))
-            if len(self.Vertices[pt].neighbors.intersection(line_points)) > 1:
-                cleaned_lines.add(pt)
-        print("Pts after cleaning",len(cleaned_lines))
-        return cleaned_lines
-                
-    @timed(False)
-    def get_connected_components_lines(self, line_points: set):
-        components = {}
-        index = 1
-        while len(line_points) != 0:
-            start = line_points.pop()
-            connected = set()
-            component_length = 0
-            queue = [start]
-            while len(queue) != 0:
-                p = queue.pop()
-                connected.add(p)
-                for elt in self.Vertices[p].neighbors.intersection(line_points):
-                    queue.append(elt)
-                    line_points.remove(elt)
-                    component_length += self.Vertices[p].distance_to_vertex(self.Vertices[elt])
-            components[index] = connected, component_length
-            index += 1
-
-        print("Number of lines: ",len(components))
-        for nb, comp in components.items():
-            pts, leng = comp
-            print("Index: ", nb)
-            print("Length: ",leng)
-            print("nb points: ", len(pts))
-        return components
-
-    @timed(False)
-    def change_separatrix_persistences_start_end_average(self):
-        if not self._flag_SalientEdge:
-            self.reduce_morse_complex(self.range)
-        self.maximalReducedComplex.change_separatrix_persistences(self.Vertices, 
-                                                                  self.Edges, 
-                                                                  self.Faces)
 
     @timed(False)
     def pipeline_salient_segmentation(self, 

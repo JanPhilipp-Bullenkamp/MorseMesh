@@ -125,40 +125,6 @@ class Vertex:
                 neighbor_labels.add(vert_dict[elt].label)
         return neighbor_labels, neighbor_indices
 
-    def compute_gradient(self, vert_dict: dict) -> float:
-        """! @brief Computes a "naive" gradient based on the 1-ring neighborhood.
-        @details Takes the average function value difference to the function 
-                 values in the 1-neighborhood, normalized by the euclidean 
-                 distance to the neighbor vertices.
-        
-        @param vert_dict A dictionary containing the vertices of the mesh.
-        @return A scalar value, giving a naive gradient.
-        """
-        grad = 0
-        for vert_ind in self.neighbors:
-            dist = self.distance_to_vertex(vert_dict[vert_ind])
-            grad += (self.fun_val - vert_dict[vert_ind].fun_val)/dist
-        return grad/len(self.neighbors)
-
-    def average_gradient_on_star(self, vert_dict: dict, face_dict: dict):
-        """! @brief Average Gradient on Star method from paper Gradient Field Estimation
-                    on Triangle Meshes 2018 Mancinelli et al.
-
-        @param vert_dict A dictionary containing the vertices of the mesh.
-        @param face_dict A dictionary containing the faces of the mesh.
-        @return The calculated average gradient on the star.
-        """
-        star_area = 0
-        sum_grads = 0
-        for f_index in self.star["F"]:
-            f_area = face_dict[f_index].compute_area(vert_dict)
-            star_area += f_area
-            sum_grads += f_area * face_dict[f_index].face_gradient(vert_dict, f_area)
-            #print("face_grad: ",face_dict[f_index].face_gradient(vert_dict, f_area))
-
-        print("average_gradient_star: ",sum_grads/star_area)
-        return sum_grads/star_area
-
     def get_n_neighborhood(self, vert_dict: dict, n: int) -> set:
         """! @brief Returns the n-neighborhood vertices.
 
@@ -325,39 +291,7 @@ class Simplex:
             cross = np.cross(vectors[0], vectors[1])
             area = (np.sum(cross**2)**.5) * .5
             self.area = area
-            return area
-
-    def face_gradient(self, vert_dict: dict, area: float = None) -> float:
-        """! @brief bla bla
-
-        @details If the face has vertices v_i, v_j, v_k with 
-        function values f_i, f_j, f_k and Area A_f, the gradient of th face
-        is computed as 
-
-        grad(face) = (f_j - f_i) x (v_i - v_k)^rot/2A_f
-                                + (f_k - f_i) x (v_j - v_i)^rot/2A_f 
-
-        where ^rot means the edge is rotated by 90 degrees 
-        \TODO which direction 90 deg??? currently not done...
-        """
-        if len(self.indices) != 3:
-            raise TypeError("This is not a Triangle-Simplex. "
-                            "face_gradient only defined for triangles atm!")
-        if area == None and self.area == None:
-            self.area = self.compute_area(vert_dict)
-        elif area != None:
-            self.area = area
-        
-        v_data = [[vert_dict[ind].coordinates(), ind, vert_dict[ind].fun_val] 
-                  for ind in self.indices]
-
-        vectors = np.diff([v[0] for v in v_data], axis = 0)
-        fun_diffs = np.diff([v[2] for v in v_data], axis=0)
-        grad_face = (fun_diffs[1]/(2 * self.area) * vectors[0] 
-                     + (-1) * fun_diffs[0]/(2 * self.area) * vectors[1])
-        self.gradient = grad_face
-        return grad_face
-        
+            return area        
        
     def get_max_fun_val_index(self) -> int:
         """! @brief Returns the vertex index contributing the highest function value.
@@ -749,59 +683,6 @@ class MorseComplex:
         """
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
-        
-    def create_segmentation(self, 
-                            salient_edge_points: set, 
-                            thresh_large: float, 
-                            thresh_small: float, 
-                            merge_threshold: float, 
-                            minimum_labels: int = 3, 
-                            size_threshold: int = 500,
-                            conforming=False, 
-                            UserLabels=None,
-                            plotting=False):
-        """! @brief Creates a segmentation from this MorseComplex with 
-        the given double edge threshold and the merging threshold.
-        
-        @details Creates a copy of the Morse cells at this persistence 
-        level and than segments based on the given parameters. Segemntation 
-        stops when either no more cells can be merged due to no more adjacent 
-        cells having a weight below the merge threshold, or reaching the 
-        optional minimum number of labels (which is defaulted to 3).
-        
-        @param salient_edge_points The salient edge points that have been 
-               calcualted from the double threshold
-        @param thresh_large The larger threshold of the double threshold 
-               that was used to get the edge points.
-        @param thresh_small The smaller threshold of the double threshold 
-               that was used to get the edge points.
-        @param merge_threshold The threshold that determines when to stop 
-               merging cells. Weights in the neighborhood graph of the 
-               Morse cells will be above this threshold.
-        @param minimum_labels The minimum number of labels we want to keep. 
-               Default is set to 3
-        """
-        if self._flag_MorseCells == False:
-            raise AssertionError("No Morse Cells calculated yet...")
-        SegmentationCells = deepcopy(self.MorseCells)
-        
-        SegmentationCells.add_salient_edge_points(salient_edge_points, 
-                                                  (thresh_large, thresh_small))
-        
-        SegmentationCells.segment(merge_threshold, 
-                                  minimum_labels=minimum_labels, 
-                                  size_threshold=size_threshold, 
-                                  conforming=conforming, 
-                                  UserLabels=UserLabels,
-                                  plotting=plotting)
-        
-        if (thresh_large, thresh_small) not in self.Segmentations.keys():
-            self.Segmentations[(thresh_large, thresh_small)] = {}
-        if merge_threshold in self.Segmentations[(thresh_large, thresh_small)].keys():
-            raise AssertionError("This parameter combination "
-                                 "has already been calculated...")
-        else:
-            self.Segmentations[(thresh_large, thresh_small)][merge_threshold] = SegmentationCells
             
     def change_separatrix_persistences(self, 
                                        vert_dict: dict, 
@@ -882,6 +763,14 @@ class Cell:
         
         self.neighbors = {}
         self.neighbors_weights = {}
+        
+    def remove_label_from_neighbors(self, label: int):
+        self.neighbors.pop(label)
+        self.neighbors_weights.pop(label)
+        
+    def add_new_neighbor(self, label, indices, weight):
+        self.neighbors[label] = indices
+        self.neighbors_weights[label] = weight                
 
     def getUserLabels(self, UserLabels):
         labels = {'interior': {}, 'boundary': {}, 'all': set()}
@@ -1008,19 +897,14 @@ class MorseCells:
         # create neighbor keys if necessary
         if label2 not in self.Cells[label1].neighbors.keys():
             self.Cells[label1].neighbors[label2] = set()
-            #self.Cells[label1].neighborlist.append(label2)
             self.Cells[label1].neighbors_weights[label2] = 0
         if label1 not in self.Cells[label2].neighbors.keys():
             self.Cells[label2].neighbors[label1] = set()
-            #self.Cells[label2].neighborlist.append(label1)
             self.Cells[label2].neighbors_weights[label1] = 0
             
         # mark the indices as boundary in their cell
-        self.Cells[label2].boundary.add(v2)
-        self.Cells[label1].boundary.add(v1)
-        # (also need to be added to vertices of the cell
-        self.Cells[label2].vertices.add(v2)
-        self.Cells[label1].vertices.add(v1)
+        self.add_boundary_to_label(label2, v2)
+        self.add_boundary_to_label(label1, v1)
         # add the indices to the correct neighbor boundary
         self.Cells[label2].neighbors[label1].add(v1)
         self.Cells[label1].neighbors[label2].add(v2)
@@ -1038,16 +922,7 @@ class MorseCells:
                     if ulabels_here['all'].isdisjoint(ulabels_there['all']):
                         weight = float('inf')
                     else:
-                        if ulabels_here['interior']:
-                            d_here = ulabels_here['interior']
-                        else:
-                            d_here = ulabels_here['boundary']
-
-                        if ulabels_there['interior']:
-                            d_there = ulabels_there['interior']
-                        else:
-                            d_there = ulabels_there['boundary']
-
+                        d_here, d_there = get_labels_count(ulabels_here, ulabels_there)
                         if max(d_here, key = d_here.get) == max(d_there, key = d_there.get) and max(d_here, key = d_here.get) in UserLabels['crit']:
                             weight = float('-inf')
                         elif max(d_here, key = d_here.get) != max(d_there, key = d_there.get):
@@ -1077,16 +952,7 @@ class MorseCells:
             if ulabels1['all'].isdisjoint(ulabels2['all']):
                 weight = float('inf')
             else:
-                if ulabels1['interior']:
-                    d_here = ulabels1['interior']
-                else:
-                    d_here = ulabels1['boundary']
-
-                if ulabels2['interior']:
-                    d_there = ulabels2['interior']
-                else:
-                    d_there = ulabels2['boundary']
-
+                d_here, d_there = get_labels_count(ulabels1, ulabels2)
                 if max(d_here, key = d_here.get) == max(d_there, key = d_there.get) and max(d_here, key = d_here.get) in UserLabels['crit']:
                     weight = float('-inf')
                 elif max(d_here, key = d_here.get) != max(d_there, key = d_there.get):
@@ -1152,8 +1018,7 @@ class MorseCells:
                 self.Cells[neighbor].neighbors[label1].update(self.Cells[neighbor].neighbors[label2])
                 
                 # remove label 2 from neighbor
-                self.Cells[neighbor].neighbors.pop(label2)
-                self.Cells[neighbor].neighbors_weights.pop(label2)
+                self.Cells[neighbor].remove_label_from_neighbors(label2)
                 
                 # recompute weight:
                 new_weight = self.calculate_weight_between_two_cells(label1, neighbor, conforming=conforming, UserLabels=UserLabels)
@@ -1163,24 +1028,19 @@ class MorseCells:
                 
             elif neighbor not in self.Cells[label1].neighbors.keys():
                 # add new neighbor to label 1 and copy weight from label 2
-                self.Cells[label1].neighbors[neighbor] = indices
-                self.Cells[label1].neighbors_weights[neighbor] = self.Cells[label2].neighbors_weights[neighbor]
-                
+                self.Cells[label1].add_new_neighbor(neighbor, indices, self.Cells[label2].neighbors_weights[neighbor])
                 # add label 1 as new neighbor to neighbor and copy weight
-                self.Cells[neighbor].neighbors[label1] = self.Cells[neighbor].neighbors[label2]
-                self.Cells[neighbor].neighbors_weights[label1] = self.Cells[neighbor].neighbors_weights[label2]
+                self.Cells[neighbor].add_new_neighbor(label1, self.Cells[neighbor].neighbors[label2], self.Cells[neighbor].neighbors_weights[label2])
                 
                 # remove label 2 from neighbor:
-                self.Cells[neighbor].neighbors.pop(label2)
-                self.Cells[neighbor].neighbors_weights.pop(label2)
+                self.Cells[neighbor].remove_label_from_neighbors(label2)
                 
             else:
                 raise AssertionError("Shouldnt happen. One of the above "
                                      " cases always should be fulfilled.")
         
         # remove label 2 from label 1:
-        self.Cells[label1].neighbors.pop(label2)
-        self.Cells[label1].neighbors_weights.pop(label2)
+        self.Cells[label1].remove_label_from_neighbors(label2)
         
         # remove label 2 cell completely (optional due to dictionary size change) 
         # need to remove after looping sometimes
@@ -1188,8 +1048,7 @@ class MorseCells:
             self.Cells.pop(label2)
         
         return updated_weights
-        
-        
+    
     def remove_small_enclosures(self, size_threshold: int = 15):
         """! @brief Removes small cells, that are fully enclosed by a single other label.
         
@@ -1207,8 +1066,7 @@ class MorseCells:
                 self.Cells[neighbor].vertices.update(cell.vertices)
                 
                 # remove enclosure from neighborhood of surrounding
-                self.Cells[neighbor].neighbors.pop(label)
-                self.Cells[neighbor].neighbors_weights.pop(label)
+                self.Cells[neighbor].remove_label_from_neighbors(label)
                 
                 # remove enclosure completely (outside the dictionary loop, 
                 # cause cant change dictionary size)
@@ -1237,98 +1095,15 @@ class MorseCells:
                 
         for label in remove:
             self.Cells.pop(label)
-
-    def segment(self, 
-                merge_threshold: float, 
-                minimum_labels: int, 
-                size_threshold: int = 500, 
-                conforming = False, 
-                UserLabels=None,
-                plotting=False):
-        """! @brief Makes this MorseCells object a Segmentation, based 
-        on the salient edge points stored in this MorseCells object 
-        and a given merge_threshold and minim_labels number.
+            
+def get_labels_count(ulabels1, ulabels2):
+    if ulabels1['interior']:
+        d1 = ulabels1['interior']
+    else:
+        d1 = ulabels1['boundary']
         
-        @details Requires this MorseCells object to contain salient edge 
-        points. Based on those, the weights between neighboring cells 
-        are calculated and then cells are merged using a Priority Queue 
-        to make sure to merge cells first if they have a low weight. 
-        Merging stops if either no more cell adjacencies have a weight 
-        below the threshold or the minimum number of labels is 
-        reached. This MorseCell object then becomes the segmentation.
-        
-        @param merge_threshold The threshold for weights between 
-               adjacent cells to stop merging.
-        @param minimum_labels A minimum number of labels that will 
-               stop the merging process if it is reached. (Otherwise 
-               the merge threshold is the stopping criterium)
-        """
-        if self.salient_edge_points == None or self.threshold == None:
-            raise AssertionError("Cannot segment if no salient edge "
-                                 "points are loaded to these Morse cells!")
-        if self.merge_threshold != None:
-            raise AssertionError("Already has a merge threshold assigned... "
-                                 "Shouldnt be so, probably messed up the "
-                                 "order of functions somewhere.")
-           
-        # 1. calculate weights between cells
-        self.calculate_all_weights(conforming=conforming, UserLabels=UserLabels)
-
-        still_changing = True
-        # pop from queue until no more elements are below the merge threshold 
-        # or we reach the minimum number of labels
-        step_counter = 0
-        while len(self.Cells) > minimum_labels and still_changing:
-            # 2. create and fill Cancellation Queue
-            queue = CancellationQueue()
-            before = len(self.Cells)
-            for label, cell in self.Cells.items():
-                for neighbor, weight in cell.neighbors_weights.items():
-                    if weight < merge_threshold:
-                        queue.insert(tuple((weight,label, neighbor)))
-
-            while queue.length() != 0:
-                weight, label1, label2 = queue.pop_front()
-                
-                # need to make sure the popped tuple is still available 
-                # for merging and their weight is also the same.
-                if label1 in self.Cells.keys() and label2 in self.Cells.keys():
-                    if label2 in self.Cells[label1].neighbors.keys():
-                        if weight == self.Cells[label1].neighbors_weights[label2]:
-                            # can merge cells
-                            updated_weights = self.merge_cells(label1, label2, conforming=conforming, UserLabels=UserLabels)
-                            if plotting:
-                                if step_counter % 50 == 0:
-                                    write_labels_txt_file(self.Cells, "./test_plot/step_"+str(step_counter))
-                            step_counter+=1 # add 1 after check to include step 0
-            after = len(self.Cells)
-            if before == after:
-                still_changing = False
-
-        if plotting:
-            write_labels_txt_file(self.Cells, "./test_plot/step_"+str(step_counter))
-            step_counter+=1 # add 1  
-        # remove small patches
-        self.remove_small_patches(size_threshold=size_threshold)    
-        if plotting:
-            write_labels_txt_file(self.Cells, "./test_plot/step_"+str(step_counter))
-            step_counter+=1 # add 1
-        # remove small enclosures
-        self.remove_small_enclosures(size_threshold=size_threshold)   
-        if plotting:
-            write_labels_txt_file(self.Cells, "./test_plot/step_"+str(step_counter))
-
-def write_header(file):
-    file.write("# +-----------------------------------------------------+\n")
-    file.write("# | txt file with labels                                |\n")
-    file.write("# +-----------------------------------------------------+\n")
-    file.write("# | Format: index label                                 |\n")
-    file.write("# +-----------------------------------------------------+\n")
-    
-def write_labels_txt_file(label_dict: dict, 
-                          target_file: str):
-    with open(target_file + ".txt", "w") as f:
-        write_header(f)
-        for label, indices in label_dict.items():
-            for index in indices.vertices:
-                f.write(str(index) + " " + str(label) + "\n")
+    if ulabels2['interior']:
+        d2 = ulabels2['interior']
+    else:
+        d2 = ulabels2['boundary']
+    return d1, d2
