@@ -333,7 +333,16 @@ class Gui_Window(Ui_MainWindow):
             self.update_mesh()
             self.flags.flag_loaded_data = True
             self.enable_disable_menu_actions()
-
+            
+    def load_ply_file(self, filename):
+        self.reset_data()
+        self.data.morse.load_mesh_new(filename, 
+                                      morse_function="quality", 
+                                      inverted=True)
+        self.update_mesh()
+        self.flags.flag_loaded_data = True
+        self.enable_disable_menu_actions()
+            
     def load_feature_vector_file(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.ReadOnly
@@ -445,22 +454,6 @@ class Gui_Window(Ui_MainWindow):
                                                                               self.data.color_points, 
                                                                               self.parameters.merge_threshold_cluster)
         self.color_segmentation()
-
-    """Currently not used!"""
-    #def save_edges_ply_file(self):
-    #    options = QtWidgets.QFileDialog.Options()
-    #    options |= QtWidgets.QFileDialog.ReadOnly
-    #    filename, _ = QtWidgets.QFileDialog.getSaveFileName(None, 
-    #                                              "Save Edges File (filename will be extended by _OverlayPoints)", 
-    #                                              "", 
-    #                                              "Ply Files (*.ply)", 
-    #                                              options=options)
-    #    if filename:
-            # Save the edge ply file:
-    #        self.data.morse.plot_salient_edges_ply(filename, 
-    #                                               self.parameters.high_thresh, 
-    #                                               self.parameters.low_thresh, 
-    #                                               only_strong=True)
 
     def save_segmentation_result(self):
         options = QtWidgets.QFileDialog.Options()

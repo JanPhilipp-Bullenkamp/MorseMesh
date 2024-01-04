@@ -36,4 +36,7 @@ if __name__ == "__main__":
     ui = Gui_Window()
     ui.setup(MainWindow)
     MainWindow.show()
+    for arg in sys.argv:
+        if arg == "--test":
+            ui.load_ply_file("./test/test_data/cube_noise2_r0.20_n4_v256.volume.ply")
     sys.exit(app.exec_())
