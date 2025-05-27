@@ -43,8 +43,6 @@ from copy import deepcopy
 import numpy as np
 
 from .weight_metrics import compute_weight_saledge
-from .cancellation_queue import CancellationQueue
-
 
 class Vertex:
     """! @brief Vertex class used for normal vertices and their properties."""
@@ -551,26 +549,6 @@ class Separatrix:
         
         # float
         self.separatrix_persistence = separatrix_persistence
-
-    def get_indices(self, edge_dict: dict, face_dict: dict) -> set:
-        """! @brief Returns a set of indices that make up this separatrix.
-        @param edge_dict A dictionary containing the edges.
-        @param face_dict A dictionary containing the faces.
-
-        @return indices A set of (vertex) indices that make up this separatrix.
-        """
-        indices = set()
-        # edge-vert separatrix -> only need to add edge indices
-        if self.dimension == 1:
-            for i, elt in enumerate(self.path):
-                if i%2 == 0:
-                    indices.add(edge_dict[elt].indices)
-        # face-edge separatrix -> only need to add face indices        
-        elif self.dimension == 2:
-            for i, elt in enumerate(self.path):
-                if i%2 == 0:
-                    indices.add(face_dict[elt].indices)
-        return indices
         
     def __str__(self) -> str:
         """! Retrieves information on this separatrix.
@@ -598,8 +576,7 @@ class MorseComplex:
     separatrices, that give information on how the gradient "flows" 
     from the maxima to the saddles and from the saddles to the minima. 
     This gives a topological skelton of the mesh which can be noise 
-    reduced using a parameter called persistence. The topologicallly 
-    relveant Betti numbers can be stored as well. Since the skeleton provides 
+    reduced using a parameter called persistence. Since the skeleton provides 
     us with enclosed areas on a mesh as well, each Morse Complex can also 
     contain MorseCells, which give a segmentation in between the skeleton 
     of the mathematical complex, as well as different segmentations that 
@@ -625,10 +602,6 @@ class MorseComplex:
     # A dictionary storing different Segmentations at this persistence level. 
     # Can be accessed via .Segmentations[(large_thr, small_thr)][merge_thr] and 
     # contains Morse Cell objects.
-    ## @var _flag_BettiNumbers
-    # Boolean wether the Betti numbers have been calculated or not.
-    ## @var BettiNumbers
-    # Betti Numbers if calculated, otherwise None.
     ## @var maximalReduced
     # Boolean wether this complex is maximally reduced, e.g. no more 
     # cancellations are possible and the persistence is maximal.
@@ -643,8 +616,7 @@ class MorseComplex:
     
     __slots__ = ("CritVertices", "CritEdges", "CritFaces", "Separatrices", 
                  "_flag_MorseCells", "MorseCells", "Segmentations", 
-                 "_flag_BettiNumbers", "BettiNumbers", "partners", 
-                 "maximalReduced", "max_separatrix_persistence", 
+                 "partners", "maximalReduced", "max_separatrix_persistence", 
                  "min_separatrix_persistence", "persistence", "filename",
                  "Separatrices_cutoff", "Separatrices_reversed")
         
@@ -667,10 +639,6 @@ class MorseComplex:
         
         self.Segmentations = {}
         
-        self._flag_BettiNumbers = False
-        self.BettiNumbers = None
-        self.partners = None # gives betti numbers and needed for persistence diagram
-        
         self.maximalReduced = False
         self.max_separatrix_persistence = None
         self.min_separatrix_persistence = None
@@ -684,33 +652,6 @@ class MorseComplex:
         critvert = CritVertex(vert)
         self.CritVertices[vert.index] = critvert
             
-    def change_separatrix_persistences(self, 
-                                       vert_dict: dict, 
-                                       edge_dict: dict, 
-                                       face_dict: dict):
-        updated_separatrices = []
-        for _, sepa in self.Separatrices:
-            if sepa.dimension == 1:
-                v_ind_high = edge_dict[sepa.origin].max_fun_val_index
-                v_ind_low = sepa.destination
-            elif sepa.dimension == 2:
-                v_ind_high = face_dict[sepa.origin].max_fun_val_index
-                v_ind_low = edge_dict[sepa.destination].max_fun_val_index
-            else:
-                raise ValueError("Separatrix should have dimension 1 or 2!")
-
-            # new metric: average function value between start and finish
-            new_sepa_persistence = ((vert_dict[v_ind_high].fun_val 
-                                     + vert_dict[v_ind_low].fun_val) / 2)
-            sepa.separatrix_persistence = new_sepa_persistence
-            updated_separatrices.append(tuple((new_sepa_persistence, sepa)))
-
-        self.Separatrices = updated_separatrices
-
-        persistences = [pers for pers, _ in self.Separatrices]
-        self.max_separatrix_persistence = max(persistences)
-        self.min_separatrix_persistence = min(persistences)
-        
     def __repr__(self) -> str:
         """! @brief Prints out an info block about this Morse Complex.
         @return Info as string.
@@ -728,7 +669,6 @@ class MorseComplex:
                 "| Euler characteristic: " + str(len(self.CritVertices) 
                                                  - len(self.CritEdges) 
                                                  + len(self.CritFaces)) + "\n"
-                "| Betti numbers: " + str(self.BettiNumbers) + "\n"
                 "+-------------------------------------------------------")
         
         

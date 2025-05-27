@@ -28,7 +28,7 @@ except ImportError:
     darkstyle_import = False
     pass
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     app = QtWidgets.QApplication(sys.argv)
     if darkstyle_import:
         app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())

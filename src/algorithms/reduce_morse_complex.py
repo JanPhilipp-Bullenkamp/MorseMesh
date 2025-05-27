@@ -459,15 +459,11 @@ def cancel_critical_pairs(MorseComplex,
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     
-    # reset Morse cells, Segmentation and Betti numbers if necessary
+    # reset Morse cells and Segmentation if necessary
     if redMorseComplex._flag_MorseCells:
         redMorseComplex.MorseCells = MorseCells()
         redMorseComplex._flag_MorseCells = False
         redMorseComplex.Segmentations = {}
-    if redMorseComplex._flag_BettiNumbers:
-        redMorseComplex.BettiNumbers = None
-        redMorseComplex.partners = None
-        redMorseComplex._flag_BettiNumbers = False
     
     
     CancelPairs = CancellationQueue()
@@ -579,15 +575,11 @@ def cancel_critical_conforming_pairs(MorseComplex,
     redMorseComplex = deepcopy(MorseComplex) 
     redMorseComplex.persistence = threshold
     
-    # reset Morse cells, Segmentation and Betti numbers if necessary
+    # reset Morse cells and  Segmentation and if necessary
     if redMorseComplex._flag_MorseCells:
         redMorseComplex.MorseCells = MorseCells()
         redMorseComplex._flag_MorseCells = False
         redMorseComplex.Segmentations = {}
-    if redMorseComplex._flag_BettiNumbers:
-        redMorseComplex.BettiNumbers = None
-        redMorseComplex.partners = None
-        redMorseComplex._flag_BettiNumbers = False
     
     
     CancelPairs = CancellationQueue()
